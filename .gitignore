@@ -1,0 +1,43 @@
+# Environment variables (Sensitive)
+.env
+.env.*
+**/.env
+**/.env.*
+backend/.env
+frontend/.env
+
+# Dependencies
+node_modules/
+**/node_modules/
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# User Uploads & Runtime Data
+backend/uploads/
+frontend/public/uploads/
+mongo-data/
+*.log
+logs/
+pids/
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Gemini/AI Cache
+.gemini/
+brain/
+scratch/
+implementation_plan.md
+task.md
+walkthrough.md

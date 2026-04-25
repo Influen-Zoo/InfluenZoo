@@ -1,0 +1,99 @@
+name: Production Deployment (Docker)
+
+on:
+  push:
+    branches:
+      - production
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    env:
+      APP_NAME: influnce
+      DOMAIN: 3.111.1.192
+      NODE_VERSION: "24" # Matching local version
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          clean: true
+
+      - name: ⚙️ Generate Backend .env
+        working-directory: ./backend
+        run: |
+          echo "${{ secrets.PROD_BACKEND_ENV }}" > .env
+          if [ ! -s .env ]; then
+            echo "❌ ERROR: Backend .env is empty or not created!"
+            exit 1
+          fi
+          echo "✅ Backend .env created"
+
+      - name: ⚙️ Generate Frontend .env
+        working-directory: ./frontend
+        run: |
+          echo "${{ secrets.PROD_FRONTEND_ENV }}" > .env
+          if [ ! -s .env ]; then
+            echo "❌ ERROR: Frontend .env is empty or not created!"
+            exit 1
+          fi
+          # Source the .env file to export variables for the docker build command
+          export $(grep -v '^#' .env | xargs)
+          echo "✅ Frontend .env created"
+
+      - name: 🚀 Build and Deploy with Docker Compose
+        run: |
+          # Pull latest VITE_API_URL from frontend .env if available
+          if [ -f ./frontend/.env ]; then
+            export $(grep -v '^#' ./frontend/.env | xargs)
+          fi
+          
+          docker-compose down
+          docker-compose up --build -d
+          echo "✅ Containers started in detached mode"
+
+      - name: 🩺 Check Deployment Health
+        run: |
+          echo "Waiting for services to stabilize..."
+          sleep 20
+          
+          echo "Checking Backend health..."
+          # Test internal connectivity to backend container
+          if docker ps | grep -q "influnce-backend"; then
+            echo "✅ Backend container is running"
+            # Try to curl the health endpoint if it exists
+            BE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/api/health || echo "500")
+            echo "Backend status code: $BE_STATUS"
+          else
+            echo "❌ Backend container FAILED to start"
+            docker logs influnce-backend
+            exit 1
+          fi
+
+          echo "Checking Frontend health..."
+          if docker ps | grep -q "influnce-frontend"; then
+            echo "✅ Frontend container is running"
+            FE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080 || echo "500")
+            echo "Frontend status code: $FE_STATUS"
+          else
+            echo "❌ Frontend container FAILED to start"
+            docker logs influnce-frontend
+            exit 1
+          fi
+
+      - name: 🧹 Cleanup Unused Docker Images
+        if: always()
+        run: |
+          docker image prune -f
+          echo "✅ Cleanup completed"
+
+      - name: 📢 Deployment Summary
+        if: success()
+        run: |
+          echo "========================================="
+          echo "✅ Deployment Successful for ${{ env.APP_NAME }}!"
+          echo "========================================="
+          docker ps

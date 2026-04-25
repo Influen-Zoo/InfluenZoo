@@ -1,0 +1,169 @@
+/* Liquid Button Demo Styles */
+.liquid-button-demo {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 50%, #1a1a2e 100%);
+  padding: 40px 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.demo-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.demo-container h1 {
+  text-align: center;
+  color: #fff;
+  font-size: 3rem;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #00d4ff, #0066ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+  animation: fadeInDown 0.6s ease;
+}
+
+.demo-container h1::after {
+  content: '';
+  display: block;
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+  margin: 20px auto;
+  border-radius: 2px;
+}
+
+.demo-section {
+  margin-bottom: 60px;
+  animation: fadeInUp 0.6s ease;
+}
+
+.demo-section h2 {
+  color: #00d4ff;
+  font-size: 1.5rem;
+  margin-bottom: 25px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(0, 212, 255, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+
+.button-group {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 212, 255, 0.1);
+  backdrop-filter: blur(10px);
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.button-group:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 212, 255, 0.2);
+}
+
+.button-group.full-width {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.button-group.full-width .liquid-button-container {
+  width: 100%;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Gradient Background Animation */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .demo-container h1 {
+    font-size: 2rem;
+  }
+
+  .demo-section h2 {
+    font-size: 1.25rem;
+  }
+
+  .button-group {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 20px;
+  }
+
+  .button-group .liquid-button-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+/* Dark mode compatibility */
+@media (prefers-color-scheme: dark) {
+  .liquid-button-demo {
+    background: linear-gradient(135deg, #0a0e27 0%, #0f3460 50%, #0a0e27 100%);
+  }
+
+  .button-group {
+    background: rgba(0, 212, 255, 0.03);
+    border-color: rgba(0, 212, 255, 0.15);
+  }
+
+  .button-group:hover {
+    background: rgba(0, 212, 255, 0.05);
+    border-color: rgba(0, 212, 255, 0.25);
+  }
+}
+
+/* Code example styling for documentation */
+.code-example {
+  background: rgba(20, 20, 40, 0.9);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+  overflow-x: auto;
+  color: #00d4ff;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}

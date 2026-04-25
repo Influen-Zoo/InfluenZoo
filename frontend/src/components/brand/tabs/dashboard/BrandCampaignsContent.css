@@ -1,0 +1,99 @@
+/* BrandCampaignsContent.css - Expandable Campaign Analytics */
+
+.campaign-analytics-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.campaign-analytics-header {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.campaign-analytics-header:hover {
+  border-color: var(--primary, #fbbf24) !important;
+}
+
+/* Expandable wrapper - uses CSS Grid for smooth height transition */
+.campaign-analytics-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+}
+
+.campaign-analytics-wrapper.expanded {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.campaign-analytics-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.campaign-analytics-content {
+  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Expand button animation - smooth rotation */
+.btn-campaign-expand {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: rotate(0deg) scale(1) !important;
+}
+
+.btn-campaign-expand:hover {
+  transform: rotate(0deg) scale(1.1) !important;
+}
+
+.btn-campaign-expand.active {
+  transform: rotate(45deg) scale(1) !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .campaign-analytics-content {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .campaign-analytics-content {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+}
+
+/* Stat Card Styles - Premium hover effects */
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 0.5rem;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  background: var(--surface-hover);
+  border-color: var(--primary);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}

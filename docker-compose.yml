@@ -1,0 +1,48 @@
+services:
+  nginx:
+    image: nginx:stable-alpine
+    container_name: influence-gateway
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/gateway.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/proxy.conf:/etc/nginx/conf.d/proxy.conf
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - influnce-network
+    restart: always
+
+  backend:
+    build: 
+      context: ./backend
+    container_name: influnce-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/uploads:/usr/src/app/uploads
+    networks:
+      - influnce-network
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:5000}
+        - VITE_APP_NAME=${VITE_APP_NAME:-Influnce}
+    container_name: influnce-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - influnce-network
+    restart: always
+
+networks:
+  influnce-network:
+    driver: bridge
