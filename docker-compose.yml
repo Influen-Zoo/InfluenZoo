@@ -23,7 +23,7 @@ services:
     env_file:
       - ./backend/.env
     volumes:
-      - ./backend/uploads:/usr/src/app/uploads
+      - /home/ubuntu/influenzoo_data/backend/uploads:/usr/src/app/uploads
     networks:
       - influnce-network
     restart: always
@@ -39,6 +39,8 @@ services:
       - "8080:80"
     depends_on:
       - backend
+    volumes:
+      - /home/ubuntu/influenzoo_data/frontend/static:/usr/share/nginx/html/static
     networks:
       - influnce-network
     restart: always

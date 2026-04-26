@@ -17,15 +17,24 @@ jobs:
       NODE_VERSION: "24" # Matching local version
 
     steps:
-      - name: 🔐 Pre-Cleanup Permissions Fix
+      - name: 🔐 Pre-Cleanup Permissions Fix & Setup
         run: |
-          echo "Fixing permissions for existing files to allow runner cleanup..."
-          # Fix ownership and permissions for the workspace directory if it exists
+          echo "Fixing permissions and ensuring persistent directories exist..."
+          # Fix ownership and permissions for the workspace
           if [ -d "${{ github.workspace }}" ]; then
             sudo chown -R $USER:$USER ${{ github.workspace }} || true
             sudo chmod -R 777 ${{ github.workspace }} || true
           fi
-          echo "✅ Permissions fixed."
+          
+          # Ensure persistent data directories exist outside of workspace
+          sudo mkdir -p /home/ubuntu/influenzoo_data/backend/uploads
+          sudo mkdir -p /home/ubuntu/influenzoo_data/frontend/static
+          
+          # Fix ownership for the 'node' user (UID 1000) used in the Docker containers
+          # We use 777 to be absolutely sure permissions don't block uploads
+          sudo chown -R 1000:1000 /home/ubuntu/influenzoo_data
+          sudo chmod -R 777 /home/ubuntu/influenzoo_data
+          echo "✅ Permissions and persistent directories ready."
 
       - name: 🛠️ Ensure System & Docker Environment
         run: |
