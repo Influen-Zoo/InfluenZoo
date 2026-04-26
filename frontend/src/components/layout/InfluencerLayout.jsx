@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import CurvedNavbar from './CurvedNavbar/CurvedNavbar';
 import AiChatbot from '../common/AiChatbot/AiChatbot';
 import CreatorSetupFlow from '../influencer/CreatorSetupFlow';
 import TopUpModal from '../influencer/TopUpModal';
 import { useInfluencerDashboard } from '../../hooks/influencer/useInfluencerDashboard';
-import { Bot, House, Compass, LayoutDashboard, User } from 'lucide-react';
+import { Bell, Bot, House, Compass, LayoutDashboard, MessageSquare, Moon, Search, Sun, User, Wallet } from 'lucide-react';
 import CustomToast from '../common/CustomToast/CustomToast';
 import { resolveAssetUrl } from '../../utils/helpers';
 import '../../pages/InfluencerDashboard.css';
@@ -14,6 +14,8 @@ import TopNavbar from './TopNavbar';
 export const InfluencerLayout = () => {
   const dashboard = useInfluencerDashboard();
   const navigate = useNavigate();
+  const [desktopSearchOpen, setDesktopSearchOpen] = useState(false);
+  const [searchLaunchKey, setSearchLaunchKey] = useState(0);
 
   const navItems = [
     { key: 'explore', icon: Compass, label: 'Discover', path: '/influencer/explore' },
@@ -22,14 +24,62 @@ export const InfluencerLayout = () => {
     { key: 'ai', icon: Bot, label: 'AI' },
     { key: 'profile', icon: User, label: 'Profile', path: '/influencer/profile', isProfile: true },
   ];
+  const unreadNotifs = dashboard.notifications.filter((n) => !n.read).length;
 
   const handleNavClick = (key) => {
     const item = navItems.find(i => i.key === key);
     if (item) {
       dashboard.setActiveTab(key);
-      navigate(item.path);
+      if (item.path) navigate(item.path);
     }
   };
+
+  const desktopDockActions = [
+    {
+      key: 'search',
+      icon: Search,
+      label: 'Search',
+      isActive: desktopSearchOpen,
+      onClick: () => {
+        setDesktopSearchOpen(true);
+        setSearchLaunchKey((key) => key + 1);
+      },
+    },
+    {
+      key: 'notifications',
+      icon: Bell,
+      label: 'Alerts',
+      badge: unreadNotifs,
+      onClick: () => navigate('/notifications'),
+    },
+    {
+      key: 'chat',
+      icon: MessageSquare,
+      label: 'Messages',
+      isActive: dashboard.activeTab === 'chat',
+      onClick: () => {
+        dashboard.setActiveTab('chat');
+        navigate('/influencer/chat');
+      },
+    },
+    {
+      key: 'wallet',
+      icon: Wallet,
+      label: 'Wallet',
+      isActive: dashboard.activeTab === 'dashboard' && dashboard.dashboardSubTab === 'wallet',
+      onClick: () => {
+        dashboard.setActiveTab('dashboard');
+        dashboard.setDashboardSubTab('wallet');
+        navigate('/influencer/dashboard');
+      },
+    },
+    {
+      key: 'theme',
+      icon: dashboard.theme === 'dark' ? Sun : Moon,
+      label: 'Theme',
+      onClick: dashboard.toggleTheme,
+    },
+  ];
 
   if (dashboard.user?.status === 'inactive') {
     return <CreatorSetupFlow user={dashboard.user} onComplete={() => window.location.reload()} />;
@@ -47,10 +97,13 @@ export const InfluencerLayout = () => {
         chatPath="/influencer/chat"
         theme={dashboard.theme}
         toggleTheme={dashboard.toggleTheme}
+        desktopSearchOpen={desktopSearchOpen}
+        searchLaunchKey={searchLaunchKey}
       />
 
       <CurvedNavbar 
         items={navItems}
+        actionItems={desktopDockActions}
         activeKey={dashboard.activeTab}
         onChange={handleNavClick}
         user={dashboard.user}

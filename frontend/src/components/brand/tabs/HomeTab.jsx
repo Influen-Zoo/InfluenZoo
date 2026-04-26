@@ -11,9 +11,9 @@ export default function HomeTab({
   onJumpToCampaign 
 }) {
   return (
-    <div className="tab-pane" style={{ animation: 'fadeIn 0.3s ease' }}>
+    <div className="tab-pane home-timeline" style={{ animation: 'fadeIn 0.3s ease' }}>
       <CreateCampaign onCampaignCreated={onCampaignCreated} />
-      <div className="posts-feed responsive-feed">
+      <div className="posts-feed responsive-feed home-feed">
         {announcements.map(campaign => (
           <BrandCampaignCard
             key={campaign._id}

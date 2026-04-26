@@ -13,10 +13,22 @@ import {
   X,
   Heart,
   UserPlus,
-  Bookmark
+  Bookmark,
+  Search,
+  Compass,
+  LayoutDashboard,
+  House,
+  User,
+  Moon,
+  Sun,
+  Bot,
+  Wallet
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import CurvedNavbar from '../components/layout/CurvedNavbar/CurvedNavbar';
 import api from '../services/api';
+import TopNavbar from '../components/layout/TopNavbar';
 import './Notifications.css';
 
 
@@ -78,9 +90,68 @@ const getNotifIconBg = (type) => {
 export default function Notifications() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeMenu, setActiveMenu] = useState(null);
+
+  // Dock Navigation Setup
+  const roleBase = user?.role === 'brand' ? '/brand' : '/influencer';
+  const navItems = [
+    { key: 'explore', icon: Compass, label: 'Discover', path: `${roleBase}/explore` },
+    { key: 'home', icon: House, label: 'Home', path: roleBase },
+    { key: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: `${roleBase}/dashboard` },
+    { key: 'ai', icon: Bot, label: 'AI' },
+    { key: 'profile', icon: User, label: 'Profile', path: `${roleBase}/profile`, isProfile: true },
+  ];
+
+  const unreadNotifs = notifications.filter((n) => !n.read).length;
+
+  const handleNavClick = (key) => {
+    const item = navItems.find(i => i.key === key);
+    if (item && item.path) {
+      navigate(item.path);
+    }
+  };
+
+  const desktopDockActions = [
+    {
+      key: 'search',
+      icon: Search,
+      label: 'Search',
+      onClick: () => {
+        // Search is handled in TopNavbar
+      },
+    },
+    {
+      key: 'notifications',
+      icon: Bell,
+      label: 'Alerts',
+      badge: unreadNotifs,
+      isActive: true,
+      onClick: () => {
+        // Already on notifications page
+      },
+    },
+    {
+      key: 'chat',
+      icon: MessageSquare,
+      label: 'Messages',
+      onClick: () => navigate(`${roleBase}/chat`),
+    },
+    {
+      key: 'wallet',
+      icon: Wallet,
+      label: 'Wallet',
+      onClick: () => navigate(`${roleBase}/dashboard`),
+    },
+    {
+      key: 'theme',
+      icon: theme === 'dark' ? Sun : Moon,
+      label: 'Theme',
+      onClick: toggleTheme,
+    },
+  ];
 
   const loadNotifications = async () => {
     try {
@@ -170,7 +241,24 @@ export default function Notifications() {
   const groupedNotifs = groupNotifications();
 
   return (
-    <div className="notifications-page">
+    <div className={`notifications-page ${theme}`}>
+      <TopNavbar 
+        user={user}
+        activeTab="notifications"
+        setActiveTab={() => {}}
+        notifications={notifications}
+        chatPath={`${roleBase}/chat`}
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
+      <CurvedNavbar 
+        items={navItems}
+        actionItems={desktopDockActions}
+        activeKey="notifications"
+        onChange={handleNavClick}
+        avatarSrc={resolveAssetUrl(user?.avatar)}
+        avatarFallback={user?.name?.[0]}
+      />
       <div className="notifications-container glass-panel">
         <div className="notifications-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

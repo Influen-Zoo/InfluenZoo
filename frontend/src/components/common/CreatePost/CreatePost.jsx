@@ -19,6 +19,23 @@ export default function CreatePost({ onPostCreated, editData, onCancelEdit }) {
   const videoRef = useRef(null);
   const audioRef = useRef(null);
   const gifRef = useRef(null);
+  const emojiPickerRef = useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target) && !event.target.closest('.action-btn')) {
+        setShowEmojiPicker(false);
+      }
+    };
+    if (showEmojiPicker) {
+      window.addEventListener('click', handleClickOutside, true);
+      window.addEventListener('touchstart', handleClickOutside, true);
+    }
+    return () => {
+      window.removeEventListener('click', handleClickOutside, true);
+      window.removeEventListener('touchstart', handleClickOutside, true);
+    };
+  }, [showEmojiPicker]);
 
   React.useEffect(() => {
     if (editData) {
@@ -103,7 +120,7 @@ export default function CreatePost({ onPostCreated, editData, onCancelEdit }) {
           rows={3}
         />
         {showEmojiPicker && (
-          <div style={{ position: 'absolute', zIndex: 10, left: '0', top: 'calc(100% + 5px)' }}>
+          <div className="emoji-picker-container" ref={emojiPickerRef}>
             <EmojiPicker onEmojiClick={onEmojiClick} theme="auto" />
           </div>
         )}
@@ -140,19 +157,19 @@ export default function CreatePost({ onPostCreated, editData, onCancelEdit }) {
           <input type="file" ref={gifRef} style={{ display: 'none' }} multiple accept="image/gif" onChange={(e) => handleMediaSelect(e, gifRef)} />
 
           <button type="button" className="action-btn" title="Add Image" onClick={() => imageRef.current?.click()}>
-            <Image size={18} />
+            <Image size={24} />
           </button>
           <button type="button" className="action-btn" title="Add Video" onClick={() => videoRef.current?.click()}>
-            <Video size={18} />
+            <Video size={24} />
           </button>
           <button type="button" className="action-btn" title="Add Audio" onClick={() => audioRef.current?.click()}>
-            <Music size={18} />
+            <Music size={24} />
           </button>
           <button type="button" className="action-btn" title="Add GIF" onClick={() => gifRef.current?.click()}>
-            <Film size={18} />
+            <Film size={24} />
           </button>
           <button type="button" className="action-btn" title="Add Emoji" onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
-            <Smile size={18} />
+            <Smile size={24} />
           </button>
           <input 
             type="text" 

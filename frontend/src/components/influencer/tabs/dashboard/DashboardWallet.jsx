@@ -11,7 +11,7 @@ export default function DashboardWallet({ user, setShowTopUp, walletTransactions
   const displayBalance = coinBalance !== undefined ? coinBalance : (user?.coins || 0);
 
   return (
-    <div style={{ animation: 'fadeIn 0.3s ease' }}>
+    <div className="dashboard-wallet-container" style={{ animation: 'fadeIn 0.3s ease' }}>
       
       {/* Single Balance Container */}
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>

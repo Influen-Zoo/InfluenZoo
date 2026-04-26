@@ -56,7 +56,7 @@ export default function DashboardAnalytics({ user }) {
   const chartData = getChartDataForMetric(analytics, selectedMetric);
 
   return (
-    <Box sx={{ animation: 'fadeIn 0.3s ease', pb: 6 }}>
+    <Box className="dashboard-analytics-container" sx={{ animation: 'fadeIn 0.3s ease', pb: 6 }}>
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <Box sx={{ mb: 2 }}>

@@ -508,15 +508,7 @@ p {
 }
 
 /* -- Convex Lens Liquid Glass (Cards) -- */
-.card,
-.glass-panel,
-.quick-stat-card,
-.explore-sub-tabs,
-.collab-card,
-.application-card,
-.brand-card-modern {
-  padding: 0 !important;
-}
+
 
 .brand-card-modern,
 .step-card,
@@ -1730,7 +1722,7 @@ p {
 .dashboard-content,
 .admin-body,
 .notifications-page,
-.user-profile-page,
+
 .brand-page,
 .influencer-page {
   padding-left: 0.9rem !important;

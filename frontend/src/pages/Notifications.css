@@ -233,3 +233,15 @@
     opacity: 1;
   }
 }
+
+@media (min-width: 1024px) {
+  .notifications-page {
+    padding: 1.5rem var(--page-gutter) 7.5rem !important;
+  }
+
+  .notifications-container {
+    max-width: 680px;
+    border-radius: 38px !important;
+    margin: 0 auto;
+  }
+}

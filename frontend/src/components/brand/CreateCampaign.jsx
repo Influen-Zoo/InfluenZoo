@@ -29,6 +29,23 @@ export default function CreateCampaign({ onCampaignCreated, editData, onCancelEd
   const videoRef = useRef(null);
   const audioRef = useRef(null);
   const gifRef = useRef(null);
+  const emojiPickerRef = useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target) && !event.target.closest('.action-btn')) {
+        setShowEmojiPicker(false);
+      }
+    };
+    if (showEmojiPicker) {
+      window.addEventListener('click', handleClickOutside, true);
+      window.addEventListener('touchstart', handleClickOutside, true);
+    }
+    return () => {
+      window.removeEventListener('click', handleClickOutside, true);
+      window.removeEventListener('touchstart', handleClickOutside, true);
+    };
+  }, [showEmojiPicker]);
 
   React.useEffect(() => {
     if (editData) {
@@ -138,7 +155,7 @@ export default function CreateCampaign({ onCampaignCreated, editData, onCancelEd
           />
         </div>
         {showEmojiPicker && (
-          <div style={{ position: 'absolute', zIndex: 10, left: '0', top: 'calc(100% + 5px)' }}>
+          <div className="emoji-picker-container">
             <EmojiPicker onEmojiClick={onEmojiClick} theme="auto" />
           </div>
         )}
@@ -251,11 +268,21 @@ export default function CreateCampaign({ onCampaignCreated, editData, onCancelEd
           <input type="file" ref={videoRef} style={{ display: 'none' }} multiple accept="video/*" onChange={(e) => handleMediaSelect(e, videoRef)} />
           <input type="file" ref={audioRef} style={{ display: 'none' }} multiple accept="audio/*" onChange={(e) => handleMediaSelect(e, audioRef)} />
           <input type="file" ref={gifRef} style={{ display: 'none' }} multiple accept="image/gif" onChange={(e) => handleMediaSelect(e, gifRef)} />
-          <button type="button" className="action-btn" title="Add Image" onClick={() => imageRef.current?.click()}><Image size={18} /></button>
-          <button type="button" className="action-btn" title="Add Video" onClick={() => videoRef.current?.click()}><Video size={18} /></button>
-          <button type="button" className="action-btn" title="Add Audio" onClick={() => audioRef.current?.click()}><Music size={18} /></button>
-          <button type="button" className="action-btn" title="Add GIF" onClick={() => gifRef.current?.click()}><Film size={18} /></button>
-          <button type="button" className="action-btn" title="Add Emoji" onClick={() => setShowEmojiPicker(!showEmojiPicker)}><Smile size={18} /></button>
+          <button type="button" className="action-btn" title="Add Image" onClick={() => imageRef.current?.click()}><Image size={24} /></button>
+          <button type="button" className="action-btn" title="Add Video" onClick={() => videoRef.current?.click()}><Video size={24} /></button>
+          <button type="button" className="action-btn" title="Add Audio" onClick={() => audioRef.current?.click()}><Music size={24} /></button>
+          <button type="button" className="action-btn" title="Add GIF" onClick={() => gifRef.current?.click()}><Film size={24} /></button>
+          <button type="button" className="action-btn" title="Add Emoji" onClick={() => setShowEmojiPicker(!showEmojiPicker)}><Smile size={24} /></button>
+
+          {showEmojiPicker && (
+            <div className="emoji-picker-container" ref={emojiPickerRef}>
+              <div className="emoji-picker-header">
+                <span>Select Emoji</span>
+                <button onClick={() => setShowEmojiPicker(false)} className="close-picker"><X size={18}/></button>
+              </div>
+              <EmojiPicker onEmojiClick={onEmojiClick} theme="auto" width="100%" height={350} />
+            </div>
+          )}
           <input type="text" placeholder="Tags (comma separated)" value={tags} onChange={(e) => setTags(e.target.value)} className="tags-input glass-indicator" style={{ padding: '0.5rem 1rem', background: 'var(--surface-alt)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.8125rem' }} />
         </div>
 

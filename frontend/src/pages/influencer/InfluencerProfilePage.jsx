@@ -28,7 +28,7 @@ export const InfluencerProfilePage = () => {
 
   return (
     <div className="tab-container">
-      <div className="tab-pane" style={{ animation: 'fadeIn 0.3s ease' }}>
+      <div className="tab-pane">
         <UserProfile 
           forcedUserId={user?._id} 
           embedded 

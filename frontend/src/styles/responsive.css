@@ -4,10 +4,12 @@
 
 :root {
   --page-gutter: clamp(0.9rem, 2.4vw, 2rem);
-  --content-max: 1180px;
-  --wide-content-max: 1360px;
+  --container-max: 1200px;
+  --content-max: 1200px;
+  --wide-content-max: 1440px;
   --feed-max: 720px;
   --card-grid-min: 280px;
+  --desktop-nav-w: 0px;
   --nav-glass-bg: rgba(255, 253, 247, 0.34);
   --nav-glass-border: rgba(255, 255, 255, 0.34);
   --nav-glass-shadow: 0 16px 48px rgba(73, 46, 8, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.45);
@@ -42,6 +44,8 @@ body {
 .influencer-page {
   width: 100%;
   box-sizing: border-box;
+  padding-left: var(--page-gutter) !important;
+  padding-right: var(--page-gutter) !important;
 }
 
 .dashboard-content,
@@ -109,10 +113,156 @@ body {
   border: 1px solid var(--nav-glass-border) !important;
 }
 
+.desktop-site-brand {
+  display: none;
+}
+
 .table-container,
 .admin-table-wrapper {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.toast-container {
+  position: fixed !important;
+  top: 1.25rem !important;
+  right: 1.25rem !important;
+  z-index: 20050 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: min(420px, calc(100vw - 2rem));
+}
+
+.toast {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: 74px;
+  border-radius: 24px !important;
+  border: 1px solid rgba(59, 130, 246, 0.26) !important;
+  border-left: 1px solid rgba(59, 130, 246, 0.26) !important;
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.16), transparent 42%),
+    rgba(20, 20, 22, 0.64) !important;
+  color: var(--text-primary) !important;
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.32),
+    inset 0 1px 1px rgba(255, 255, 255, 0.14) !important;
+  backdrop-filter: blur(22px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(170%) !important;
+  padding: 1rem 1.1rem !important;
+  animation: toastLegacyEnter 0.42s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+[data-theme='light'] .toast {
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.14), transparent 42%),
+    rgba(255, 253, 247, 0.86) !important;
+  box-shadow:
+    0 24px 70px rgba(73, 46, 8, 0.16),
+    inset 0 1px 1px rgba(255, 255, 255, 0.72) !important;
+}
+
+.toast::before {
+  content: '';
+  position: absolute;
+  inset: -40% auto auto -10%;
+  width: 190px;
+  height: 190px;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.28);
+  filter: blur(34px);
+  pointer-events: none;
+}
+
+.toast::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, rgba(59, 130, 246, 0.35));
+  transform-origin: left;
+  animation: toastProgress 3000ms linear forwards;
+}
+
+.toast span {
+  position: relative;
+  z-index: 1;
+  display: block;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.toast-success {
+  border-color: rgba(16, 185, 129, 0.26) !important;
+  background:
+    linear-gradient(135deg, rgba(16, 185, 129, 0.16), transparent 42%),
+    rgba(20, 20, 22, 0.64) !important;
+}
+
+.toast-success::before {
+  background: rgba(16, 185, 129, 0.28);
+}
+
+.toast-success::after {
+  background: linear-gradient(90deg, #10b981, rgba(16, 185, 129, 0.35));
+}
+
+.toast-danger,
+.toast-error {
+  border-color: rgba(239, 68, 68, 0.26) !important;
+  background:
+    linear-gradient(135deg, rgba(239, 68, 68, 0.16), transparent 42%),
+    rgba(20, 20, 22, 0.64) !important;
+}
+
+.toast-danger::before,
+.toast-error::before {
+  background: rgba(239, 68, 68, 0.28);
+}
+
+.toast-danger::after,
+.toast-error::after {
+  background: linear-gradient(90deg, #ef4444, rgba(239, 68, 68, 0.35));
+}
+
+.toast-warning {
+  border-color: rgba(245, 158, 11, 0.26) !important;
+  background:
+    linear-gradient(135deg, rgba(245, 158, 11, 0.16), transparent 42%),
+    rgba(20, 20, 22, 0.64) !important;
+}
+
+.toast-warning::before {
+  background: rgba(245, 158, 11, 0.28);
+}
+
+.toast-warning::after {
+  background: linear-gradient(90deg, #f59e0b, rgba(245, 158, 11, 0.35));
+}
+
+@keyframes toastLegacyEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.96);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes toastProgress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
 }
 
 img,
@@ -128,7 +278,16 @@ button {
   max-width: 100%;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
+  :root {
+    --max-width: 720px;
+    --feed-max: 100%;
+  }
+
+  #root {
+    max-width: none !important;
+  }
+
   .dashboard-content,
   .admin-body {
     padding-left: var(--page-gutter) !important;
@@ -149,14 +308,15 @@ button {
   }
 
   .create-post-footer {
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1.25rem !important;
   }
 
-  .create-post-footer > button {
-    width: auto !important;
-    min-width: 150px;
+  .create-post-footer > div:last-child {
+    width: 100% !important;
+    display: flex;
+    justify-content: center;
   }
 
   .create-post-actions {
@@ -202,10 +362,45 @@ button {
 }
 
 @media (min-width: 1024px) {
+  :root {
+    --desktop-nav-w: 0px;
+    --max-width: 1200px;
+    --feed-max: 100%;
+  }
+
+  .influencer-dashboard,
+  .brand-dashboard {
+    width: 100%;
+  }
+
   .dashboard-content {
-    max-width: var(--content-max);
+    width: 100%;
+    max-width: none;
+    margin-inline: auto;
     padding-top: 1.5rem !important;
-    padding-bottom: calc(var(--bottom-nav-h, 90px) + 2rem) !important;
+    padding-bottom: 7.5rem !important;
+    padding-left: var(--page-gutter) !important;
+    padding-right: var(--page-gutter) !important;
+  }
+
+  .tab-container,
+  .tab-pane,
+  .responsive-tab-content,
+  .home-timeline,
+  .explore-results,
+  .profile-wrapper,
+  .notifications-container {
+    width: 100% !important;
+    max-width: min(100%, var(--wide-content-max)) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box;
+  }
+
+  .notifications-page,
+  .user-profile-page:not(.embedded-profile) {
+    padding-left: var(--page-gutter) !important;
+    padding-right: var(--page-gutter) !important;
   }
 
   .admin-body {
@@ -214,11 +409,109 @@ button {
   }
 
   .top-navbar-global {
+    width: 100% !important;
+    margin-left: 0;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 1rem !important;
     padding-inline: var(--page-gutter) !important;
+    position: sticky;
+  }
+
+  .top-navbar-row {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .top-navbar-row .avatar-mini {
+    display: none !important;
+  }
+
+  .desktop-site-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-height: 46px;
+    padding: 0.35rem 0.85rem 0.35rem 0.45rem;
+    border: 1px solid var(--nav-glass-border);
+    border-radius: 18px;
+    background: var(--nav-glass-bg);
+    box-shadow: var(--nav-glass-shadow);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .desktop-site-brand img {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    object-fit: contain;
+    flex: 0 0 auto;
+  }
+
+  .top-navbar-global .dash-actions {
+    display: none !important;
   }
 
   .top-search-wrapper {
-    max-width: 640px !important;
+    flex: 1 1 auto !important;
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    transform-origin: 22px center;
+    will-change: transform, opacity;
+  }
+
+  .top-search-wrapper.desktop-search-collapsed {
+    max-width: 46px !important;
+    width: 46px !important;
+    min-height: 46px !important;
+    padding: 0 !important;
+    justify-content: center;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .top-search-wrapper.desktop-search-collapsed input {
+    width: 0;
+    min-width: 0;
+    opacity: 0;
+    margin-left: 0;
+    pointer-events: none;
+  }
+
+  .top-search-wrapper.desktop-search-open {
+    pointer-events: auto;
+    overflow: visible;
+  }
+
+  .top-search-wrapper.desktop-search-open input {
+    opacity: 1;
+  }
+
+  .desktop-search-flight {
+    position: fixed;
+    z-index: 12000;
+    width: 52px;
+    height: 52px;
+    border: 1px solid var(--nav-glass-border);
+    border-radius: 999px;
+    background: var(--nav-glass-bg);
+    box-shadow: var(--nav-glass-shadow);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
   }
 
   .responsive-card-grid {
@@ -226,10 +519,37 @@ button {
     gap: 1.5rem;
   }
 
+  .posts-feed.responsive-feed {
+    width: 100%;
+    max-width: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 1.5rem;
+  }
+
+  .posts-feed.responsive-feed > .empty-state-modern {
+    grid-column: 1 / -1;
+  }
+
+  .home-timeline .create-post-container.glass-panel {
+    width: 100%;
+    max-width: none;
+  }
+
+  .home-timeline .posts-feed.responsive-feed.home-feed {
+    width: 100%;
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
   .responsive-feed .post-card,
   .posts-feed.responsive-feed .post-card,
   .posts-feed.responsive-feed .brand-campaign-card {
-    margin-bottom: 1.25rem;
+    margin-bottom: 0;
   }
 
   .explore-results {
@@ -253,9 +573,25 @@ button {
   .campaign-card,
   .application-card,
   .brand-card-modern,
-  .post-card,
+  .post-card {
+    border-radius: 28px !important;
+  }
+
   .create-post-container.glass-panel {
     border-radius: 28px !important;
+    max-width: var(--feed-max) !important;
+    margin-inline: auto !important;
+    width: 100% !important;
+  }
+
+  /* Constrain summary cards and sections on desktop to match feed width */
+  .dash-section.glass-panel,
+  .dashboard-wallet-container,
+  .dashboard-analytics-container,
+  .dashboard-applications-container {
+    max-width: var(--feed-max) !important;
+    margin-inline: auto !important;
+    width: 100% !important;
   }
 
   .brand-card-cover {
@@ -266,16 +602,6 @@ button {
   .profile-actions,
   .applicant-actions {
     flex-wrap: wrap;
-  }
-
-  .profile-wrapper {
-    width: min(100%, var(--content-max));
-    margin-inline: auto;
-  }
-
-  .user-profile-page:not(.embedded-profile) {
-    padding-left: var(--page-gutter) !important;
-    padding-right: var(--page-gutter) !important;
   }
 
   .profile-header-section {
@@ -291,7 +617,17 @@ button {
   }
 
   .profile-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.42fr);
     gap: 1.5rem;
+  }
+
+  .profile-main-grid + .profile-social-links,
+  .connected-social-section,
+  .education-section,
+  .work-section,
+  .bio-section {
+    width: 100%;
   }
 
   .bio-details-grid {
@@ -308,16 +644,31 @@ button {
 }
 
 @media (min-width: 1280px) {
+  :root {
+    --desktop-nav-w: 0px;
+    --max-width: 1200px;
+  }
+
   .dashboard-content {
-    max-width: var(--wide-content-max);
+    width: 100%;
+    margin-inline: auto;
   }
 
   .responsive-card-grid {
     --card-grid-min: 320px;
   }
 
+  .posts-feed.responsive-feed {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .home-timeline .posts-feed.responsive-feed.home-feed {
+    display: flex;
+    flex-direction: column;
+  }
+
   .profile-wrapper {
-    width: min(100%, 1240px);
+    width: min(100%, var(--wide-content-max));
   }
 
   .profile-banner {
@@ -370,6 +721,17 @@ button {
 
   .empty-state-modern {
     padding: 2.5rem 1rem !important;
+  }
+
+  .toast-container {
+    top: 0.75rem !important;
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+    width: auto;
+  }
+
+  .toast {
+    border-radius: 20px !important;
   }
 }
 

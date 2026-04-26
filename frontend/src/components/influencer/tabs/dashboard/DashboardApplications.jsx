@@ -9,7 +9,7 @@ export default function DashboardApplications({ filters, setFilters, application
     : applications?.filter(a => !filters.type || a.status === filters.type);
 
   return (
-    <div style={{ animation: 'fadeIn 0.3s ease' }}>
+    <div className="dashboard-applications-container" style={{ animation: 'fadeIn 0.3s ease' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '2.5rem' }}>
         <div>
           <h3 style={{ marginBottom: '1.5rem' }}>{isSavedTab ? 'Saved Campaigns' : 'My Applications'}</h3>

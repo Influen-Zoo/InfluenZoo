@@ -280,7 +280,7 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
   }
 
   return (
-    <div className={`user-profile-page page-enter${embedded ? ' embedded-profile' : ''}`} data-theme={theme}>
+    <div className={`user-profile-page${embedded ? ' embedded-profile' : ''}`} data-theme={theme}>
       {toast && (
         <div className="toast-container">
           <div className={`toast toast-${toast.type}`}>

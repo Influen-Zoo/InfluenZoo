@@ -3,16 +3,12 @@
 .user-profile-page {
   min-height: 100vh;
   background: var(--bg-color); /* Uses the global dark liquid gradient */
-  transition: all 0.3s ease;
   color: var(--text-primary);
 }
 
 .user-profile-page.embedded-profile {
   min-height: auto;
   background: transparent;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  padding-top: 0 !important;
 }
 
 .profile-wrapper {
