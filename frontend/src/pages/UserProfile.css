@@ -8,19 +8,18 @@
 }
 
 .profile-wrapper {
-  max-width: 1000px;
-  margin: 0 auto;
   width: 100%;
+  box-sizing: border-box;
 }
 
 /* Banner Section */
 .profile-banner {
-  height: 280px;
+  height: 220px;
   background-size: cover;
   background-position: center;
   background-image: linear-gradient(135deg, var(--primary), var(--accent));
   position: relative;
-  border-radius: 0 0 32px 32px;
+  border-radius: 0 0 28px 28px;
   overflow: hidden;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
@@ -47,13 +46,12 @@
 }
 
 .profile-container {
-
   border-radius: 38px !important;
   position: relative;
-  overflow: visible !important; /* Allow avatar to overflow outside banner overlap */
-  padding: 2.5rem;
-  margin-top: -60px; /* Overlap with banner for premium look */
-  margin-bottom: 2rem;
+  overflow: visible !important;
+  padding: 2rem 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 5rem;
   z-index: 10;
 }
 
