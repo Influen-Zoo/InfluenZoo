@@ -17,6 +17,16 @@ jobs:
       NODE_VERSION: "24" # Matching local version
 
     steps:
+      - name: 🔐 Pre-Cleanup Permissions Fix
+        run: |
+          echo "Fixing permissions for existing files to allow runner cleanup..."
+          # Fix ownership and permissions for the workspace directory if it exists
+          if [ -d "${{ github.workspace }}" ]; then
+            sudo chown -R $USER:$USER ${{ github.workspace }} || true
+            sudo chmod -R 777 ${{ github.workspace }} || true
+          fi
+          echo "✅ Permissions fixed."
+
       - name: 🛠️ Ensure System & Docker Environment
         run: |
           echo "Updating system and installing base utilities..."

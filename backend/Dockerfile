@@ -13,6 +13,7 @@ CMD ["npm", "run", "dev"]
 FROM base AS production
 RUN npm ci --omit=dev
 COPY . .
-RUN mkdir -p uploads && chmod 777 uploads
+RUN mkdir -p uploads && chown -R node:node uploads && chmod 777 uploads
+USER node
 EXPOSE 5000
 CMD ["node", "server.js"]
