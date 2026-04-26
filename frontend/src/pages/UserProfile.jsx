@@ -390,7 +390,7 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
                 </div>
 
                 <div className="profile-bio-text">
-                  {profile.bio || "Streamer || Indie Game developer || Web developer || App developer"}
+                  {profile.bio}
                 </div>
               </div>
             </div>
