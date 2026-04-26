@@ -1,5 +1,13 @@
 /* BrandProfile Styles - Synchronized with UserProfile for 100% Parity */
 
+.user-profile-page.embedded-profile {
+  min-height: auto;
+  background: transparent;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-top: 0 !important;
+}
+
 .profile-wrapper {
   width: 100%;
   box-sizing: border-box;
@@ -357,7 +365,7 @@
   .profile-avatar-large { width: 120px; height: 120px; }
   .profile-header-info h1 { font-size: 1.8rem; }
   .profile-actions { justify-content: center; }
-  .profile-container { margin-top: -40px; }
+  .profile-container { margin-top: 0.75rem; }
 }
 
 @media (max-width: 768px) {

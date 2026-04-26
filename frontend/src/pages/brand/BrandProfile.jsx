@@ -147,7 +147,7 @@ export default function BrandProfile({ forcedUserId = null, embedded = false, on
   const brandInfo = profile.brandProfile || {};
 
   return (
-    <div className="user-profile-page" data-theme={theme}>
+    <div className={`user-profile-page${embedded ? ' embedded-profile' : ''}`} data-theme={theme}>
       {toast && (
         <div className="toast-container">
           <div className={`toast toast-${toast.type}`}>

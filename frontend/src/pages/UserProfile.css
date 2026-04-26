@@ -7,6 +7,14 @@
   color: var(--text-primary);
 }
 
+.user-profile-page.embedded-profile {
+  min-height: auto;
+  background: transparent;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-top: 0 !important;
+}
+
 .profile-wrapper {
   width: 100%;
   box-sizing: border-box;
@@ -1518,7 +1526,7 @@
 
 .profile-container {
   background: var(--surface);
-  margin-top: 2rem; 
+  margin-top: 1rem;
   position: relative;
   border-radius: 20px;
   box-shadow: none;
@@ -1540,7 +1548,7 @@
   }
 
   .profile-container {
-    margin-top: -24px;
+    margin-top: 0.75rem;
     padding: 1rem !important;
     border-radius: 24px !important;
   }
