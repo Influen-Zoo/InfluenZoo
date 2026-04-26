@@ -21,23 +21,23 @@
   inset-inline: 0;
   bottom: 0;
   height: 72px;
-  background: rgba(255, 255, 255, 0.02); /* More transparent */
+  background: rgba(255, 253, 247, 0.34);
   border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.34);
   box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.05),
-    inset 0 1px 1px rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(8px) saturate(160%); /* Less blurry */
-  -webkit-backdrop-filter: blur(8px) saturate(160%);
+    0 16px 48px rgba(73, 46, 8, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(18px) saturate(170%);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
   z-index: 5;
 }
 
 [data-theme='dark'] .curved-navbar-bar {
-  background: rgba(20, 20, 22, 0.15); /* More transparent dark glass */
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(20, 20, 22, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.3),
-    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    0 16px 48px rgba(0, 0, 0, 0.34),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08);
 }
 
 /* 💧 THE DROPLET */
@@ -50,6 +50,24 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.curved-navbar-shell .curved-navbar .curved-navbar-bar {
+  background: rgba(255, 253, 247, 0.34) !important;
+  border: 1px solid rgba(255, 255, 255, 0.34) !important;
+  box-shadow:
+    0 16px 48px rgba(73, 46, 8, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(18px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(170%) !important;
+}
+
+[data-theme='dark'] .curved-navbar-shell .curved-navbar .curved-navbar-bar {
+  background: rgba(20, 20, 22, 0.38) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.34),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
 }
 
 .droplet-inner {
