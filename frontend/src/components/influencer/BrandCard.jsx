@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserCheck, MapPin, ExternalLink, Users, Star } from 'lucide-react';
+import { UserCheck, MapPin, ExternalLink, Users, Star, Eye, UserPlus } from 'lucide-react';
 import { resolveAssetUrl } from '../../utils/helpers';
 import LiquidButton from '../common/LiquidButton/LiquidButton';
 
@@ -19,7 +19,7 @@ export default function BrandCard({
         {brand.banner ? (
           <img src={resolveAssetUrl(brand.banner)} alt="Banner" className="cover-img" />
         ) : (
-          <div className="cover-placeholder" style={{ background: 'linear-gradient(135deg, #8b5cf6, #ec4899)' }} />
+          <div className="cover-placeholder" style={{ background: 'linear-gradient(135deg, #f59e0b, #ffdf85)' }} />
         )}
       </div>
 
@@ -33,7 +33,7 @@ export default function BrandCard({
             )}
           </div>
           {brand.isVerified && (
-            <div className="verified-badge-large" title="Verified Brand" style={{ background: '#8b5cf6' }}>
+            <div className="verified-badge-large" title="Verified Brand" style={{ background: '#f59e0b' }}>
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="m9 11 3 3L22 4l-1.4-1.4L9 14.2l-3.6-3.6L4 12l5 5Z"/></svg>
             </div>
           )}
@@ -42,7 +42,7 @@ export default function BrandCard({
         <div className="brand-info-main">
           <div className="brand-name-row">
             <h4>{brand.name}</h4>
-            <span className="brand-category-tag" style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}>
+            <span className="brand-category-tag" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' }}>
               {brand.category || 'Brand'}
             </span>
           </div>
@@ -73,7 +73,8 @@ export default function BrandCard({
               onClick();
             }}
           >
-            View Profile
+            <Eye size={16} />
+            <span>View Profile</span>
           </LiquidButton>
           
           <LiquidButton 
@@ -96,7 +97,12 @@ export default function BrandCard({
                   <span>Following</span>
                 </>
               )
-            ) : "Follow"}
+            ) : (
+              <>
+                <UserPlus size={16} />
+                <span>Follow</span>
+              </>
+            )}
           </LiquidButton>
         </div>
       </div>

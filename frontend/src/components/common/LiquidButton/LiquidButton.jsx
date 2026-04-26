@@ -191,17 +191,14 @@ const LiquidButton = ({
               color: filled ? "#000" : "var(--text-primary)",
 
               // ✅ TRUE GLASS BASE
-              background: "rgba(255,255,255,0.15)",
-
-              backdropFilter: "blur(30px) saturate(140%)",
-              WebkitBackdropFilter: "blur(30px) saturate(140%)",
-
-              border: "1px solid rgba(255,255,255,0.2)",
+              background: "rgba(255,255,255,0.12)",
+              backdropFilter: "blur(20px) saturate(160%)",
+              WebkitBackdropFilter: "blur(20px) saturate(160%)",
+              border: "1px solid rgba(255,255,255,0.12)",
 
               boxShadow: `
-                0 12px 30px rgba(0,0,0,0.15),
-                inset 0 1px 1px rgba(255,255,255,0.4),
-                inset 0 -1px 1px rgba(0,0,0,0.1)
+                0 10px 25px rgba(0,0,0,0.2),
+                inset 0 1px 1px rgba(255,255,255,0.3)
               `,
 
               // ✨ TOP GLOSS
@@ -214,10 +211,9 @@ const LiquidButton = ({
                 height: "60%",
                 borderRadius: "50px 50px 0 0",
                 background:
-                  "linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 50%, transparent 100%)",
+                  "linear-gradient(to bottom, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 50%, transparent 100%)",
                 pointerEvents: "none",
                 zIndex: 5,
-                borderTop: "1px solid rgba(255,255,255,0.4)",
               },
 
               // 🌑 DEPTH
@@ -230,10 +226,9 @@ const LiquidButton = ({
                 height: "45%",
                 borderRadius: "0 0 50px 50px",
                 background:
-                  "linear-gradient(to top, rgba(0,0,0,0.08), transparent)",
+                  "linear-gradient(to top, rgba(0,0,0,0.1), transparent)",
                 pointerEvents: "none",
                 zIndex: 5,
-                borderBottom: "1px solid rgba(0,0,0,0.05)",
               },
               ...style
             }}

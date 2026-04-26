@@ -62,10 +62,14 @@ export const useBrandDiscovery = (user, exploreSubTab, filters, searchQuery, sho
   };
 
   useEffect(() => {
-    if (user) {
+    if (!user) return;
+    
+    const handler = setTimeout(() => {
       loadInfluencers();
-    }
-  }, [user, loadInfluencers]);
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(handler);
+  }, [user, loadInfluencers, searchQuery]);
 
   return {
     posts,

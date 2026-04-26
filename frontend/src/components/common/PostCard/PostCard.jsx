@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, MessageCircle, Share2, Send, MoreVertical, Edit2, Trash2 } from 'lucide-react';
 import CreatePost from '../CreatePost/CreatePost';
+import { resolveAssetUrl } from '../../../utils/helpers';
 
 import { useAuth } from '../../../context/AuthContext';
 import api from '../../../services/api';
@@ -99,7 +100,11 @@ export default function PostCard({ post, onPostUpdated, onPostDeleted, onViewPro
           }} 
           style={{ cursor: 'pointer' }}
         >
-          {post.author?.avatar ? <img src={post.author.avatar.startsWith('http') ? post.author.avatar : `http://localhost:5000${post.author.avatar}`} alt="Avatar" /> : post.author?.name?.[0]}
+          {post.author?.avatar ? (
+            <img src={resolveAssetUrl(post.author.avatar)} alt="Avatar" />
+          ) : (
+            post.author?.name?.[0]
+          )}
         </div>
         <div className="post-author-info">
           <h4>{post.author?.name}</h4>
@@ -154,7 +159,7 @@ export default function PostCard({ post, onPostUpdated, onPostDeleted, onViewPro
               return null;
             }
 
-            const src = media.url.startsWith('http') ? media.url : `http://localhost:5000${media.url}`;
+            const src = resolveAssetUrl(media.url);
             return (
               <div key={i} className="media-wrapper">
                 {media.type === 'video' ? (
@@ -211,7 +216,7 @@ export default function PostCard({ post, onPostUpdated, onPostDeleted, onViewPro
             {comments.map((comment, i) => (
               <div key={i} className="comment-item">
                 <div className="comment-avatar">
-                   {comment.user?.avatar ? <img src={comment.user.avatar.startsWith('http') ? comment.user.avatar : `http://localhost:5000${comment.user.avatar}`} alt="Avatar" /> : comment.user?.name?.[0]}
+                   {comment.user?.avatar ? <img src={resolveAssetUrl(comment.user.avatar)} alt="Avatar" /> : comment.user?.name?.[0]}
                 </div>
                 <div className="comment-bubble">
                   <strong>{comment.user?.name}</strong>

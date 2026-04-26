@@ -349,7 +349,7 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
                       className="avatar-upload-btn"
                       title={uploading ? 'Uploading...' : 'Upload new profile picture'}
                     >
-                      <Camera size={20} color="#1c1e21" />
+                      <Camera size={20} />
                     </label>
                   </>
                 )}

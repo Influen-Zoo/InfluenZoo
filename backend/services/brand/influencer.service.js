@@ -16,7 +16,7 @@ const brandInfluencerService = {
       role: 'influencer',
       _id: { $nin: excludeIds }
     })
-      .select('name avatar bio category niche followers engagement location createdAt')
+      .select('name avatar banner bio category niche followers engagement location createdAt')
       .sort({ createdAt: -1 })
       .limit(20);
   },
@@ -25,7 +25,7 @@ const brandInfluencerService = {
     const brand = await User.findById(brandId).populate({
       path: 'following',
       match: { role: 'influencer' },
-      select: 'name avatar bio category niche followers engagement location'
+      select: 'name avatar banner bio category niche followers engagement location'
     });
     
     if (!brand) return [];

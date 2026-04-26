@@ -3,6 +3,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { Image, Video, Music, Smile, X, Send, Film, Check } from 'lucide-react';
 import LiquidButton from '../LiquidButton/LiquidButton';
 import api from '../../../services/api';
+import { resolveAssetUrl } from '../../../utils/helpers';
 import { serializePostPayload } from '../../../features/influencer/postSerializer';
 import EmojiPicker from 'emoji-picker-react';
 import './CreatePost.css';
@@ -26,7 +27,7 @@ export default function CreatePost({ onPostCreated, editData, onCancelEdit }) {
       if (editData.media) {
         const existingMedia = editData.media.map(m => ({
           isExisting: true,
-          preview: m.url.startsWith('http') ? m.url : `http://localhost:5000${m.url}`,
+          preview: resolveAssetUrl(m.url),
           url: m.url,
           type: m.type
         }));
@@ -89,10 +90,10 @@ export default function CreatePost({ onPostCreated, editData, onCancelEdit }) {
   };
 
   return (
-    <div className="create-post-container">
+    <div className="create-post-container glass-panel">
       <div className="create-post-header" style={{ position: 'relative' }}>
         <div className="create-post-avatar">
-          {user?.avatar ? <img src={user.avatar} alt="Avatar" /> : user?.name?.[0] || 'U'}
+          {user?.avatar ? <img src={resolveAssetUrl(user.avatar)} alt="Avatar" /> : user?.name?.[0] || 'U'}
         </div>
         <textarea 
           placeholder="What's on your mind? Share your update..." 

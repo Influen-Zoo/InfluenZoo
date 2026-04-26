@@ -194,7 +194,7 @@ export default function BrandProfile({ forcedUserId = null, embedded = false, on
                   <>
                     <input type="file" id="avatar-upload" accept="image/*" onChange={handleAvatarUpload} disabled={uploading} style={{ display: 'none' }} />
                     <label htmlFor="avatar-upload" className="avatar-upload-btn" title={uploading ? 'Uploading...' : 'Upload Brand Logo'}>
-                      <Camera size={20} color="#1c1e21" />
+                      <Camera size={20} />
                     </label>
                   </>
                 )}

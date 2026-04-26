@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import './CurvedNavbar.css';
 
 export default function CurvedNavbar({
@@ -8,7 +8,7 @@ export default function CurvedNavbar({
   onChange,
   avatarSrc,
   avatarFallback = 'P',
-  width = 420,
+  width = 440,
 }) {
   const [viewportWidth, setViewportWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : width
@@ -20,25 +20,26 @@ export default function CurvedNavbar({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const safeWidth = Math.min(width, Math.max(320, viewportWidth - 16));
   const activeItems = items.filter(item => !item.isAction);
+  const safeWidth = Math.min(width, viewportWidth - 24);
+  
+  // Calculate perfectly equal spacing with balanced side margins
+  const sideMargin = 60;
+  const usableWidth = safeWidth - (sideMargin * 2);
+  const spacing = usableWidth / (activeItems.length - 1);
+
   const fallbackActiveKey = activeItems[0]?.key;
   const resolvedActiveKey = activeItems.some(item => item.key === activeKey) ? activeKey : fallbackActiveKey;
   const activeIndex = Math.max(0, activeItems.findIndex(item => item.key === resolvedActiveKey));
-  const activeItem = activeItems[activeIndex] || items[0];
+  const activeItem = activeItems[activeIndex] || activeItems[0];
 
-  const sidePadding = 60;
-  const usableWidth = safeWidth - sidePadding * 2;
-  const spacing = activeItems.length > 1 ? usableWidth / (activeItems.length - 1) : 0;
-  const getCenterX = (index) => sidePadding + spacing * index;
-  const centerX = getCenterX(activeIndex);
-  const baseX = centerX - 24;
-  const verticalOffset = 10;
+  const centerX = sideMargin + (spacing * activeIndex);
 
-  const spring = {
+  const dropletSpring = {
     type: 'spring',
-    stiffness: 500,
+    stiffness: 380,
     damping: 30,
+    mass: 0.8
   };
 
   return (
@@ -46,78 +47,73 @@ export default function CurvedNavbar({
       <div className="curved-navbar" style={{ width: safeWidth }}>
         <div className="curved-navbar-bar" />
 
+        {/* 💧 THE LIQUID DROPLET INDICATOR */}
         <motion.div
-          className="curved-navbar-notch"
-          animate={{ left: baseX - 8 }}
-          style={{ top: -2 + verticalOffset }}
-          transition={spring}
-        />
-
-        <motion.div
-          className="curved-navbar-fab"
-          animate={{ left: baseX, scale: [1, 1.1, 1] }}
-          style={{ top: 6 + verticalOffset }}
-          transition={{ ...spring, scale: { duration: 0.25 } }}
+          className="curved-navbar-droplet"
+          animate={{ x: centerX }}
+          transition={dropletSpring}
+          style={{ translateX: '-50%' }}
         >
-          {activeItem?.renderActive ? (
-            activeItem.renderActive()
-          ) : activeItem?.isProfile ? (
-            avatarSrc ? (
-              <img src={avatarSrc} alt={activeItem.label} className="curved-navbar-avatar" />
-            ) : (
-              <span className="curved-navbar-avatar-fallback">{avatarFallback}</span>
-            )
-          ) : activeItem?.icon ? (
-            React.createElement(activeItem.icon, { className: 'curved-navbar-fab-icon' })
-          ) : null}
+          <div className="droplet-inner">
+            <div className="droplet-gloss" />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={resolvedActiveKey}
+                initial={{ y: 10, opacity: 0, scale: 0.5 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: -10, opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.2 }}
+                className="droplet-content"
+              >
+                {activeItem?.isProfile ? (
+                  avatarSrc ? (
+                    <img src={avatarSrc} alt="" className="droplet-avatar" />
+                  ) : (
+                    <span className="droplet-fallback">{avatarFallback}</span>
+                  )
+                ) : activeItem?.icon ? (
+                  React.createElement(activeItem.icon, { className: 'droplet-icon' })
+                ) : null}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+          
+          <motion.span 
+            className="droplet-label"
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            key={`label-${resolvedActiveKey}`}
+          >
+            {activeItem?.label}
+          </motion.span>
         </motion.div>
 
-        <motion.span
-          className="curved-navbar-label"
-          animate={{ left: centerX }}
-          style={{
-            top: 64 + verticalOffset,
-            transform: 'translateX(-50%)',
-          }}
-          transition={spring}
-        >
-          {activeItem?.label}
-        </motion.span>
-
-        {items.map((item) => {
-          const iconCenter = item.isAction ? safeWidth - 42 : getCenterX(activeItems.findIndex(active => active.key === item.key));
+        {/* 🔘 BACKGROUND ICONS */}
+        {activeItems.map((item, idx) => {
+          const itemX = sideMargin + (spacing * idx);
+          const isActive = item.key === resolvedActiveKey;
           const Icon = item.icon;
-          const hidden = !item.isAction && resolvedActiveKey === item.key;
 
           return (
-            <motion.button
+            <button
               key={item.key}
               type="button"
-              className={`curved-navbar-icon ${item.isAction ? 'is-action' : ''} ${item.isProfile ? 'is-profile' : ''}`}
-              style={{
-                left: iconCenter,
-                bottom: 24,
-                transform: 'translateX(-50%)',
-              }}
-              whileTap={{ scale: 0.85 }}
-              onClick={() => (item.isAction ? item.onClick?.() : onChange(item.key))}
+              className={`nav-item-btn ${isActive ? 'is-active' : ''}`}
+              style={{ left: itemX }}
+              onClick={() => onChange(item.key)}
             >
-              {item.isProfile ? (
-                avatarSrc ? (
-                  <img
-                    src={avatarSrc}
-                    alt={item.label}
-                    className={`curved-navbar-inline-avatar ${hidden ? 'is-hidden' : ''}`}
-                  />
-                ) : (
-                  <span className={`curved-navbar-inline-fallback ${hidden ? 'is-hidden' : ''}`}>{avatarFallback}</span>
-                )
-              ) : Icon ? (
-                <Icon className={hidden ? 'is-hidden' : ''} />
-              ) : (
-                <span className={hidden ? 'is-hidden' : ''}>{item.label[0]}</span>
-              )}
-            </motion.button>
+              <div className="nav-item-icon-wrapper">
+                {item.isProfile ? (
+                  avatarSrc ? (
+                    <img src={avatarSrc} alt="" className="nav-item-avatar" />
+                  ) : (
+                    <span className="nav-item-fallback">{avatarFallback}</span>
+                  )
+                ) : Icon ? (
+                  <Icon size={22} />
+                ) : null}
+              </div>
+            </button>
           );
         })}
       </div>

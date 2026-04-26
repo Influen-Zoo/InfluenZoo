@@ -1,34 +1,28 @@
-# Stage 1: Build the React application (matching local v24)
-FROM node:24 as build
-
+# Stage 1: Base & Dependencies
+FROM node:24 AS base
 WORKDIR /app
-
+ENV PATH /app/node_modules/.bin:$PATH
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
+# Stage 2: Development (For local dev with HMR)
+FROM base AS development
 COPY . .
+EXPOSE 5173
+CMD ["npm", "run", "dev"]
 
-# Increase memory for the build process
-ENV NODE_OPTIONS=--max-old-space-size=4096
-
-# Pass build arguments for environment variables
+# Stage 3: Build (For generating production assets)
+FROM development AS build
 ARG VITE_API_URL
 ARG VITE_APP_NAME
-
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_APP_NAME=$VITE_APP_NAME
-
+ENV NODE_OPTIONS=--max-old-space-size=4096
 RUN npm run build
 
-# Stage 2: Serve the application using Nginx
-FROM nginx:stable-alpine
-
-# Copy the built application from the build stage
+# Stage 4: Production (Final Nginx image)
+FROM nginx:stable-alpine AS production
 COPY --from=build /app/dist /usr/share/nginx/html
-
-# Copy custom nginx config (now inside the frontend context)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
 EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]

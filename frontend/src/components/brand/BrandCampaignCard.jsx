@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, MessageCircle, Share2, Send, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { resolveAssetUrl } from '../../utils/helpers';
 import CreateCampaign from './CreateCampaign';
 import LiquidButton from '../common/LiquidButton/LiquidButton';
 import { useAuth } from '../../context/AuthContext';
@@ -70,7 +71,7 @@ export default function BrandCampaignCard({ campaign, onCampaignUpdated, onCampa
       <div className="post-header">
         <div className="post-avatar" onClick={() => navigate(`/profile/${campaign.author?._id}`)} style={{ cursor: 'pointer' }}>
           {campaign.author?.avatar
-            ? <img src={campaign.author.avatar.startsWith('http') ? campaign.author.avatar : `http://localhost:5000${campaign.author.avatar}`} alt="Avatar" />
+            ? <img src={resolveAssetUrl(campaign.author.avatar)} alt="Avatar" />
             : campaign.author?.name?.[0]}
         </div>
         <div className="post-author-info">
@@ -120,10 +121,11 @@ export default function BrandCampaignCard({ campaign, onCampaignUpdated, onCampa
               </div>
             )}
             {campaign.budget && (
-              <div className="announcement-campaign-details glass-indicator" style={{
+              <div className="announcement-campaign-details" style={{
                 marginTop: '1rem', padding: '1.25rem',
-                border: '1.5px solid rgba(255, 255, 255, 0.1) !important',
-                background: 'rgba(255, 255, 255, 0.05) !important',
+                borderRadius: '24px',
+                border: '1.5px solid var(--border)',
+                background: 'var(--surface-alt)',
                 fontSize: '0.9rem', color: 'var(--text-primary)'
               }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
@@ -195,7 +197,7 @@ export default function BrandCampaignCard({ campaign, onCampaignUpdated, onCampa
         <div className={`post-media grid-${Math.min(campaign.media.length, 4)}`}>
           {campaign.media.map((media, i) => {
             if (brokenMedia.includes(i)) return null;
-            const src = media.url.startsWith('http') ? media.url : `http://localhost:5000${media.url}`;
+            const src = resolveAssetUrl(media.url || media);
             return (
               <div key={i} className="media-wrapper">
                 {media.type === 'video' ? (
@@ -246,10 +248,10 @@ export default function BrandCampaignCard({ campaign, onCampaignUpdated, onCampa
               <div key={i} className="comment-item">
                 <div className="comment-avatar">
                   {comment.user?.avatar
-                    ? <img src={comment.user.avatar.startsWith('http') ? comment.user.avatar : `http://localhost:5000${comment.user.avatar}`} alt="Avatar" />
+                    ? <img src={resolveAssetUrl(comment.user.avatar)} alt="Avatar" />
                     : comment.user?.name?.[0]}
                 </div>
-                <div className="comment-bubble glass-indicator" style={{ background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(8px)', padding: '0.75rem 1.25rem', borderRadius: '0 16px 16px 16px', fontSize: '0.9rem', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <div className="comment-bubble glass-indicator" style={{ background: 'var(--surface-alt)', backdropFilter: 'blur(8px)', padding: '0.75rem 1.25rem', borderRadius: '0 16px 16px 16px', fontSize: '0.9rem', border: '1px solid var(--border)' }}>
                   <strong style={{ display: 'block', fontSize: '0.8125rem', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>{comment.user?.name}</strong>
                   <p style={{ margin: 0, color: 'var(--text-muted)' }}>{comment.text}</p>
                 </div>
@@ -265,7 +267,7 @@ export default function BrandCampaignCard({ campaign, onCampaignUpdated, onCampa
               placeholder="Write a comment..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              style={{ flex: 1, padding: '0.75rem 1.25rem', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-primary)', outline: 'none', backdropFilter: 'blur(10px)' }}
+              style={{ flex: 1, padding: '0.75rem 1.25rem', borderRadius: '20px', border: '1px solid var(--border)', background: 'var(--surface-alt)', color: 'var(--text-primary)', outline: 'none', backdropFilter: 'blur(10px)' }}
             />
             <button type="submit" disabled={!newComment.trim()}>
               <Send size={16} />

@@ -1,24 +1,18 @@
-# Use official Node.js image (matching local v24)
-FROM node:24-alpine
-
-# Create app directory
+# Base stage for shared setup
+FROM node:24-alpine AS base
 WORKDIR /usr/src/app
-
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
 
-# Use npm ci for a clean, predictable install
-RUN npm ci --omit=dev
-
-# Bundle app source
+# Development stage
+FROM base AS development
+RUN npm install
 COPY . .
+CMD ["npm", "run", "dev"]
 
-# Create uploads directory and set permissions
+# Production stage
+FROM base AS production
+RUN npm ci --omit=dev
+COPY . .
 RUN mkdir -p uploads && chmod 777 uploads
-
-# Expose port
 EXPOSE 5000
-
-# Start the application
-CMD [ "node", "server.js" ]
+CMD ["node", "server.js"]

@@ -21,6 +21,7 @@
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
+  padding: 1.25rem 1.25rem 0;
 }
 
 .post-avatar {
@@ -54,6 +55,7 @@
 
 .post-content {
   margin-bottom: 1rem;
+  padding: 0 1.25rem;
 }
 
 .post-content p {
@@ -75,7 +77,7 @@
 }
 
 .post-media {
-  border-radius: var(--radius-md);
+  border-radius: 0;
   overflow: hidden;
   margin-bottom: 1rem;
   display: grid;
@@ -113,14 +115,15 @@
   justify-content: space-between;
   font-size: 0.8125rem;
   color: var(--text-secondary);
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
+  padding: 0 1.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-light);
   margin-bottom: 0.5rem;
 }
 
 .post-actions {
   display: flex;
   justify-content: space-between;
+  padding: 0 1.25rem 1.25rem;
 }
 
 .action-btn {
@@ -153,6 +156,7 @@
 .post-comments-section {
   border-top: 1px solid var(--border);
   margin-top: 0.75rem;
+  padding: 1.25rem;
   padding-top: 1rem;
 }
 
@@ -191,11 +195,11 @@
 }
 
 .comment-bubble {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-alt);
   backdrop-filter: blur(8px);
-  padding: 0.6rem 1rem;
-  border-radius: 1.2rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.75rem 1.25rem;
+  border-radius: 1.5rem;
+  border: 1px solid var(--border);
   border-top-left-radius: 0;
   font-size: 0.875rem;
 }
@@ -224,10 +228,10 @@
 .comment-form input {
   flex: 1;
   background: var(--surface-alt);
-  border: 1px solid transparent;
+  border: 1px solid var(--border);
   border-radius: var(--radius-pill);
-  padding: 0.5rem 1rem;
-  color: var(--text);
+  padding: 0.6rem 1.25rem;
+  color: var(--text-primary);
   font-size: 0.875rem;
   transition: all 0.2s;
 }
@@ -267,10 +271,20 @@
   }
 
   .post-header {
+    padding: 1rem 1rem 0;
     gap: 0.75rem;
   }
 
+  .post-content {
+    padding: 0 1rem;
+  }
+
+  .post-stats {
+    padding: 0 1.25rem 0.5rem;
+  }
+
   .post-actions {
+    padding: 0 0.75rem 1rem;
     gap: 0.25rem;
   }
 

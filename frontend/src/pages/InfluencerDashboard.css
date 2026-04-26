@@ -2,9 +2,9 @@
 .influencer-page { padding-bottom:calc(var(--bottom-nav-h) + 1rem); background:transparent; min-height:100vh; color:var(--text-primary); }
 
 .dash-header { 
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.15) 40%, rgba(251, 191, 36, 0.08) 100%) !important;
-  backdrop-filter: blur(60px) saturate(220%) brightness(1.08) !important;
-  -webkit-backdrop-filter: blur(60px) saturate(220%) brightness(1.08) !important;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 40%, rgba(251, 191, 36, 0.01) 100%) !important;
+  backdrop-filter: blur(8px) saturate(220%) brightness(1.08) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(220%) brightness(1.08) !important;
   padding: 1.5rem 1rem 2.5rem; 
   border-radius: 0 0 38px 38px; 
   position: relative; 
@@ -391,13 +391,17 @@
 
 /* Brand Card Modern */
 .brand-card-modern {
-
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px) saturate(160%);
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 38px !important;
   position: relative;
   overflow: hidden;
   margin-bottom: 1.25rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  padding: 0 !important;
 }
 [data-theme='dark'] .brand-card-modern {
 
@@ -423,8 +427,8 @@
 .cover-placeholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, var(--accent), var(--secondary));
-  opacity: 0.5;
+  background: linear-gradient(135deg, #fbbf24, #fcd34d);
+  opacity: 1;
 }
 
 .brand-card-content {
@@ -535,17 +539,14 @@
 
 .brand-card-actions .glass-button,
 .btn-unfollow-modern {
-  height: 40px !important;
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.8125rem;
   font-weight: 700;
-  padding: 0 1.25rem;
-  border-radius: var(--radius-md);
   margin: 0;
-  transform: none !important; /* Disable LiquidButton's hover translate to keep them aligned */
+  transform: none !important; 
 }
 
 .brand-card-actions .glass-button:hover,
@@ -585,7 +586,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #555; 
+  color: var(--text-secondary); 
   background: white !important;
   font-weight: 800;
   font-size: 1.1rem;
@@ -1012,14 +1013,11 @@
 
   .collab-card-header,
   .brand-name-row,
-  .brand-card-actions,
   .collab-footer {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .brand-card-actions .glass-button,
-  .btn-unfollow-modern,
   .social-action-btn {
     width: 100%;
   }

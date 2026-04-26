@@ -1,9 +1,9 @@
 .curved-navbar-shell {
   position: fixed;
   left: 50%;
-  bottom: 0.5rem;
+  bottom: 0.75rem;
   transform: translateX(-50%);
-  width: min(100vw - 1rem, 420px);
+  width: min(100vw - 1rem, 440px);
   z-index: 9999;
   pointer-events: none;
 }
@@ -11,7 +11,7 @@
 .curved-navbar {
   position: relative;
   width: 100%;
-  height: 100px;
+  height: 90px;
   margin: 0 auto;
   pointer-events: auto;
 }
@@ -20,288 +20,176 @@
   position: absolute;
   inset-inline: 0;
   bottom: 0;
-  height: 85px; /* Slight size increase as requested */
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: var(--radius-xl);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  height: 72px;
+  background: rgba(255, 255, 255, 0.02); /* More transparent */
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.1),
-    0 4px 12px rgba(0, 0, 0, 0.05),
-    inset 0 2px 0 rgba(255, 255, 255, 0.95),
-    inset 2px 0 6px rgba(255, 255, 255, 0.2),
-    inset -2px 0 6px rgba(255, 255, 255, 0.15),
-    inset 0 -2px 0 rgba(255, 255, 255, 0.4);
-
-  backdrop-filter: blur(16px) saturate(160%); /* Slight blur effect */
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  overflow: hidden;
-}
-
-/* Central dome highlight — convex lens catches light at the top-center */
-.curved-navbar-bar::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(
-      ellipse 85% 70% at 50% 10%,
-      rgba(255, 255, 255, 0.9) 0%,
-      rgba(255, 255, 255, 0.45) 25%,
-      rgba(255, 255, 255, 0.1) 55%,
-      transparent 75%
-    ),
-    radial-gradient(
-      ellipse 70% 30% at 50% 120%,
-      rgba(255, 255, 255, 0.3) 0%,
-      transparent 60%
-    );
-  border-radius: var(--radius-xl);
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Lens edge vignette — edges darker than center */
-.curved-navbar-bar::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse 95% 85% at 50% 50%,
-    transparent 55%,
-    rgba(0, 0, 0, 0.04) 100%
-  );
-  border-radius: var(--radius-xl);
-  pointer-events: none;
-  z-index: 1;
+    0 16px 48px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px) saturate(160%); /* Less blurry */
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  z-index: 5;
 }
 
 [data-theme='dark'] .curved-navbar-bar {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(20, 20, 22, 0.15); /* More transparent dark glass */
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.5),
-    0 4px 12px rgba(0, 0, 0, 0.3),
-    inset 0 2px 0 rgba(255, 255, 255, 0.25),
-    inset 2px 0 6px rgba(255, 255, 255, 0.08),
-    inset -2px 0 6px rgba(255, 255, 255, 0.06),
-    inset 0 -2px 0 rgba(255, 255, 255, 0.1);
-
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
+    0 16px 48px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
 }
 
-[data-theme='dark'] .curved-navbar-bar::before {
-  background:
-    radial-gradient(
-      ellipse 85% 70% at 50% 10%,
-      rgba(255, 255, 255, 0.2) 0%,
-      rgba(255, 255, 255, 0.08) 35%,
-      transparent 65%
-    );
-}
-
-[data-theme='dark'] .curved-navbar-bar::after {
-  background: radial-gradient(
-    ellipse 95% 85% at 50% 50%,
-    transparent 50%,
-    rgba(0, 0, 0, 0.15) 100%
-  );
-}
-
-.curved-navbar-notch {
+/* 💧 THE DROPLET */
+.curved-navbar-droplet {
   position: absolute;
-  width: 64px;
-  height: 64px;
-  background: rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(30px) saturate(140%);
-  -webkit-backdrop-filter: blur(30px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-lg);
-  z-index: 10;
-  box-shadow:
-    0 8px 20px rgba(0, 0, 0, 0.12),
-    inset 0 1px 1px rgba(255, 255, 255, 0.5),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+  top: 5px;
+  width: 58px;
+  height: 58px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Notch gloss */
-.curved-navbar-notch::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 60%;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.3) 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 100%
-  );
-  border-top: 1px solid rgba(255, 255, 255, 0.4);
-  pointer-events: none;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  z-index: 1;
-}
-
-[data-theme='dark'] .curved-navbar-notch {
-  background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow:
-    0 8px 20px rgba(0, 0, 0, 0.35),
-    inset 0 1px 1px rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(30px) saturate(150%);
-  -webkit-backdrop-filter: blur(30px) saturate(150%);
-}
-
-[data-theme='light'] .curved-navbar-notch {
-  background: rgba(255, 255, 255, 0.15) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.curved-navbar-fab {
-  position: absolute;
-  width: 48px;
-  height: 48px;
-  background: var(--accent) !important;
-  border-radius: var(--radius-md);
+.droplet-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 30%, #ffdf85 0%, #fbbf24 60%, #d97706 100%);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
-  z-index: 20;
-  color: white !important;
+  box-shadow: 
+    0 8px 16px rgba(0, 0, 0, 0.15),
+    inset 0 4px 8px rgba(255, 255, 255, 0.6),
+    inset 0 -4px 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.curved-navbar-fab-icon {
-  width: 22px;
-  height: 22px;
-  color: white !important;
-}
-
-.curved-navbar-label {
+/* Secondary specular highlight for liquid look */
+.droplet-inner::after {
+  content: '';
   position: absolute;
-  font-size: 11px;
-  color: var(--text-secondary);
-  text-align: center;
-  white-space: nowrap;
-  z-index: 20;
-}
-
-.curved-navbar-icon {
-  position: absolute;
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 15;
-}
-
-.curved-navbar-icon svg {
-  width: 22px;
-  height: 22px;
-}
-
-.curved-navbar-icon.is-action {
-  color: var(--danger);
-}
-
-.curved-navbar-inline-avatar,
-.curved-navbar-avatar {
-  width: 24px;
-  height: 24px;
+  top: 6px;
+  left: 20%;
+  width: 35%;
+  height: 25%;
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 50%;
-  object-fit: cover;
-  border: none !important;
-}
-
-.curved-navbar-avatar {
-  width: 100%;
-  height: 100%;
-}
-
-.curved-navbar-inline-fallback,
-.curved-navbar-avatar-fallback {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #f0f2f5 !important;
-  color: #444;
-  font-size: 0.78rem;
-  font-weight: 800;
-  border: none !important;
-}
-
-.curved-navbar-avatar-fallback {
-  width: 100%;
-  height: 100%;
-  font-size: 1.1rem;
-}
-
-.is-hidden {
-  color: transparent !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
+  filter: blur(2px);
   pointer-events: none;
 }
 
-@media (min-width: 1024px) {
-  .curved-navbar-shell {
-    width: min(460px, calc(100vw - 2rem));
-    bottom: 1rem;
-  }
+.droplet-gloss {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
+  pointer-events: none;
 }
 
-@media (max-width: 768px) {
+.droplet-content {
+  color: white;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.droplet-icon {
+  width: 22px;
+  height: 22px;
+  color: #000; /* Darker icon for contrast on yellow drop */
+  filter: drop-shadow(0 1px 1px rgba(255,255,255,0.4));
+}
+
+.droplet-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+}
+
+.droplet-label {
+  position: absolute;
+  bottom: -20px;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* 🔘 NAV ITEMS */
+.nav-item-btn {
+  position: absolute;
+  bottom: 18px;
+  background: transparent;
+  border: none;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(-50%);
+  cursor: pointer;
+  z-index: 10;
+  color: var(--text-muted);
+  transition: color 0.3s, opacity 0.3s;
+}
+
+.nav-item-btn.is-active {
+  color: transparent;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav-item-icon-wrapper {
+  transition: transform 0.2s;
+}
+
+.nav-item-btn:hover .nav-item-icon-wrapper {
+  transform: translateY(-2px);
+  color: var(--text-primary);
+}
+
+.nav-item-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  filter: grayscale(100%);
+  opacity: 0.7;
+}
+
+.nav-item-fallback {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+@media (max-width: 480px) {
   .curved-navbar-shell {
-    bottom: 0.75rem;
-    width: calc(100vw - 1rem);
-    max-width: 460px;
+    width: calc(100vw - 1.5rem);
   }
-
-  .curved-navbar {
-    height: 92px;
-  }
-
-  .curved-navbar-bar {
-    height: 76px;
-    border-radius: 24px;
-    background: rgba(255, 251, 239, 0.95);
-    border-color: rgba(217, 173, 52, 0.18);
-  }
-
-  .curved-navbar-notch {
+  
+  .curved-navbar-droplet {
     width: 60px;
     height: 60px;
-    border-radius: 20px;
+    top: -25px;
   }
-
-  .curved-navbar-fab {
-    width: 46px;
-    height: 46px;
-    border-radius: 16px;
-    color: #24190b !important;
-  }
-
-  .curved-navbar-fab-icon,
-  .curved-navbar-icon svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .curved-navbar-label {
+  
+  .droplet-label {
     font-size: 10px;
-    font-weight: 700;
-  }
-
-  .curved-navbar-icon {
-    min-width: 44px;
-    min-height: 44px;
+    bottom: -22px;
   }
 }

@@ -11,14 +11,14 @@
   --primary-dark: #d97706;
   --primary-rgb: 251, 191, 36;
   --secondary: #050505;
-  --surface: rgba(255, 255, 255, 0.05);
-  --surface-hover: rgba(255, 255, 255, 0.08);
-  --surface-alt: rgba(255, 255, 255, 0.03);
+  --surface: rgba(255, 255, 255, 0.02);
+  --surface-hover: rgba(255, 255, 255, 0.05);
+  --surface-alt: rgba(255, 255, 255, 0.01);
   --accent: #fbbf24;
   --accent-dark: #f59e0b;
   --accent-light: #fef3c7;
   --accent-rgb: 251, 191, 36;
-  --accent-gradient: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  --accent-gradient: linear-gradient(135deg, #fbbf24 0%, #fcd34d 100%);
   
   /* Liquid Background Tokens */
   --liquid-color-1: #6d28d9; /* Deep Violet */
@@ -514,6 +514,10 @@ p {
 .explore-sub-tabs,
 .collab-card,
 .application-card,
+.brand-card-modern {
+  padding: 0 !important;
+}
+
 .brand-card-modern,
 .step-card,
 .feature-card,
@@ -585,19 +589,7 @@ p {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(
-      ellipse 85% 70% at 50% 10%,
-      rgba(255, 255, 255, 0.9) 0%,
-      rgba(255, 255, 255, 0.45) 25%,
-      rgba(255, 255, 255, 0.1) 55%,
-      transparent 75%
-    ),
-    radial-gradient(
-      ellipse 70% 30% at 50% 120%,
-      rgba(255, 255, 255, 0.3) 0%,
-      transparent 60%
-    ) !important;
+  background: none !important;
   border-radius: inherit;
   pointer-events: none;
   z-index: -1;
@@ -704,13 +696,7 @@ p {
 [data-theme='dark'] .moderation-card::before,
 [data-theme='dark'] .dispute-card::before,
 [data-theme='dark'] .admin-profile-card::before {
-  background:
-    radial-gradient(
-      ellipse 85% 70% at 50% 10%,
-      rgba(255, 255, 255, 0.2) 0%,
-      rgba(255, 255, 255, 0.08) 35%,
-      transparent 65%
-    ) !important;
+  background: none !important;
   display: block !important;
 }
 
@@ -881,50 +867,7 @@ p {
 .step-card::before,
 .feature-card::before,
 .profile-container::before,
-.profile-social-links::before,
-.social-accounts-container::before,
-.profile-stats-section::before,
-.stat-card::before,
-.work-section::before,
-.info-item::before,
-.campaign-card::before,
-.applicant-card::before,
-.notifications-container::before,
-.profile-bio-card::before,
-.bio-section::before,
-.post-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 40%;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
-  pointer-events: none;
-  z-index: -1;
-}
-[data-theme='light'] .card::before,
-.glass-panel::before,
-.quick-stat-card::before,
-.explore-sub-tabs::before,
-.collab-card::before,
-.application-card::before,
-.brand-card-modern::before,
-.step-card::before,
-.feature-card::before,
-.profile-container::before,
-.profile-social-links::before,
-.social-accounts-container::before,
-.profile-stats-section::before,
-.stat-card::before,
-.work-section::before,
-.info-item::before,
-.campaign-card::before,
-.applicant-card::before,
-.notifications-container::before,
-.profile-bio-card::before,
-.bio-section::before,
-.post-card::before {
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.6) 0%, transparent 100%);
-}
+/* Handled by global rule at line 580 */
 
 .card:hover {
   box-shadow: var(--shadow-card-hover);
@@ -1471,89 +1414,37 @@ select.input {
 
 /* -- Top Navbar Convex Lens Glass -- */
 .top-navbar-global {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.15) 100%) !important;
-  backdrop-filter: blur(16px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
-  border-radius: 0 0 24px 24px !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  backdrop-filter: blur(8px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(160%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 0 0 30px 30px !important;
   box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.08),
-    0 8px 24px rgba(0, 0, 0, 0.04),
-    0 4px 12px rgba(0, 0, 0, 0.05),
-    inset 0 -2px 0 rgba(255, 255, 255, 0.95),
-    inset 2px 0 6px rgba(255, 255, 255, 0.2),
-    inset -2px 0 6px rgba(255, 255, 255, 0.15),
-    inset 0 2px 0 rgba(255, 255, 255, 0.4) !important;
+    0 16px 48px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
   position: sticky !important;
   top: 0;
   z-index: 1000;
   overflow: hidden;
 }
 
-.top-navbar-global::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(
-      ellipse 85% 70% at 50% 10%,
-      rgba(255, 255, 255, 0.9) 0%,
-      rgba(255, 255, 255, 0.45) 25%,
-      rgba(255, 255, 255, 0.1) 55%,
-      transparent 75%
-    ),
-    radial-gradient(
-      ellipse 70% 30% at 50% 120%,
-      rgba(255, 255, 255, 0.3) 0%,
-      transparent 60%
-    );
-  pointer-events: none;
-  z-index: 10;
-}
-
+/* Removed pseudo-elements to ensure perfect transparency match with bottom nav */
+.top-navbar-global::before,
 .top-navbar-global::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse 95% 85% at 50% 50%,
-    transparent 55%,
-    rgba(0, 0, 0, 0.04) 100%
-  );
-  pointer-events: none;
-  z-index: -1;
+  display: none !important;
 }
 [data-theme='dark'] .top-navbar-global {
-  background: rgba(255, 255, 255, 0.03) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.18) !important;
+  background: rgba(20, 20, 22, 0.15) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.5),
-    0 4px 12px rgba(0, 0, 0, 0.3),
-    inset 0 -2px 0 rgba(255, 255, 255, 0.25),
-    inset 2px 0 6px rgba(255, 255, 255, 0.08),
-    inset -2px 0 6px rgba(255, 255, 255, 0.06),
-    inset 0 2px 0 rgba(255, 255, 255, 0.1) !important;
-  backdrop-filter: blur(16px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+    0 16px 48px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(8px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(160%) !important;
 }
 
-[data-theme='dark'] .top-navbar-global::before {
-  background:
-    radial-gradient(
-      ellipse 85% 70% at 50% 10%,
-      rgba(255, 255, 255, 0.2) 0%,
-      rgba(255, 255, 255, 0.08) 35%,
-      transparent 65%
-    );
-}
+/* Dark Mode pseudo-elements removed for transparency parity */
 
-[data-theme='dark'] .top-navbar-global::after {
-  background: radial-gradient(
-    ellipse 95% 85% at 50% 50%,
-    transparent 50%,
-    rgba(0, 0, 0, 0.12) 100%
-  );
-}
 /* -- Top Navbar Icons Liquid Glass Parity -- */
 .btn-icon-modern, .theme-toggle-btn {
   display: flex !important;
@@ -1603,13 +1494,13 @@ select.input {
   --surface-alt: #fff6db;
   --border: rgba(217, 173, 52, 0.18);
   --border-light: rgba(217, 173, 52, 0.1);
-  --text-primary: #22190b;
-  --text-secondary: #665844;
-  --text-muted: #9d8e79;
-  --text-inverse: #22190b;
-  --text-on-gradient: #22190b;
-  --text-on-hero: #24190b;
-  --text-hero-muted: #72634d;
+  --text-primary: #000000;
+  --text-secondary: #1a1a1a;
+  --text-muted: #4a4a4a;
+  --text-inverse: #ffffff;
+  --text-on-gradient: #000000;
+  --text-on-hero: #000000;
+  --text-hero-muted: #2d2d2d;
   --bg-glass-hero: rgba(255, 255, 255, 0.72);
   --border-glass-hero: rgba(217, 173, 52, 0.16);
   --success: #0f9f6e;
@@ -1635,13 +1526,13 @@ select.input {
   --surface-alt: rgba(58, 46, 24, 0.74);
   --border: rgba(245, 197, 66, 0.18);
   --border-light: rgba(245, 197, 66, 0.1);
-  --text-primary: #fff8e7;
-  --text-secondary: #dfd1b4;
-  --text-muted: #b9a98a;
-  --text-inverse: #1a150d;
-  --text-on-gradient: #1a150d;
-  --text-on-hero: #fff8e7;
-  --text-hero-muted: #e8d9b4;
+  --text-primary: #ffffff;
+  --text-secondary: #e5e5e5;
+  --text-muted: #b0b0b0;
+  --text-inverse: #000000;
+  --text-on-gradient: #ffffff;
+  --text-on-hero: #ffffff;
+  --text-hero-muted: #d1d1d1;
   --bg-glass-hero: rgba(40, 32, 20, 0.72);
   --border-glass-hero: rgba(245, 197, 66, 0.18);
   --hero-gradient: linear-gradient(180deg, #19150d 0%, #2a2114 58%, #3d2e14 100%);
@@ -1665,11 +1556,12 @@ body {
   font-size: 0.9375rem;
 }
 
-body::before,
-body::after,
-.liquid-orb-overlay,
-.material-grain {
-  opacity: 0.22;
+[data-theme='dark'] body::before,
+[data-theme='dark'] body::after,
+[data-theme='dark'] .liquid-orb-bg,
+[data-theme='dark'] .liquid-orb-overlay {
+  opacity: 0 !important;
+  display: none !important;
 }
 
 #root {
@@ -1699,30 +1591,9 @@ p {
   line-height: 1.55;
 }
 
-.btn,
-.glass-button {
-  min-height: 46px;
-  border-radius: 16px !important;
-  padding: 0.8rem 1rem !important;
-  font-size: 0.9375rem !important;
-  font-weight: 700;
-  box-shadow: var(--shadow-sm);
-}
+/* Note: .glass-button and variants are now handled in LiquidButton.css/jsx 
+   to maintain the "Convex Lens" design system without layering conflicts. */
 
-.btn-primary,
-.btn-accent,
-.glass-button-primary {
-  background: linear-gradient(135deg, var(--primary) 0%, #ffd74a 100%) !important;
-  color: #24190b !important;
-  border-color: transparent !important;
-}
-
-.btn-outline,
-.glass-button-secondary {
-  background: rgba(255, 255, 255, 0.86) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border) !important;
-}
 
 .card,
 .glass-panel,

@@ -16,8 +16,8 @@ export const InfluencerLayout = () => {
   const navigate = useNavigate();
 
   const navItems = [
-    { key: 'home', icon: House, label: 'Home', path: '/influencer' },
     { key: 'explore', icon: Compass, label: 'Discover', path: '/influencer/explore' },
+    { key: 'home', icon: House, label: 'Home', path: '/influencer' },
     { key: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/influencer/dashboard' },
     { key: 'ai', icon: Bot, label: 'AI' },
     { key: 'profile', icon: User, label: 'Profile', path: '/influencer/profile', isProfile: true },

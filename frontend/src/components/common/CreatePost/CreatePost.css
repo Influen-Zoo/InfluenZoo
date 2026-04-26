@@ -1,13 +1,10 @@
-.create-post-container {
+.create-post-container.glass-panel {
   width: 100%;
   box-sizing: border-box;
   max-width: none;
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--border);
-  margin-bottom: 2rem;
+  border-radius: 38px !important;
+  padding: 1.25rem !important;
+  margin-bottom: 1.5rem;
   transition: all 0.3s ease;
   display: block;
 }
@@ -196,9 +193,10 @@
 }
 
 @media (max-width: 600px) {
-  .create-post-container {
-    border-radius: 22px;
-    padding: 1rem;
+  .create-post-container.glass-panel {
+    border-radius: 22px !important;
+    padding: 1rem !important;
+    margin-bottom: 1rem;
   }
 
   .create-post-header {

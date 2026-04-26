@@ -15,8 +15,8 @@ export const BrandLayout = () => {
   const navigate = useNavigate();
 
   const navItems = [
-    { key: 'home', icon: House, label: 'Home', path: '/brand' },
     { key: 'explore', icon: Compass, label: 'Discover', path: '/brand/explore' },
+    { key: 'home', icon: House, label: 'Home', path: '/brand' },
     { key: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/brand/dashboard' },
     { key: 'ai', icon: Bot, label: 'AI' },
     { key: 'profile', icon: User, label: 'Profile', path: '/brand/profile', isProfile: true },
