@@ -70,13 +70,16 @@ jobs:
           sudo systemctl stop nginx || true
           sudo systemctl disable nginx || true
           
-          # Pull latest VITE_API_URL from frontend .env if available
+          # Pull variables from frontend .env if available
           if [ -f ./frontend/.env ]; then
             export $(grep -v '^#' ./frontend/.env | xargs)
           fi
           
-          sudo docker compose down
-          sudo docker compose up --build -d
+          # Ensure VITE_API_URL is set to the public domain
+          export VITE_API_URL="http://${{ env.DOMAIN }}"
+          
+          sudo -E docker compose down
+          sudo -E docker compose up --build -d
           echo "✅ Containers started in detached mode"
 
       - name: 🩺 Check Deployment Health
