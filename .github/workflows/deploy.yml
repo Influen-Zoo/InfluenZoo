@@ -64,6 +64,10 @@ jobs:
 
       - name: 🚀 Build and Deploy with Docker Compose
         run: |
+          # Stop host Nginx if it's running to free up Port 80
+          sudo systemctl stop nginx || true
+          sudo systemctl disable nginx || true
+          
           # Pull latest VITE_API_URL from frontend .env if available
           if [ -f ./frontend/.env ]; then
             export $(grep -v '^#' ./frontend/.env | xargs)
@@ -78,6 +82,15 @@ jobs:
           echo "Waiting for services to stabilize..."
           sleep 20
           
+          echo "Checking Gateway health..."
+          if sudo docker ps | grep -q "influence-gateway"; then
+            echo "✅ Gateway container is running"
+          else
+            echo "❌ Gateway container FAILED to start"
+            sudo docker logs influence-gateway
+            exit 1
+          fi
+
           echo "Checking Backend health..."
           # Test internal connectivity to backend container
           if sudo docker ps | grep -q "influnce-backend"; then
