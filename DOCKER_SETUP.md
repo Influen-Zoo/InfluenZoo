@@ -20,7 +20,7 @@ Ensure your `.env` files are set up:
 To build the images and start the entire stack (Frontend, Backend, and Nginx Gateway), run:
 
 ```bash
-docker-compose up --build -d
+docker compose up --build -d
 ```
 
 ### 3. Access the Application
@@ -43,17 +43,17 @@ Once the containers are running:
 
 - **Stop all services**:
   ```bash
-  docker-compose down
+  docker compose down
   ```
 
 - **View live logs**:
   ```bash
-  docker-compose logs -f
+  docker compose logs -f
   ```
 
 - **Restart the Gateway**:
   ```bash
-  docker-compose restart nginx
+  docker compose restart nginx
   ```
 
 ## 🌐 Production Deployment

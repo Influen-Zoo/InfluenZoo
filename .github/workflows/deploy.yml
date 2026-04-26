@@ -51,8 +51,8 @@ jobs:
             export $(grep -v '^#' ./frontend/.env | xargs)
           fi
           
-          docker-compose down
-          docker-compose up --build -d
+          docker compose down
+          docker compose up --build -d
           echo "✅ Containers started in detached mode"
 
       - name: 🩺 Check Deployment Health

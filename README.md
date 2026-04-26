@@ -7,7 +7,7 @@ A premium influencer-brand collaboration platform built with the MERN stack and 
 This project is fully containerized. To get started, ensure you have Docker installed and run:
 
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 Access the app at: **[http://localhost](http://localhost)**
