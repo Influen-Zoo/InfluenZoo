@@ -1,0 +1,386 @@
+/* Shared responsive layer.
+   Imported after the legacy styles so page-level behavior can be improved
+   without changing component logic or interactions. */
+
+:root {
+  --page-gutter: clamp(0.9rem, 2.4vw, 2rem);
+  --content-max: 1180px;
+  --wide-content-max: 1360px;
+  --feed-max: 720px;
+  --card-grid-min: 280px;
+  --nav-glass-bg: rgba(255, 253, 247, 0.34);
+  --nav-glass-border: rgba(255, 255, 255, 0.34);
+  --nav-glass-shadow: 0 16px 48px rgba(73, 46, 8, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+}
+
+[data-theme='dark'] {
+  --nav-glass-bg: rgba(20, 20, 22, 0.38);
+  --nav-glass-border: rgba(255, 255, 255, 0.12);
+  --nav-glass-shadow: 0 16px 48px rgba(0, 0, 0, 0.34), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+}
+
+html {
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-width: 320px;
+}
+
+#root,
+.influencer-dashboard,
+.brand-dashboard {
+  min-height: 100vh;
+}
+
+.dashboard-content,
+.admin-body,
+.notifications-page,
+.user-profile-page,
+.brand-page,
+.influencer-page {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dashboard-content,
+.admin-body {
+  margin-inline: auto;
+}
+
+.tab-container,
+.tab-pane {
+  width: 100%;
+  min-width: 0;
+}
+
+.responsive-section {
+  width: 100%;
+  min-width: 0;
+}
+
+.responsive-feed {
+  width: min(100%, var(--feed-max));
+  margin-inline: auto;
+}
+
+.responsive-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.responsive-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  width: 100%;
+}
+
+.responsive-tab-content {
+  margin-top: 1.5rem;
+}
+
+.profile-signout {
+  padding: 0 0 2rem;
+  width: min(100%, var(--feed-max));
+  margin-inline: auto;
+}
+
+.empty-state-modern {
+  width: 100%;
+}
+
+.top-navbar-global,
+.curved-navbar-bar {
+  background: var(--nav-glass-bg) !important;
+  border-color: var(--nav-glass-border) !important;
+  box-shadow: var(--nav-glass-shadow) !important;
+  backdrop-filter: blur(18px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(170%) !important;
+}
+
+.top-navbar-global {
+  border-bottom: 1px solid var(--nav-glass-border) !important;
+}
+
+.curved-navbar-bar {
+  border: 1px solid var(--nav-glass-border) !important;
+}
+
+.table-container,
+.admin-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+img,
+video,
+canvas {
+  max-width: 100%;
+}
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .dashboard-content,
+  .admin-body {
+    padding-left: var(--page-gutter) !important;
+    padding-right: var(--page-gutter) !important;
+  }
+
+  .responsive-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+
+  .responsive-stack {
+    gap: 1.25rem;
+  }
+
+  .profile-signout {
+    padding-bottom: 2.5rem;
+  }
+
+  .create-post-footer {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between;
+  }
+
+  .create-post-footer > button {
+    width: auto !important;
+    min-width: 150px;
+  }
+
+  .create-post-actions {
+    width: auto !important;
+  }
+
+  .quick-stats-modern {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: visible !important;
+    gap: 0.85rem !important;
+  }
+
+  .quick-stat-card {
+    min-width: 0 !important;
+  }
+
+  .profile-container {
+    padding: 2rem !important;
+  }
+
+  .profile-banner {
+    height: clamp(220px, 24vw, 320px);
+  }
+
+  .profile-main-grid,
+  .bio-details-grid,
+  .social-accounts-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .profile-main-content {
+    display: contents;
+  }
+
+  .profile-social-links,
+  .connected-social-section,
+  .education-section,
+  .work-section,
+  .bio-section {
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-content {
+    max-width: var(--content-max);
+    padding-top: 1.5rem !important;
+    padding-bottom: calc(var(--bottom-nav-h, 90px) + 2rem) !important;
+  }
+
+  .admin-body {
+    max-width: var(--wide-content-max);
+    padding: 2rem var(--page-gutter) !important;
+  }
+
+  .top-navbar-global {
+    padding-inline: var(--page-gutter) !important;
+  }
+
+  .top-search-wrapper {
+    max-width: 640px !important;
+  }
+
+  .responsive-card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(var(--card-grid-min), 1fr));
+    gap: 1.5rem;
+  }
+
+  .responsive-feed .post-card,
+  .posts-feed.responsive-feed .post-card,
+  .posts-feed.responsive-feed .brand-campaign-card {
+    margin-bottom: 1.25rem;
+  }
+
+  .explore-results {
+    width: 100%;
+  }
+
+  .quick-stats-modern {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem !important;
+  }
+
+  .dash-section-header,
+  .campaign-card-header,
+  .collab-footer,
+  .campaign-stats,
+  .applicant-actions {
+    gap: 1rem;
+  }
+
+  .collab-card,
+  .campaign-card,
+  .application-card,
+  .brand-card-modern,
+  .post-card,
+  .create-post-container.glass-panel {
+    border-radius: 28px !important;
+  }
+
+  .brand-card-cover {
+    height: 120px;
+  }
+
+  .brand-card-actions,
+  .profile-actions,
+  .applicant-actions {
+    flex-wrap: wrap;
+  }
+
+  .profile-wrapper {
+    width: min(100%, var(--content-max));
+    margin-inline: auto;
+  }
+
+  .user-profile-page:not(.embedded-profile) {
+    padding-left: var(--page-gutter) !important;
+    padding-right: var(--page-gutter) !important;
+  }
+
+  .profile-header-section {
+    padding-inline: clamp(1.5rem, 4vw, 3rem) !important;
+  }
+
+  .profile-header-top {
+    width: 100%;
+  }
+
+  .profile-container {
+    margin-bottom: 3rem !important;
+  }
+
+  .profile-main-grid {
+    gap: 1.5rem;
+  }
+
+  .bio-details-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .modal {
+    max-width: min(92vw, 720px);
+  }
+
+  .chat-dashboard-container {
+    min-height: 620px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboard-content {
+    max-width: var(--wide-content-max);
+  }
+
+  .responsive-card-grid {
+    --card-grid-min: 320px;
+  }
+
+  .profile-wrapper {
+    width: min(100%, 1240px);
+  }
+
+  .profile-banner {
+    height: 340px;
+  }
+}
+
+@media (max-width: 767px) {
+  .responsive-card-grid,
+  .responsive-stack {
+    gap: 1rem;
+  }
+
+  .responsive-tab-content {
+    margin-top: 1rem;
+  }
+
+  .profile-signout {
+    padding-inline: 0;
+  }
+
+  .dash-section-header,
+  .collab-footer,
+  .campaign-card-header,
+  .post-stats,
+  .modal-footer {
+    flex-wrap: wrap;
+  }
+
+  .post-actions,
+  .social-engagement,
+  .brand-card-actions {
+    min-width: 0;
+  }
+
+  .brand-card-actions .glass-button,
+  .profile-actions .glass-button,
+  .modal-footer .glass-button {
+    width: 100%;
+  }
+
+  .filter-bar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-bar select {
+    flex: 0 0 auto;
+  }
+
+  .empty-state-modern {
+    padding: 2.5rem 1rem !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .dashboard-content,
+  .admin-body,
+  .notifications-page,
+  .user-profile-page,
+  .brand-page,
+  .influencer-page {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}

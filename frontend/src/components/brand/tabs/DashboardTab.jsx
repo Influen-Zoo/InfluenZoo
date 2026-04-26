@@ -85,7 +85,7 @@ export default function DashboardTab({
       />
 
       {/* Tab Content */}
-      <div style={{ marginTop: '1.5rem' }}>
+      <div className="responsive-tab-content">
 
         {/* Analytics Sub-tab — full campaign analytics */}
         {activeSubTab === 'analytics' && (
@@ -113,7 +113,7 @@ export default function DashboardTab({
               </span>
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="responsive-stack">
               {campaigns.map(camp => {
                 const isExpanded = expandedCamp === camp._id;
                 const campApps = applications[camp._id] || [];

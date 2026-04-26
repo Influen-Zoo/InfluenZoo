@@ -43,7 +43,7 @@ export default function ExploreTab({
       ) : exploreSubTab === 'all' ? (
         // Feed tab: show all posts
         posts && posts.length > 0 ? (
-          <div className="feed-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '600px', margin: '0 auto' }}>
+          <div className="feed-container responsive-feed responsive-stack">
             {posts.map(post => (
               <PostCard key={post._id} post={post} onViewProfile={onViewProfile} />
             ))}
@@ -64,13 +64,13 @@ export default function ExploreTab({
       ) : (
         <div className="explore-results">
           {exploreSubTab === 'all' ? (
-            <div className="feed-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '600px', margin: '0 auto' }}>
+            <div className="feed-container responsive-feed responsive-stack">
               {items.map(post => (
                 <PostCard key={post._id} post={post} onViewProfile={onViewProfile} />
               ))}
             </div>
           ) : (
-            <div className="influencer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+            <div className="influencer-grid responsive-card-grid">
               {items.map((inf, idx) => {
                 const infId = getItemId(inf);
                 return (

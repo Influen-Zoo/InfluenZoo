@@ -34,7 +34,7 @@ export const InfluencerProfilePage = () => {
           embedded 
           onEditProfile={openEditProfileModal} 
         />
-        <div style={{ padding: '0 1rem 2rem' }}>
+        <div className="profile-signout">
           <LiquidButton variant="error" fullWidth onClick={logout}>
             Sign Out
           </LiquidButton>

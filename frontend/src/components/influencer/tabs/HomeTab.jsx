@@ -8,7 +8,7 @@ export default function HomeTab({ feed = [], loadFeed, onViewProfile }) {
   return (
     <div className="tab-pane" style={{ animation: 'fadeIn 0.3s ease' }}>
       <CreatePost onPostCreated={() => loadFeed()} />
-      <div className="posts-feed" style={{ marginTop: '1rem' }}>
+      <div className="posts-feed responsive-feed" style={{ marginTop: '1rem' }}>
         {feed.length === 0 ? (
           <EmptyState 
             icon={Mailbox} 

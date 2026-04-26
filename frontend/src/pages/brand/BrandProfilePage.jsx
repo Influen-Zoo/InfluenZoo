@@ -25,7 +25,7 @@ export const BrandProfilePage = () => {
           embedded 
           onEditProfile={openEditProfile} 
         />
-        <div style={{ padding: '0 1rem 2rem' }}>
+        <div className="profile-signout">
           <LiquidButton variant="error" fullWidth onClick={logout}>
             Sign Out
           </LiquidButton>

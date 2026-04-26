@@ -36,7 +36,7 @@ export default function DashboardTab({
       />
 
       {/* Tab Content */}
-      <div style={{ marginTop: '1.5rem' }}>
+      <div className="responsive-tab-content">
         {activeSubTab === 'analytics' && (
           <DashboardAnalytics user={user} />
         )}

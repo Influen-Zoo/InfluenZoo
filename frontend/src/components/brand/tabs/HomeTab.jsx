@@ -13,7 +13,7 @@ export default function HomeTab({
   return (
     <div className="tab-pane" style={{ animation: 'fadeIn 0.3s ease' }}>
       <CreateCampaign onCampaignCreated={onCampaignCreated} />
-      <div className="posts-feed">
+      <div className="posts-feed responsive-feed">
         {announcements.map(campaign => (
           <BrandCampaignCard
             key={campaign._id}

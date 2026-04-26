@@ -58,36 +58,40 @@ export default function ExploreTab({
           <div style={{ fontSize: 48, opacity: 0.5, marginBottom: '1rem' }}>🔍</div>
           <p>No results found</p>
         </div>
-      ) : items.map((item, index) => {
-        const itemId = getItemId(item);
-        
-        if (exploreSubTab === 'new' || exploreSubTab === 'followed') {
-          return (
-            <BrandCard 
-              key={itemId || `brand-explore-${index}`}
-              brand={item}
-              onFollow={handleFollow}
-              onUnfollow={handleUnfollow}
-              isFollowing={followingIds.includes(itemId)}
-              onClick={() => onViewProfile(itemId)}
-            />
-          );
-        }
+      ) : (
+        <div className={exploreSubTab === 'all' ? 'responsive-feed responsive-stack' : 'responsive-card-grid'}>
+          {items.map((item, index) => {
+            const itemId = getItemId(item);
+            
+            if (exploreSubTab === 'new' || exploreSubTab === 'followed') {
+              return (
+                <BrandCard 
+                  key={itemId || `brand-explore-${index}`}
+                  brand={item}
+                  onFollow={handleFollow}
+                  onUnfollow={handleUnfollow}
+                  isFollowing={followingIds.includes(itemId)}
+                  onClick={() => onViewProfile(itemId)}
+                />
+              );
+            }
 
-        return (
-          <CampaignCard
-            key={itemId || `campaign-explore-${index}`}
-            campaign={item}
-            applied={appliedCampaignIds.includes(itemId)}
-            saved={savedCampaignIds.includes(itemId)}
-            onApply={() => setApplyModal(item)}
-            onSave={() => handleToggleSave(item)}
-            onClick={() => handleCardClick(item)}
-            onViewBrand={onViewProfile}
-            currentUserId={currentUserId}
-          />
-        );
-      })}
+            return (
+              <CampaignCard
+                key={itemId || `campaign-explore-${index}`}
+                campaign={item}
+                applied={appliedCampaignIds.includes(itemId)}
+                saved={savedCampaignIds.includes(itemId)}
+                onApply={() => setApplyModal(item)}
+                onSave={() => handleToggleSave(item)}
+                onClick={() => handleCardClick(item)}
+                onViewBrand={onViewProfile}
+                currentUserId={currentUserId}
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
