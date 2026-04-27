@@ -16,6 +16,7 @@ Access the app at: **[http://localhost](http://localhost)**
 
 For detailed information on architecture, environment variables, and production deployment, please refer to:
 - **[DOCKER_SETUP.md](DOCKER_SETUP.md)** - Full guide for running and deploying the application.
+- **[SOCIAL_MEDIA_API_SETUP.md](SOCIAL_MEDIA_API_SETUP.md)** - Configure YouTube, Instagram, and Facebook metric fetching.
 
 ## 🛠️ Tech Stack
 - **Frontend**: React 19, Material UI, Vite

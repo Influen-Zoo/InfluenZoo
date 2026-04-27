@@ -2,6 +2,7 @@
 FROM node:24-alpine AS base
 WORKDIR /usr/src/app
 COPY package*.json ./
+RUN apk add --no-cache autoconf automake file g++ gcc libtool make nasm pkgconfig python3
 
 # Development stage
 FROM base AS development

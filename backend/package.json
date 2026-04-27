@@ -22,6 +22,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.18.2",
     "joi": "^17.11.0",
+    "jpegtran-bin": "^7.0.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.0.3",
     "multer": "^2.1.1",
