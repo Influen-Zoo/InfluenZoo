@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 import './CustomToast.css';
@@ -34,7 +35,7 @@ const CustomToast = ({ message, type = 'success', onClose, duration = 3000 }) =>
     }
   };
 
-  return (
+  const toast = (
     <motion.div
       className={`custom-toast-container ${normalizedType}`}
       role="status"
@@ -61,6 +62,8 @@ const CustomToast = ({ message, type = 'success', onClose, duration = 3000 }) =>
       <div className="toast-progress-bar" />
     </motion.div>
   );
+
+  return createPortal(toast, document.body);
 };
 
 export default CustomToast;
