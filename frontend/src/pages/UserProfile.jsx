@@ -116,6 +116,14 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
 
   const handleConnectSocial = async () => {
     try {
+      if (selectedPlatform === 'youtube') {
+        setConnectingSocial(true);
+        const data = await api.getYouTubeAuthUrl();
+        if (!data?.authUrl) throw new Error('Unable to start YouTube connection');
+        window.location.href = data.authUrl;
+        return;
+      }
+
       if (!socialFormData.accountName && !socialFormData.accountUrl) {
         showToast('Please enter an account URL or handle', 'danger');
         return;
@@ -417,26 +425,16 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
             </div>
           </div>
 
-          {profile.socialLinks && Object.keys(profile.socialLinks).length > 0 && (
-            <div className="profile-social-links">
-              <h3>Social Media Links</h3>
-              <div className="social-links-grid">
-                {Object.entries(profile.socialLinks).map(([platform, url]) =>
-                  url ? (
-                    <a key={platform} href={url} target="_blank" rel="noreferrer" className="social-link-btn">
-                      {platform.charAt(0).toUpperCase() + platform.slice(1)}
-                    </a>
-                  ) : null
-                )}
-              </div>
-            </div>
-          )}
-
           {profile.socialMediaAccounts && profile.socialMediaAccounts.length > 0 && (
             <div className="connected-social-section">
               <h3>Connected Social Media Accounts</h3>
               <div className="social-accounts-grid">
-                {profile.socialMediaAccounts.map((account) => (
+                {profile.socialMediaAccounts.map((account) => {
+                  const audienceCount = account.platform === 'youtube'
+                    ? (account.subscribers ?? account.followers ?? 0)
+                    : (account.followers ?? 0);
+
+                  return (
                   <div key={account.platform} className="social-account-card">
                     <div className="social-account-header">
                       <span className="platform-badge">{account.platform.toUpperCase()}</span>
@@ -457,7 +455,7 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
                         <span className="stat-label">
                           {account.platform === 'youtube' ? 'Subscribers' : 'Followers'}
                         </span>
-                        <span className="stat-value">{(account.followers / 1000).toFixed(1)}K</span>
+                        <span className="stat-value">{(audienceCount / 1000).toFixed(1)}K</span>
                       </div>
                       <div className="account-stat">
                         <span className="stat-label">{account.platform === 'youtube' ? 'Videos' : 'Posts'}</span>
@@ -469,7 +467,8 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
                       Visit Profile <LinkIcon size={14} />
                     </a>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -708,6 +707,7 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
                     </select>
                   </div>
 
+                  {selectedPlatform !== 'youtube' && (
                   <div className="form-group">
                     <label>Account Name / Handle</label>
                     <input
@@ -719,7 +719,9 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
                       style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'var(--text-primary)' }}
                     />
                   </div>
+                  )}
 
+                  {selectedPlatform !== 'youtube' && (
                   <div className="form-group">
                     <label>Account URL</label>
                     <input
@@ -737,9 +739,12 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
                       style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'var(--text-primary)' }}
                     />
                   </div>
+                  )}
 
                   <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-                    Counts will be fetched automatically: {selectedPlatform === 'youtube' ? 'subscribers and videos/shorts' : 'followers and posts'}.
+                    {selectedPlatform === 'youtube'
+                      ? 'You will be redirected to Google to connect your own YouTube channel. Subscribers and videos/shorts will be fetched automatically.'
+                      : 'Counts will be fetched automatically: followers and posts.'}
                   </p>
                 </div>
 

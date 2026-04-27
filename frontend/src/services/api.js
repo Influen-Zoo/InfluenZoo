@@ -574,6 +574,11 @@ class ApiClient {
     return response.data?.data || response.data;
   }
 
+  async getYouTubeAuthUrl() {
+    const response = await this.client.get('/users/social-media/youtube/auth-url');
+    return response.data?.data || response.data;
+  }
+
   async disconnectSocialMedia(platform) {
     const response = await this.client.delete(`/users/social-media/disconnect/${platform}`);
     return response.data?.data || response.data;

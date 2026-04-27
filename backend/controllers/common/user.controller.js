@@ -1,4 +1,5 @@
 const { userService, influencerService } = require('../../services/common/user.service');
+const youtubeOAuthService = require('../../services/common/youtubeOAuth.service');
 
 const userController = {
   getProfile: async (req, res) => {
@@ -164,6 +165,27 @@ const userController = {
         return res.status(400).json({ error: error.message });
       }
       res.status(500).json({ error: 'Server error' });
+    }
+  },
+
+  getYouTubeAuthUrl: async (req, res) => {
+    try {
+      const authUrl = youtubeOAuthService.createAuthUrl(req.userId);
+      res.json({ success: true, data: { authUrl } });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  },
+
+  handleYouTubeCallback: async (req, res) => {
+    const frontendUrl = youtubeOAuthService.getFrontendRedirectUrl();
+
+    try {
+      const userId = await youtubeOAuthService.handleCallback(req.query);
+      res.redirect(`${frontendUrl}/profile/${userId}?youtube=connected`);
+    } catch (error) {
+      const message = encodeURIComponent(error.message || 'YouTube connection failed');
+      res.redirect(`${frontendUrl}/auth?youtubeError=${message}`);
     }
   },
 

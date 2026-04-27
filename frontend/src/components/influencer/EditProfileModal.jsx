@@ -49,17 +49,6 @@ export default function EditProfileModal({
         </div>
 
         <div className="divider" />
-        <h4 style={{ marginBottom: '1rem' }}>Social Links</h4>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}>
-          {SOCIAL_PLATFORMS.map((platform) => (
-            <div key={platform} className="input-group" style={{ marginBottom: 0 }}>
-              <label style={{ textTransform: 'capitalize' }}>{platform}</label>
-              <input className="input" placeholder={`https://${platform}.com/...`} value={profileData.socialLinks?.[platform] || ''} onChange={e => handleSocialLinkChange(platform, e.target.value)} />
-            </div>
-          ))}
-        </div>
-
-        <div className="divider" />
         <h4 style={{ marginBottom: '1rem' }}>Personal Information</h4>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
           <div className="input-group" style={{ marginBottom: 0, gridColumn: '1 / -1' }}>

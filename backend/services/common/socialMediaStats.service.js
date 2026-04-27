@@ -91,7 +91,8 @@ const fetchYoutubeStats = async (account) => {
   return {
     accountId: channel.id,
     accountName: channel.snippet?.title || account.accountName,
-    followers: toNumber(channel.statistics?.subscriberCount),
+    followers: 0,
+    subscribers: toNumber(channel.statistics?.subscriberCount),
     posts: 0,
     videos: toNumber(channel.statistics?.videoCount)
   };

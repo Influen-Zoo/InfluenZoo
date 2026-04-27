@@ -55,6 +55,8 @@ router.delete('/:userId/unfollow', authMiddleware, userController.unfollowUser);
 router.get('/:userId/is-following', authMiddleware, userController.isFollowing);
 
 router.post('/social-media/connect', authMiddleware, userController.connectSocialMedia);
+router.get('/social-media/youtube/auth-url', authMiddleware, userController.getYouTubeAuthUrl);
+router.get('/social-media/youtube/callback', userController.handleYouTubeCallback);
 router.delete('/social-media/disconnect/:platform', authMiddleware, userController.disconnectSocialMedia);
 
 router.get('/:userId/stats', userController.getStats);

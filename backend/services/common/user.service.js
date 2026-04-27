@@ -214,6 +214,8 @@ const influencerService = {
     const stats = await fetchSocialMediaStats({ platform, accountId, accountName, accountUrl });
     const resolvedAccountId = stats.accountId || accountId;
     const resolvedAccountName = stats.accountName || accountName;
+    const followers = platform === 'youtube' ? 0 : (stats.followers || 0);
+    const subscribers = platform === 'youtube' ? (stats.subscribers || stats.followers || 0) : 0;
 
     const existingIndex = user.socialMediaAccounts.findIndex(acc => acc.platform === platform);
     if (existingIndex >= 0) {
@@ -221,7 +223,8 @@ const influencerService = {
       existing.accountId = resolvedAccountId;
       existing.accountName = resolvedAccountName;
       existing.accountUrl = accountUrl;
-      existing.followers = stats.followers || 0;
+      existing.followers = followers;
+      existing.subscribers = subscribers;
       existing.posts = stats.posts || 0;
       existing.videos = stats.videos || 0;
       existing.lastSyncedAt = new Date();
@@ -231,7 +234,8 @@ const influencerService = {
         accountId: resolvedAccountId,
         accountName: resolvedAccountName,
         accountUrl,
-        followers: stats.followers || 0,
+        followers,
+        subscribers,
         posts: stats.posts || 0,
         videos: stats.videos || 0,
         lastSyncedAt: new Date(),
