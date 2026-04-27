@@ -1,10 +1,12 @@
 const postService = require('../../services/common/post.service');
 
+const getCompressionResults = (files = []) => files.map(file => file.compression).filter(Boolean);
+
 const postController = {
   createPost: async (req, res) => {
     try {
       const post = await postService.createPost(req.userId, req.body, req.files);
-      res.status(201).json({ success: true, post });
+      res.status(201).json({ success: true, post, compression: getCompressionResults(req.files) });
     } catch (error) {
       if (error.message === 'Post content or media is required') {
         return res.status(400).json({ error: error.message });
@@ -48,7 +50,7 @@ const postController = {
   updatePost: async (req, res) => {
     try {
       const post = await postService.updatePost(req.params.id, req.userId, req.body, req.files);
-      res.json({ success: true, post });
+      res.json({ success: true, post, compression: getCompressionResults(req.files) });
     } catch (error) {
       if (error.message === 'Post not found') return res.status(404).json({ error: error.message });
       if (error.message === 'Not authorized') return res.status(403).json({ error: error.message });
