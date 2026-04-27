@@ -14,7 +14,6 @@ import { useAuthForm } from '../hooks/auth/useAuthForm';
 import AuthHeader from '../components/auth/AuthHeader';
 import RoleSelector from '../components/auth/RoleSelector';
 import AuthForm from '../components/auth/AuthForm';
-import DemoAccounts from '../components/auth/DemoAccounts';
 import AuthToggle from '../components/auth/AuthToggle';
 
 import './Auth.css';
@@ -32,7 +31,6 @@ export default function Auth() {
     setShowPassword,
     toggleMode,
     handleSubmit,
-    demoLogin,
     handleFieldChange
   } = useAuthForm();
 
@@ -75,12 +73,6 @@ export default function Auth() {
               showPassword={showPassword}
               setShowPassword={setShowPassword}
               handleSubmit={handleSubmit}
-            />
-
-            {/* Demo Access Section */}
-            <DemoAccounts 
-              loading={loading}
-              demoLogin={demoLogin}
             />
 
             {/* Mode Switcher (Login/Signup toggle) */}
