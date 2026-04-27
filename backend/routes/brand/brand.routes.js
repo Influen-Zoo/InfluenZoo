@@ -7,6 +7,7 @@ const brandInfluencerController = require('../../controllers/brand/influencer.co
 const brandProfileController = require('../../controllers/brand/profile.controller');
 const { authMiddleware } = require('../../middleware/auth/auth.middleware');
 const { brandOnly } = require('../../middleware/brand/brand.middleware');
+const { losslessImageCompression } = require('../../middleware/common/losslessImageCompression.middleware');
 
 const router = express.Router();
 
@@ -33,9 +34,9 @@ const upload = multer({
 });
 
 // Brand Campaign Management
-router.post('/campaigns', authMiddleware, brandOnly, upload.array('media', 4), brandCampaignController.createCampaign);
+router.post('/campaigns', authMiddleware, brandOnly, upload.array('media', 4), losslessImageCompression, brandCampaignController.createCampaign);
 router.get('/campaigns/my', authMiddleware, brandOnly, brandCampaignController.getMyCampaigns);
-router.put('/campaigns/:id', authMiddleware, brandOnly, upload.array('media', 4), brandCampaignController.updateCampaign);
+router.put('/campaigns/:id', authMiddleware, brandOnly, upload.array('media', 4), losslessImageCompression, brandCampaignController.updateCampaign);
 router.delete('/campaigns/:id', authMiddleware, brandOnly, brandCampaignController.deleteCampaign);
 
 // Brand Application Review

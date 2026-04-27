@@ -3,6 +3,7 @@ const multer = require('multer');
 const fs = require('fs');
 const userController = require('../../controllers/common/user.controller');
 const { authMiddleware } = require('../../middleware/auth/auth.middleware');
+const { losslessImageCompression } = require('../../middleware/common/losslessImageCompression.middleware');
 
 const router = express.Router();
 
@@ -29,10 +30,10 @@ const upload = multer({
 
 router.get('/profile/:id', userController.getProfile);
 
-router.post('/upload', authMiddleware, upload.single('file'), (req, res) => {
+router.post('/upload', authMiddleware, upload.single('file'), losslessImageCompression, (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Please upload a file' });
   const fileUrl = `/uploads/${req.file.filename}`;
-  res.json({ success: true, url: fileUrl });
+  res.json({ success: true, url: fileUrl, compression: req.file.compression || null });
 });
 
 router.put('/profile', authMiddleware, userController.updateProfile);

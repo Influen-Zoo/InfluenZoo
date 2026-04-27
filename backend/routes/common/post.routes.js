@@ -3,6 +3,7 @@ const multer = require('multer');
 const fs = require('fs');
 const postController = require('../../controllers/common/post.controller');
 const { authMiddleware } = require('../../middleware/auth/auth.middleware');
+const { losslessImageCompression } = require('../../middleware/common/losslessImageCompression.middleware');
 
 const router = express.Router();
 
@@ -30,11 +31,11 @@ const upload = multer({
   }
 });
 
-router.post('/', authMiddleware, upload.array('media', 4), postController.createPost);
+router.post('/', authMiddleware, upload.array('media', 4), losslessImageCompression, postController.createPost);
 router.get('/', authMiddleware, postController.getPosts);
 router.post('/:id/like', authMiddleware, postController.likePost);
 router.post('/:id/comment', authMiddleware, postController.commentOnPost);
-router.put('/:id', authMiddleware, upload.array('media', 4), postController.updatePost);
+router.put('/:id', authMiddleware, upload.array('media', 4), losslessImageCompression, postController.updatePost);
 router.delete('/:id', authMiddleware, postController.deletePost);
 
 module.exports = router;

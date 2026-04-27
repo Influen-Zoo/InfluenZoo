@@ -6,6 +6,9 @@ const postController = {
       const post = await postService.createPost(req.userId, req.body, req.files);
       res.status(201).json({ success: true, post });
     } catch (error) {
+      if (error.message === 'Post content or media is required') {
+        return res.status(400).json({ error: error.message });
+      }
       console.error('Create Post Error:', error);
       res.status(500).json({ error: 'Failed to create post' });
     }

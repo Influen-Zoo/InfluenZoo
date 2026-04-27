@@ -21,9 +21,14 @@ const postService = {
       catch { parsedTags = data.tags.split(',').map(t => t.trim()); }
     }
 
+    const content = typeof data.content === 'string' ? data.content.trim() : '';
+    if (!content && mediaFiles.length === 0) {
+      throw new Error('Post content or media is required');
+    }
+
     const newPost = await Post.create({
       author: authorId,
-      content: data.content,
+      content,
       media: mediaFiles,
       tags: parsedTags,
     });
