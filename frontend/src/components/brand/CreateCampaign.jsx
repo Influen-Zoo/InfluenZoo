@@ -3,10 +3,14 @@ import { useAuth } from '../../context/AuthContext';
 import { Image, Video, Music, Smile, X, Send, Film, Check } from 'lucide-react';
 import { resolveAssetUrl } from '../../utils/helpers';
 import LiquidButton from '../common/LiquidButton/LiquidButton';
+import CustomToast from '../common/CustomToast/CustomToast';
 import api from '../../services/api';
 import EmojiPicker from 'emoji-picker-react';
 import { serializeCampaignPayload } from '../../features/brand/campaignSerializer';
 import '../common/CreatePost/CreatePost.css';
+
+const MAX_VIDEO_SIZE_BYTES = 25 * 1024 * 1024;
+const MAX_VIDEO_SIZE_MESSAGE = 'Maximum video size allowed is 25 MB';
 
 export default function CreateCampaign({ onCampaignCreated, editData, onCancelEdit }) {
   const { user } = useAuth();
@@ -24,6 +28,7 @@ export default function CreateCampaign({ onCampaignCreated, editData, onCancelEd
   const [requirements, setRequirements] = useState('');
   const [deliverables, setDeliverables] = useState('');
   const [showCampaignFields, setShowCampaignFields] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const imageRef = useRef(null);
   const videoRef = useRef(null);
@@ -78,7 +83,14 @@ export default function CreateCampaign({ onCampaignCreated, editData, onCancelEd
     if (e.target.files) {
       const filesArray = Array.from(e.target.files);
       if (filesArray.length + mediaFiles.length > 4) {
-        alert('You can only upload up to 4 media files at once.');
+        setToast({ message: 'You can only upload up to 4 media files at once.', type: 'warning' });
+        if (ref.current) ref.current.value = '';
+        return;
+      }
+      const oversizedVideo = filesArray.find(file => file.type.startsWith('video/') && file.size > MAX_VIDEO_SIZE_BYTES);
+      if (oversizedVideo) {
+        setToast({ message: MAX_VIDEO_SIZE_MESSAGE, type: 'danger' });
+        if (ref.current) ref.current.value = '';
         return;
       }
       const newMediaFiles = filesArray.map(file => ({
@@ -124,7 +136,7 @@ export default function CreateCampaign({ onCampaignCreated, editData, onCancelEd
       }
     } catch (err) {
       console.error(err);
-      alert('Failed to save campaign: ' + (err.response?.data?.error || err.message));
+      setToast({ message: err.response?.data?.error || err.message || 'Failed to save campaign', type: 'danger' });
     } finally {
       setLoading(false);
     }
@@ -132,6 +144,13 @@ export default function CreateCampaign({ onCampaignCreated, editData, onCancelEd
 
   return (
     <div className="create-post-container glass-panel">
+      {toast && (
+        <CustomToast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <div className="create-post-header" style={{ position: 'relative' }}>
         <div className="create-post-avatar">
           {user?.avatar ? <img src={user.avatar} alt="Avatar" /> : user?.name?.[0] || 'B'}

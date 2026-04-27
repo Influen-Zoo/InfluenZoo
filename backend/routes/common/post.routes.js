@@ -6,6 +6,7 @@ const { authMiddleware } = require('../../middleware/auth/auth.middleware');
 const { losslessImageCompression } = require('../../middleware/common/losslessImageCompression.middleware');
 
 const router = express.Router();
+const MAX_MEDIA_FILE_SIZE = 25 * 1024 * 1024;
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -20,7 +21,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: 20 * 1024 * 1024 },
+  limits: { fileSize: MAX_MEDIA_FILE_SIZE },
   fileFilter: (req, file, cb) => {
     const validPrefixes = ['image/', 'video/', 'audio/'];
     if (validPrefixes.some(prefix => file.mimetype.startsWith(prefix))) {

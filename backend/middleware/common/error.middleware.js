@@ -13,6 +13,13 @@ const errorMiddleware = (err, req, res, next) => {
     return res.status(400).json({ error: 'Validation Error', details: err.message });
   }
 
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    const message = req.path === '/upload'
+      ? 'Maximum image size allowed is 5 MB'
+      : 'Maximum video size allowed is 25 MB';
+    return res.status(413).json({ error: message });
+  }
+
   if (err.name === 'CastError') {
     return res.status(400).json({ error: 'Invalid ID format' });
   }

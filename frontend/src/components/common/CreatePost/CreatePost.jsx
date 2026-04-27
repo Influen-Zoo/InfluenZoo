@@ -2,11 +2,15 @@ import React, { useState, useRef } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { Image, Video, Music, Smile, X, Send, Film, Check } from 'lucide-react';
 import LiquidButton from '../LiquidButton/LiquidButton';
+import CustomToast from '../CustomToast/CustomToast';
 import api from '../../../services/api';
 import { resolveAssetUrl } from '../../../utils/helpers';
 import { serializePostPayload } from '../../../features/influencer/postSerializer';
 import EmojiPicker from 'emoji-picker-react';
 import './CreatePost.css';
+
+const MAX_VIDEO_SIZE_BYTES = 25 * 1024 * 1024;
+const MAX_VIDEO_SIZE_MESSAGE = 'Maximum video size allowed is 25 MB';
 
 export default function CreatePost({ onPostCreated, editData, onCancelEdit }) {
   const { user } = useAuth();
@@ -15,6 +19,7 @@ export default function CreatePost({ onPostCreated, editData, onCancelEdit }) {
   const [tags, setTags] = useState('');
   const [loading, setLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [toast, setToast] = useState(null);
   const imageRef = useRef(null);
   const videoRef = useRef(null);
   const audioRef = useRef(null);
@@ -57,7 +62,14 @@ export default function CreatePost({ onPostCreated, editData, onCancelEdit }) {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files);
       if (filesArray.length + mediaFiles.length > 4) {
-        alert('You can only upload up to 4 media files at once.');
+        setToast({ message: 'You can only upload up to 4 media files at once.', type: 'warning' });
+        if (ref.current) ref.current.value = '';
+        return;
+      }
+      const oversizedVideo = filesArray.find(file => file.type.startsWith('video/') && file.size > MAX_VIDEO_SIZE_BYTES);
+      if (oversizedVideo) {
+        setToast({ message: MAX_VIDEO_SIZE_MESSAGE, type: 'danger' });
+        if (ref.current) ref.current.value = '';
         return;
       }
       const newMediaFiles = filesArray.map(file => ({
@@ -100,7 +112,7 @@ export default function CreatePost({ onPostCreated, editData, onCancelEdit }) {
       }
     } catch (err) {
       console.error(err);
-      alert('Failed to save post: ' + (err.response?.data?.error || err.message));
+      setToast({ message: err.response?.data?.error || err.message || 'Failed to save post', type: 'danger' });
     } finally {
       setLoading(false);
     }
@@ -108,6 +120,13 @@ export default function CreatePost({ onPostCreated, editData, onCancelEdit }) {
 
   return (
     <div className="create-post-container glass-panel">
+      {toast && (
+        <CustomToast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <div className="create-post-header" style={{ position: 'relative' }}>
         <div className="create-post-avatar">
           {user?.avatar ? <img src={resolveAssetUrl(user.avatar)} alt="Avatar" /> : user?.name?.[0] || 'U'}

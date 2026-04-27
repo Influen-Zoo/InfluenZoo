@@ -1,14 +1,21 @@
 const fs = require('fs/promises');
+const path = require('path');
 const { execFile } = require('child_process');
 const { promisify } = require('util');
 const sharp = require('sharp');
 const jpegtranBin = require('jpegtran-bin');
+const ffmpegBin = require('ffmpeg-static');
 
 const execFileAsync = promisify(execFile);
 const jpegtran = jpegtranBin.default || jpegtranBin;
+const ffmpeg = ffmpegBin.default || ffmpegBin;
 const MAX_IMAGE_DIMENSION = 2048;
+const VIDEO_MIN_SAVINGS_RATIO = 0.08;
+const VIDEO_MAX_DIMENSION = 1280;
+const VIDEO_CRF = 28;
 
 const jpegTypes = new Set(['image/jpeg', 'image/jpg', 'image/pjpeg']);
+const fastStartVideoExtensions = new Set(['.mp4', '.m4v', '.mov', '.qt']);
 const compressibleImageTypes = new Set([
   'image/jpeg',
   'image/jpg',
@@ -134,6 +141,81 @@ const optimizeJpeg = async (file, tempPath, metadata) => {
   ]);
 };
 
+const isVideoFile = (file) => file?.mimetype?.startsWith('video/');
+
+const getTempPath = (file) => {
+  if (!isVideoFile(file)) return `${file.path}.optimized`;
+  return `${file.path}.optimized.mp4`;
+};
+
+const remuxVideo = async (file, tempPath) => {
+  if (!ffmpeg) throw new Error('ffmpeg binary is not available');
+
+  const extension = path.extname(file.originalname || file.filename || file.path).toLowerCase();
+  const args = ['-y', '-i', file.path, '-map', '0', '-c', 'copy', '-map_metadata', '-1'];
+
+  if (fastStartVideoExtensions.has(extension)) {
+    args.push('-movflags', '+faststart');
+  }
+
+  args.push(tempPath);
+  await execFileAsync(ffmpeg, args);
+};
+
+const transcodeVideo = async (file, tempPath) => {
+  if (!ffmpeg) throw new Error('ffmpeg binary is not available');
+
+  await execFileAsync(ffmpeg, [
+    '-y',
+    '-i',
+    file.path,
+    '-map',
+    '0:v:0',
+    '-map',
+    '0:a?',
+    '-vf',
+    `scale='if(gt(iw,ih),min(${VIDEO_MAX_DIMENSION},iw),-2)':'if(gt(iw,ih),-2,min(${VIDEO_MAX_DIMENSION},ih))'`,
+    '-c:v',
+    'libx264',
+    '-preset',
+    'medium',
+    '-crf',
+    String(VIDEO_CRF),
+    '-pix_fmt',
+    'yuv420p',
+    '-c:a',
+    'aac',
+    '-b:a',
+    '128k',
+    '-movflags',
+    '+faststart',
+    '-map_metadata',
+    '-1',
+    tempPath
+  ]);
+};
+
+const optimizeVideo = async (file, tempPath, originalSize) => {
+  const remuxPath = `${file.path}.remuxed.mp4`;
+
+  try {
+    await remuxVideo(file, remuxPath);
+    const remuxedSize = (await fs.stat(remuxPath)).size;
+    const remuxSavingsRatio = (originalSize - remuxedSize) / originalSize;
+
+    if (remuxedSize < originalSize && remuxSavingsRatio >= VIDEO_MIN_SAVINGS_RATIO) {
+      await fs.rename(remuxPath, tempPath);
+      return 'lossless-remux';
+    }
+  } catch {
+    // Fall back to transcode below.
+  }
+
+  await fs.unlink(remuxPath).catch(() => {});
+  await transcodeVideo(file, tempPath);
+  return 'transcode';
+};
+
 const optimizeFile = async (file) => {
   if (!file?.path) return;
 
@@ -142,7 +224,7 @@ const optimizeFile = async (file) => {
   file.detectedType = await detectImageType(file.path, file.mimetype);
   let originalMetadata = null;
 
-  if (!compressibleImageTypes.has(file.detectedType)) {
+  if (!compressibleImageTypes.has(file.detectedType) && !isVideoFile(file)) {
     file.compression = {
       originalSize,
       compressedSize: originalSize,
@@ -154,7 +236,7 @@ const optimizeFile = async (file) => {
     return;
   }
 
-  const tempPath = `${file.path}.optimized`;
+  const tempPath = getTempPath(file);
   const backupPath = `${file.path}.original`;
   try {
     if (compressibleImageTypes.has(file.detectedType)) {
@@ -165,7 +247,25 @@ const optimizeFile = async (file) => {
       }
     }
 
-    if (jpegTypes.has(file.detectedType)) {
+    if (isVideoFile(file)) {
+      let videoCompressionMode = null;
+      try {
+        videoCompressionMode = await optimizeVideo(file, tempPath, originalSize);
+      } catch (error) {
+        file.compression = {
+          originalSize,
+          compressedSize: originalSize,
+          savedBytes: 0,
+          skipped: true,
+          reason: 'video-lossless-compression-failed'
+        };
+        console.warn(
+          `[upload-compression] skipped ${file.filename || file.originalname || file.path}: ${error.message}`
+        );
+        return;
+      }
+      file.videoCompressionMode = videoCompressionMode;
+    } else if (jpegTypes.has(file.detectedType)) {
       try {
         await optimizeJpeg(file, tempPath, originalMetadata || {});
       } catch (error) {
@@ -263,6 +363,7 @@ const optimizeFile = async (file) => {
       skipped: false,
       detectedType: file.detectedType,
       resized: wasResized,
+      videoCompressionMode: file.videoCompressionMode || null,
       originalWidth: originalMetadata?.width || null,
       originalHeight: originalMetadata?.height || null
     };

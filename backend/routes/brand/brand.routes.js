@@ -10,6 +10,7 @@ const { brandOnly } = require('../../middleware/brand/brand.middleware');
 const { losslessImageCompression } = require('../../middleware/common/losslessImageCompression.middleware');
 
 const router = express.Router();
+const MAX_MEDIA_FILE_SIZE = 25 * 1024 * 1024;
 
 // Ensure uploads directory exists
 const storage = multer.diskStorage({
@@ -25,7 +26,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 20 * 1024 * 1024 },
+  limits: { fileSize: MAX_MEDIA_FILE_SIZE },
   fileFilter: (req, file, cb) => {
     const validPrefixes = ['image/', 'video/', 'audio/'];
     if (validPrefixes.some(p => file.mimetype.startsWith(p))) cb(null, true);
