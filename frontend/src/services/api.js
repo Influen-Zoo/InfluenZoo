@@ -564,15 +564,12 @@ class ApiClient {
   }
 
   // Social Media
-  async connectSocialMedia(platform, accountId, accountName, accountUrl, followers, posts, videos) {
+  async connectSocialMedia(platform, accountId, accountName, accountUrl) {
     const response = await this.client.post('/users/social-media/connect', {
       platform,
       accountId,
       accountName,
       accountUrl,
-      followers,
-      posts,
-      videos,
     });
     return response.data?.data || response.data;
   }

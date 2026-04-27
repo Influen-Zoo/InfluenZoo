@@ -155,6 +155,14 @@ const userController = {
     } catch (error) {
       if (error.message === 'Invalid platform') return res.status(400).json({ error: error.message });
       if (error.message === 'User not found') return res.status(404).json({ error: error.message });
+      if (
+        error.message.includes('required to fetch') ||
+        error.message.includes('Unable to fetch') ||
+        error.message.includes('Unable to find') ||
+        error.message === 'Social account identifier is required'
+      ) {
+        return res.status(400).json({ error: error.message });
+      }
       res.status(500).json({ error: 'Server error' });
     }
   },

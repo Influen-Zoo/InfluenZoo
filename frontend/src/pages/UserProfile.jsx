@@ -26,13 +26,11 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState('instagram');
   const [uploading, setUploading] = useState(false);
+  const [connectingSocial, setConnectingSocial] = useState(false);
   const [socialFormData, setSocialFormData] = useState({
     accountId: '',
     accountName: '',
     accountUrl: '',
-    followers: 0,
-    posts: 0,
-    videos: 0,
   });
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [initMessage, setInitMessage] = useState('');
@@ -118,35 +116,32 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
 
   const handleConnectSocial = async () => {
     try {
-      if (!socialFormData.accountName || !socialFormData.accountUrl) {
-        showToast('Please fill in all fields', 'danger');
+      if (!socialFormData.accountName && !socialFormData.accountUrl) {
+        showToast('Please enter an account URL or handle', 'danger');
         return;
       }
 
+      setConnectingSocial(true);
       await api.connectSocialMedia(
         selectedPlatform,
         socialFormData.accountId,
         socialFormData.accountName,
-        socialFormData.accountUrl,
-        socialFormData.followers,
-        socialFormData.posts,
-        socialFormData.videos
+        socialFormData.accountUrl
       );
 
-      showToast(`Connected ${selectedPlatform} successfully`);
+      showToast(`Connected ${selectedPlatform} and synced metrics`);
       setShowSocialModal(false);
       setSocialFormData({
         accountId: '',
         accountName: '',
         accountUrl: '',
-        followers: 0,
-        posts: 0,
-        videos: 0,
       });
 
       await reloadProfileAndStats();
     } catch (error) {
-      showToast('Error connecting account', 'danger');
+      showToast(error.response?.data?.error || 'Error connecting account', 'danger');
+    } finally {
+      setConnectingSocial(false);
     }
   };
 
@@ -717,7 +712,7 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
                     <label>Account Name / Handle</label>
                     <input
                       type="text"
-                      placeholder="e.g., @username or Channel Name"
+                      placeholder="Optional if the URL includes the handle"
                       value={socialFormData.accountName}
                       onChange={(e) => setSocialFormData({ ...socialFormData, accountName: e.target.value })}
                       className="input glass-indicator"
@@ -729,7 +724,13 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
                     <label>Account URL</label>
                     <input
                       type="text"
-                      placeholder="https://instagram.com/username"
+                      placeholder={
+                        selectedPlatform === 'youtube'
+                          ? 'https://youtube.com/@channel'
+                          : selectedPlatform === 'facebook'
+                            ? 'https://facebook.com/page'
+                            : 'https://instagram.com/username'
+                      }
                       value={socialFormData.accountUrl}
                       onChange={(e) => setSocialFormData({ ...socialFormData, accountUrl: e.target.value })}
                       className="input glass-indicator"
@@ -737,57 +738,17 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label>{selectedPlatform === 'youtube' ? 'Subscribers' : 'Followers'}</label>
-                    <input
-                      type="number"
-                      placeholder="0"
-                      value={socialFormData.followers}
-                      onChange={(e) =>
-                        setSocialFormData({ ...socialFormData, followers: parseInt(e.target.value, 10) || 0 })
-                      }
-                      className="input glass-indicator"
-                      style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'var(--text-primary)' }}
-                    />
-                  </div>
-
-                  {selectedPlatform !== 'youtube' && (
-                    <div className="form-group">
-                      <label>Posts</label>
-                      <input
-                        type="number"
-                        placeholder="0"
-                        value={socialFormData.posts}
-                        onChange={(e) =>
-                          setSocialFormData({ ...socialFormData, posts: parseInt(e.target.value, 10) || 0 })
-                        }
-                        className="input"
-                      />
-                    </div>
-                  )}
-
-                  {selectedPlatform === 'youtube' && (
-                    <div className="form-group">
-                      <label>Videos / Shorts</label>
-                      <input
-                        type="number"
-                        placeholder="0"
-                        value={socialFormData.videos}
-                        onChange={(e) =>
-                          setSocialFormData({ ...socialFormData, videos: parseInt(e.target.value, 10) || 0 })
-                        }
-                        className="input"
-                      />
-                    </div>
-                  )}
+                  <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                    Counts will be fetched automatically: {selectedPlatform === 'youtube' ? 'subscribers and videos/shorts' : 'followers and posts'}.
+                  </p>
                 </div>
 
                 <div className="modal-footer" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                  <LiquidButton variant="secondary" onClick={() => setShowSocialModal(false)}>
+                  <LiquidButton variant="secondary" onClick={() => setShowSocialModal(false)} disabled={connectingSocial}>
                     Cancel
                   </LiquidButton>
-                  <LiquidButton variant="primary" onClick={handleConnectSocial}>
-                    Connect Account
+                  <LiquidButton variant="primary" onClick={handleConnectSocial} disabled={connectingSocial}>
+                    {connectingSocial ? 'Fetching Metrics...' : 'Connect Account'}
                   </LiquidButton>
                 </div>
               </div>

@@ -6,6 +6,7 @@ const BrandProfile = require('../../models/BrandProfile');
 const Post = require('../../models/Post');
 const Campaign = require('../../models/Campaign');
 const Notification = require('../../models/Notification');
+const { fetchSocialMediaStats, SUPPORTED_PLATFORMS } = require('./socialMediaStats.service');
 
 const userService = {
   getProfile: async (userId) => {
@@ -199,33 +200,40 @@ const influencerService = {
   },
 
   connectSocialMedia: async (userId, data) => {
-    const { platform, accountId, accountName, accountUrl, followers, posts, videos } = data;
-    if (!['facebook', 'instagram', 'youtube'].includes(platform)) {
+    const { platform, accountId, accountName, accountUrl } = data;
+    if (!SUPPORTED_PLATFORMS.includes(platform)) {
       throw new Error('Invalid platform');
+    }
+    if (!accountId && !accountName && !accountUrl) {
+      throw new Error('Social account identifier is required');
     }
 
     const user = await User.findById(userId);
     if (!user) throw new Error('User not found');
 
+    const stats = await fetchSocialMediaStats({ platform, accountId, accountName, accountUrl });
+    const resolvedAccountId = stats.accountId || accountId;
+    const resolvedAccountName = stats.accountName || accountName;
+
     const existingIndex = user.socialMediaAccounts.findIndex(acc => acc.platform === platform);
     if (existingIndex >= 0) {
       const existing = user.socialMediaAccounts[existingIndex];
-      existing.accountId = accountId;
-      existing.accountName = accountName;
+      existing.accountId = resolvedAccountId;
+      existing.accountName = resolvedAccountName;
       existing.accountUrl = accountUrl;
-      existing.followers = followers || 0;
-      existing.posts = posts || 0;
-      existing.videos = videos || 0;
+      existing.followers = stats.followers || 0;
+      existing.posts = stats.posts || 0;
+      existing.videos = stats.videos || 0;
       existing.lastSyncedAt = new Date();
     } else {
       user.socialMediaAccounts.push({
         platform,
-        accountId,
-        accountName,
+        accountId: resolvedAccountId,
+        accountName: resolvedAccountName,
         accountUrl,
-        followers: followers || 0,
-        posts: posts || 0,
-        videos: videos || 0,
+        followers: stats.followers || 0,
+        posts: stats.posts || 0,
+        videos: stats.videos || 0,
         lastSyncedAt: new Date(),
       });
     }
