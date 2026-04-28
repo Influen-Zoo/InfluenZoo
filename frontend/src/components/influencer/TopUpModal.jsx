@@ -2,6 +2,16 @@ import { useEffect, useState } from 'react';
 import walletService from '../../services/wallet.service';
 import LiquidButton from '../common/LiquidButton/LiquidButton';
 
+const DEFAULT_CHECKOUT_LOGO = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"%3E%3Crect width="96" height="96" rx="20" fill="%230ea5a0"/%3E%3Ctext x="48" y="58" text-anchor="middle" font-size="42" font-family="Arial,sans-serif" font-weight="700" fill="white"%3EI%3C/text%3E%3C/svg%3E';
+
+const getCheckoutLogo = () => {
+  const configuredLogo = import.meta.env.VITE_RAZORPAY_LOGO_URL;
+  if (configuredLogo && /^https:\/\//i.test(configuredLogo) && !/localhost|127\.0\.0\.1|0\.0\.0\.0/i.test(configuredLogo)) {
+    return configuredLogo;
+  }
+  return DEFAULT_CHECKOUT_LOGO;
+};
+
 const loadRazorpayCheckout = () => new Promise((resolve, reject) => {
   if (window.Razorpay) {
     resolve(true);
@@ -82,6 +92,7 @@ export default function TopUpModal({
         amount: order.amount,
         currency: order.currency,
         name: 'influenZoo',
+        image: getCheckoutLogo(),
         description: `${order.coins} coins`,
         order_id: order.orderId,
         prefill: {

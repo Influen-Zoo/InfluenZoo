@@ -1429,15 +1429,15 @@
 }
 
 .profile-avatar-large {
-  width: 168px;
-  height: 168px;
+  width: 208px;
+  height: 208px;
   border-radius: 50%;
   border: 4px solid var(--surface);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   position: relative;
   overflow: visible;
   background: var(--surface);
-  margin-top: -84px; /* Half of height to overlap banner perfectly */
+  margin-top: -104px; /* Half of height to overlap banner perfectly */
 }
 
 .profile-avatar-inner {
@@ -1456,8 +1456,8 @@
 
 .avatar-upload-btn {
   position: absolute;
-  bottom: 8px;
-  right: 8px;
+  bottom: 2px;
+  right: 2px;
   background: var(--surface);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -1555,9 +1555,9 @@
   }
 
   .profile-avatar-large {
-    width: 112px;
-    height: 112px;
-    margin-top: -56px;
+    width: 144px;
+    height: 144px;
+    margin-top: -72px;
   }
 
   .profile-social-links,
