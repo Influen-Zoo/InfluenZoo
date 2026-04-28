@@ -188,18 +188,15 @@ const LiquidButton = ({
               whiteSpace: "nowrap",
 
               // ✅ TEXT ALWAYS VISIBLE
-              color: filled ? "#000" : "var(--text-primary)",
+              color: filled ? "#000" : "var(--btn-text)",
 
               // ✅ TRUE GLASS BASE
-              background: "rgba(255,255,255,0.12)",
+              background: "var(--btn-glass-bg)",
               backdropFilter: "blur(20px) saturate(160%)",
               WebkitBackdropFilter: "blur(20px) saturate(160%)",
-              border: "1px solid rgba(255,255,255,0.12)",
+              border: "1px solid var(--btn-glass-border)",
 
-              boxShadow: `
-                0 10px 25px rgba(0,0,0,0.2),
-                inset 0 1px 1px rgba(255,255,255,0.3)
-              `,
+              boxShadow: "0 10px 25px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.1)",
 
               // ✨ TOP GLOSS
               "&::before": {
@@ -241,8 +238,8 @@ const LiquidButton = ({
                   inset: 0,
                   borderRadius: "inherit",
                   background:
-                    "linear-gradient(145deg, var(--accent), var(--accent-dark))",
-                  opacity: 0.8,
+                    "linear-gradient(145deg, var(--accent-color), var(--accent-dark))",
+                  opacity: 0.9,
                   pointerEvents: "none",
                   zIndex: 1,
                 }}
@@ -262,7 +259,7 @@ const LiquidButton = ({
                   transform: "translate(-50%, -50%)",
                   borderRadius: "50%",
                   background:
-                    "radial-gradient(circle, var(--accent), var(--accent-light), transparent 70%)",
+                    "radial-gradient(circle, var(--accent-color), var(--accent-light, var(--accent-color)), transparent 70%)",
                   pointerEvents: "none",
                   animation:
                     spread.type === "in"

@@ -2,6 +2,8 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import { isTokenExpired } from './features/auth/authUtils';
 import Landing from './pages/Landing'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
+import TermsOfServicePage from './pages/TermsOfServicePage'
 import Auth from './pages/Auth'
 import InfluencerDashboard from './components/layout/InfluencerLayout'
 import InfluencerHome from './pages/influencer/InfluencerHomePage'
@@ -77,6 +79,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={user ? <Navigate to={`/${user.role === 'influencer' ? 'influencer' : user.role}`} replace /> : <Landing />} />
         <Route path="/auth" element={user ? <Navigate to={`/${user.role === 'influencer' ? 'influencer' : user.role}`} replace /> : <Auth />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms-of-service" element={<TermsOfServicePage />} />
         <Route path="/profile/:userId" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 

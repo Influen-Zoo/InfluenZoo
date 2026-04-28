@@ -1,9 +1,56 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import LiquidButton from "../components/common/LiquidButton/LiquidButton";
-import "./Landing.css";
 import logo from "../assets/influenzoo-logo.png";
+import heroImage from "../assets/hero.png";
+import "./Landing.css";
+
+const steps = [
+  {
+    num: "01",
+    title: "Create Your Profile",
+    desc: "Sign up as a brand or influencer and build a profile with your best work, social proof, and collaboration goals.",
+  },
+  {
+    num: "02",
+    title: "Discover and Connect",
+    desc: "Brands post campaigns while creators find opportunities that match their niche, audience, and content style.",
+  },
+  {
+    num: "03",
+    title: "Collaborate and Grow",
+    desc: "Apply, chat, deliver content, manage wallet coins, and build long-term partnerships from one place.",
+  },
+];
+
+const features = [
+  { icon: "Match", title: "Smart Matching", desc: "Find brand and creator fits faster with profile, niche, and campaign signals." },
+  { icon: "Pay", title: "Secure Payments", desc: "Wallet coins and payment workflows keep campaign access and payouts organized." },
+  { icon: "Data", title: "Real Analytics", desc: "Track engagement, campaign performance, posts, and platform activity." },
+  { icon: "Trust", title: "Verified Profiles", desc: "Admin moderation and profile tools help maintain platform quality." },
+  { icon: "Chat", title: "In-App Messaging", desc: "Brands and creators can coordinate campaign details without leaving the app." },
+  { icon: "AI", title: "AI Assistance", desc: "Use AI-powered helpers for bios, scripts, content ideas, and campaign communication." },
+];
+
+const testimonials = [
+  {
+    text: "InfluenZoo helped me land my first paid brand deal within a week. The workflow is clear and the brand quality is strong.",
+    name: "Priya Sharma",
+    role: "Lifestyle Creator - 125K followers",
+  },
+  {
+    text: "We found the right micro creators for our product launch and tracked the campaign from one dashboard.",
+    name: "NovaSkin Cosmetics",
+    role: "Beauty Brand",
+  },
+  {
+    text: "The analytics and wallet flow make influencer collaborations easier to manage than spreadsheets and DMs.",
+    name: "Arjun Mehta",
+    role: "Tech Creator - 89K followers",
+  },
+];
 
 export default function Landing() {
   const [scrolled, setScrolled] = useState(false);
@@ -17,65 +64,49 @@ export default function Landing() {
   }, []);
 
   return (
-    <div className="landing">
+    <div className="landing" data-theme={theme}>
       <nav className={`landing-nav ${scrolled ? "scrolled" : ""}`}>
         <div className="landing-nav-inner">
-          <div className="landing-brand-group">
-            <div
-              className="landing-logo landing-logo-compact"
-              onClick={() => navigate("/")}
-              style={{ cursor: "pointer" }}
-            >
-              <img
-                src={logo}
-                alt="influenZoo Logo"
-                style={{ height: "40px", width: "auto", borderRadius: "50%" }}
-              />
-              <span>influenZoo</span>
-            </div>
-            <button
-              className="theme-toggle"
-              onClick={toggleTheme}
-              aria-label="Toggle Theme"
-            >
-              {theme === "dark" ? "☀️" : "🌙"}
-            </button>
-          </div>
+          <button className="landing-logo landing-logo-compact" onClick={() => navigate("/")}>
+            <span className="landing-logo-mark">
+              <img src={logo} alt="influenZoo Logo" />
+            </span>
+            <span>influenZoo</span>
+          </button>
 
           <div className="landing-nav-links">
             <a href="#how-it-works">How It Works</a>
-            <a href="#testimonials">Testimonials</a>
             <a href="#features">Features</a>
+            <a href="#testimonials">Testimonials</a>
           </div>
 
-          <div className="landing-nav-cta">
-            <div className="landing-auth-buttons">
-              <LiquidButton
-                variant="secondary"
-                size="small"
-                onClick={() => navigate("/auth")}
-              >
-                Log in
-              </LiquidButton>
-              <LiquidButton
-                variant="primary"
-                size="small"
-                onClick={() => navigate("/auth?mode=signup")}
-              >
-                Get Started
-              </LiquidButton>
-            </div>
+          <div className="landing-auth-buttons">
+            <button
+              className="theme-toggle"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+              title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            >
+              {theme === "dark" ? <Sun size={18} strokeWidth={2.4} /> : <Moon size={18} strokeWidth={2.4} />}
+            </button>
+            <LiquidButton variant="primary" size="small" onClick={() => navigate("/auth")}>
+              Log in
+            </LiquidButton>
+            <LiquidButton variant="primary" size="small" onClick={() => navigate("/auth?mode=signup")}>
+              Get Started
+            </LiquidButton>
           </div>
         </div>
       </nav>
 
-      <section className="hero">
-        <div className="hero-orb hero-orb-1" />
-        <div className="hero-orb hero-orb-2" />
+      <section
+        className="hero"
+        style={{ backgroundImage: `linear-gradient(180deg, rgba(4, 12, 22, 0.58), rgba(4, 12, 22, 0.9)), url(${heroImage})` }}
+      >
         <div className="hero-content">
           <div className="hero-badge">
             <span className="dot" />
-            <span>Trusted by 2,000+ brands and creators</span>
+            <span>Trusted by brands and creators across India</span>
           </div>
           <h1>
             Where Brands Meet
@@ -83,41 +114,17 @@ export default function Landing() {
             <span className="gradient-text">Top Creators</span>
           </h1>
           <p>
-            The premium platform connecting brands with authentic influencers.
-            Launch campaigns, discover talent, and grow together.
+            Launch campaigns, discover talent, manage wallet coins, track engagement, and build creator partnerships from a focused collaboration platform.
           </p>
           <div className="hero-cta">
-            <LiquidButton
-              variant="primary"
-              fullWidth
-              onClick={() => navigate("/auth?mode=signup")}
-            >
+            <LiquidButton variant="primary" onClick={() => navigate("/auth?mode=signup")}>
               Start Free Today
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ marginLeft: "8px" }}
-              >
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
             </LiquidButton>
             <LiquidButton
               variant="secondary"
-              fullWidth
-              onClick={() =>
-                document
-                  .getElementById("how-it-works")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
+              onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
             >
-              See how it works →
+              See how it works
             </LiquidButton>
           </div>
           <div className="hero-stats">
@@ -130,8 +137,8 @@ export default function Landing() {
               <div className="hero-stat-label">Brands</div>
             </div>
             <div className="hero-stat">
-              <div className="hero-stat-value">₹4.2Cr</div>
-              <div className="hero-stat-label">Paid to Creators</div>
+              <div className="hero-stat-value">INR 4.2Cr</div>
+              <div className="hero-stat-label">Creator Payouts</div>
             </div>
           </div>
         </div>
@@ -140,33 +147,13 @@ export default function Landing() {
       <section id="how-it-works" className="how-it-works">
         <div className="section-header">
           <div className="overline">Simple Process</div>
-          <h2>How influenZoo Works</h2>
-          <p>Get started in minutes whether you are a creator or a brand.</p>
+          <h2>How InfluenZoo Works</h2>
+          <p>Get started in minutes whether you are building campaigns or applying to them.</p>
         </div>
         <div className="steps-grid">
-          {[
-            {
-              icon: "👤",
-              num: "1",
-              title: "Create Your Profile",
-              desc: "Sign up as a brand or influencer and build your professional profile with your best work.",
-            },
-            {
-              icon: "🔍",
-              num: "2",
-              title: "Discover and Connect",
-              desc: "Brands post campaigns, creators discover opportunities that match their niche and audience.",
-            },
-            {
-              icon: "🚀",
-              num: "3",
-              title: "Collaborate and Grow",
-              desc: "Apply, get accepted, create content, and get paid. Build lasting partnerships.",
-            },
-          ].map((step) => (
+          {steps.map((step) => (
             <div className="step-card" key={step.num}>
               <div className="step-number">{step.num}</div>
-              <div className="step-icon">{step.icon}</div>
               <h3>{step.title}</h3>
               <p>{step.desc}</p>
             </div>
@@ -176,50 +163,16 @@ export default function Landing() {
 
       <section id="features" className="features-section">
         <div className="section-header">
-          <div className="overline">Why influenZoo</div>
+          <div className="overline">Why InfluenZoo</div>
           <h2>Built for Serious Collaboration</h2>
-          <p>
-            Every feature designed to make brand influencer partnerships
-            effortless.
-          </p>
+          <p>Every feature is designed to make brand-influencer partnerships easier to run and measure.</p>
         </div>
         <div className="features-grid">
-          {[
-            {
-              icon: "🎯",
-              title: "Smart Matching",
-              desc: "AI-powered recommendations match brands with the perfect creators for their niche.",
-            },
-            {
-              icon: "💰",
-              title: "Secure Payments",
-              desc: "Escrow-protected payments ensure creators get paid and brands get quality content.",
-            },
-            {
-              icon: "📊",
-              title: "Real Analytics",
-              desc: "Track campaign performance with detailed engagement and ROI metrics.",
-            },
-            {
-              icon: "🛡️",
-              title: "Verified Profiles",
-              desc: "Every account is verified to ensure trust and authenticity on the platform.",
-            },
-            {
-              icon: "💬",
-              title: "In-App Messaging",
-              desc: "Direct messaging between brands and creators for seamless communication.",
-            },
-            {
-              icon: "⚡",
-              title: "Fast Approvals",
-              desc: "Streamlined application process gets campaigns running in hours, not weeks.",
-            },
-          ].map((feat, i) => (
-            <div className="feature-card" key={i}>
-              <div className="feature-icon">{feat.icon}</div>
-              <h4>{feat.title}</h4>
-              <p>{feat.desc}</p>
+          {features.map((feature) => (
+            <div className="feature-card" key={feature.title}>
+              <div className="feature-icon">{feature.icon}</div>
+              <h4>{feature.title}</h4>
+              <p>{feature.desc}</p>
             </div>
           ))}
         </div>
@@ -229,37 +182,18 @@ export default function Landing() {
         <div className="section-header">
           <div className="overline">Testimonials</div>
           <h2>Loved by Creators and Brands</h2>
-          <p>See what our community has to say about influenZoo.</p>
+          <p>Real workflows for creator discovery, campaign execution, and performance tracking.</p>
         </div>
         <div className="testimonial-grid">
-          {[
-            {
-              text: "influenZoo helped me land my first paid brand deal within a week. The platform is intuitive and the brand quality is top notch.",
-              name: "Priya Sharma",
-              role: "Lifestyle Creator · 125K followers",
-              stars: 5,
-            },
-            {
-              text: "We found the perfect micro influencers for our product launch. The ROI was 3x compared to traditional advertising.",
-              name: "NovaSkin Cosmetics",
-              role: "Beauty Brand",
-              stars: 5,
-            },
-            {
-              text: "The analytics dashboard gives me everything I need to track campaign performance. Best platform for influencer marketing in India.",
-              name: "Arjun Mehta",
-              role: "Tech Creator · 89K followers",
-              stars: 5,
-            },
-          ].map((t, i) => (
-            <div className="testimonial-card" key={i}>
-              <div className="testimonial-stars">{"★".repeat(t.stars)}</div>
-              <p className="testimonial-text">"{t.text}"</p>
+          {testimonials.map((testimonial) => (
+            <div className="testimonial-card" key={testimonial.name}>
+              <div className="testimonial-stars">*****</div>
+              <p className="testimonial-text">"{testimonial.text}"</p>
               <div className="testimonial-author">
-                <div className="avatar">{t.name[0]}</div>
+                <div className="avatar">{testimonial.name[0]}</div>
                 <div className="testimonial-author-info">
-                  <h4>{t.name}</h4>
-                  <span>{t.role}</span>
+                  <h4>{testimonial.name}</h4>
+                  <span>{testimonial.role}</span>
                 </div>
               </div>
             </div>
@@ -270,14 +204,8 @@ export default function Landing() {
       <section className="cta-section">
         <div className="cta-content">
           <h2>Ready to Grow?</h2>
-          <p>
-            Join thousands of brands and creators already collaborating on
-            influenZoo.
-          </p>
-          <LiquidButton
-            variant="primary"
-            onClick={() => navigate("/auth?mode=signup")}
-          >
+          <p>Join brands and creators already managing collaborations on InfluenZoo.</p>
+          <LiquidButton variant="primary" onClick={() => navigate("/auth?mode=signup")}>
             Create Free Account
           </LiquidButton>
         </div>
@@ -286,42 +214,39 @@ export default function Landing() {
       <footer className="landing-footer">
         <div className="footer-grid">
           <div className="footer-brand">
-            <div
-              className="landing-logo"
-              style={{ color: "rgba(255,255,255,0.8)" }}
-            >
-              <img
-                src={logo}
-                alt="influenZoo Logo"
-                style={{ height: "32px", width: "auto", borderRadius: "50%" }}
-              />
+            <div className="landing-logo footer-logo">
+              <span className="landing-logo-mark">
+                <img src={logo} alt="influenZoo Logo" />
+              </span>
               <span>influenZoo</span>
             </div>
-            <p>The premium platform for brand influencer collaborations.</p>
+            <p>The focused platform for brand-influencer collaborations.</p>
           </div>
           <div className="footer-col">
             <h4>Product</h4>
-            <a href="#">For Brands</a>
-            <a href="#">For Creators</a>
-            <a href="#">Pricing</a>
-            <a href="#">Features</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#features">Features</a>
+            <a href="/auth?mode=signup">For Brands</a>
+            <a href="/auth?mode=signup">For Creators</a>
           </div>
           <div className="footer-col">
             <h4>Company</h4>
-            <a href="#">About Us</a>
-            <a href="#">Blog</a>
-            <a href="#">Careers</a>
-            <a href="#">Contact</a>
+            <a href="mailto:ask@influenzoo.com">Contact</a>
+            <a href="#testimonials">Testimonials</a>
           </div>
           <div className="footer-col">
             <h4>Legal</h4>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Cookie Policy</a>
+            <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="footer-link-button">
+              Privacy Policy
+            </a>
+            <a href="/terms-of-service" target="_blank" rel="noopener noreferrer" className="footer-link-button">
+              Terms of Service
+            </a>
           </div>
         </div>
+
         <div className="footer-bottom">
-          <p>© 2024 influenZoo. All rights reserved.</p>
+          <p>(c) 2026 influenZoo. All rights reserved.</p>
         </div>
       </footer>
     </div>
