@@ -43,7 +43,6 @@ export const useBrandAnalytics = (user) => {
 
   const handleTopUp = async (amount) => {
     try {
-      await brandService.buyCoins(amount);
       showToast(`Purchased ${amount} coins successfully! ✨`);
       loadWallet();
       return true;

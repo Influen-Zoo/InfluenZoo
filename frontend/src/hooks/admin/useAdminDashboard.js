@@ -10,6 +10,7 @@ export const useAdminDashboard = () => {
   const [withdrawals, setWithdrawals] = useState([]);
   const [platformAnalytics, setPlatformAnalytics] = useState(null);
   const [feeStructure, setFeeStructure] = useState({});
+  const [razorpaySettings, setRazorpaySettings] = useState({});
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
@@ -22,7 +23,7 @@ export const useAdminDashboard = () => {
   const loadAllData = async () => {
     try {
       setLoading(true);
-      const [s, u, c, p, d, a, anns, w, fees] = await Promise.all([
+      const [s, u, c, p, d, a, anns, w, fees, razorpay] = await Promise.all([
         adminService.getStats().catch(() => ({})),
         adminService.getUsers().catch(() => []),
         adminService.getCampaigns().catch(() => []),
@@ -32,6 +33,7 @@ export const useAdminDashboard = () => {
         adminService.getAdminAnnouncements().catch(() => []),
         adminService.getWithdrawals('all').catch(() => []),
         adminService.getFeeStructure().catch(() => ({})),
+        adminService.getRazorpaySettings().catch(() => ({})),
       ]);
       setStats(s || {});
       setUsers(Array.isArray(u) ? u : []);
@@ -42,6 +44,7 @@ export const useAdminDashboard = () => {
       setAnnouncements(Array.isArray(anns) ? anns : []);
       setWithdrawals(Array.isArray(w) ? w : []);
       setFeeStructure(fees || {});
+      setRazorpaySettings(razorpay || {});
     } catch (e) {
       console.error('Error loading admin data:', e);
       showToast('Failed to load dashboard data', 'danger');
@@ -76,7 +79,7 @@ export const useAdminDashboard = () => {
 
   return {
     stats, users, campaigns, posts, disputes, withdrawals, 
-    platformAnalytics, feeStructure, announcements, loading, toast,
+    platformAnalytics, feeStructure, razorpaySettings, announcements, loading, toast,
     loadAllData, showToast, handleApproveWithdrawal, handleRejectWithdrawal,
     setUsers, setCampaigns, setPosts, setDisputes, setWithdrawals, setStats
   };

@@ -215,6 +215,32 @@ exports.updateFeeStructure = async (req, res) => {
 };
 
 /**
+ * GET /api/admin/razorpay-settings
+ * Get Razorpay coin purchase settings
+ */
+exports.getRazorpaySettings = async (req, res) => {
+  try {
+    const settings = await adminService.getRazorpaySettings();
+    res.json({ success: true, data: settings });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+/**
+ * PUT /api/admin/razorpay-settings
+ * Update Razorpay coin purchase settings
+ */
+exports.updateRazorpaySettings = async (req, res) => {
+  try {
+    const settings = await adminService.updateRazorpaySettings(req.body);
+    res.json({ success: true, data: settings });
+  } catch (error) {
+    res.status(500).json({ error: error.message || 'Server error' });
+  }
+};
+
+/**
  * PUT /api/admin/posts/:id/block
  * Block a post
  */

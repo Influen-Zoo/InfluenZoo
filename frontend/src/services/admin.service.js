@@ -74,6 +74,16 @@ export const adminService = {
     return response.data?.data || response.data;
   },
 
+  async getRazorpaySettings() {
+    const response = await apiClient.get('/admin/razorpay-settings');
+    return response.data?.data || response.data;
+  },
+
+  async updateRazorpaySettings(settings) {
+    const response = await apiClient.put('/admin/razorpay-settings', settings);
+    return response.data?.data || response.data;
+  },
+
   async blockPost(postId, reason) {
     const response = await apiClient.put(`/admin/posts/${postId}/block`, { reason });
     return response.data?.data || response.data;

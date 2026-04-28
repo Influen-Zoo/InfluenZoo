@@ -126,8 +126,8 @@ export const InfluencerLayout = () => {
         <TopUpModal 
           showTopUp={dashboard.showTopUp}
           setShowTopUp={dashboard.setShowTopUp}
-          onTopUp={dashboard.handleTopUp} // I need to add this method to the hook or pass handleTopUp
-          // Wait, I should check the hook again.
+          onPaymentSuccess={dashboard.handleTopUp}
+          user={dashboard.user}
         />
       )}
 

@@ -1,8 +1,18 @@
 import apiClient from './apiClient';
 
 export const walletService = {
-  async buyCoins(amount) {
-    const response = await apiClient.post('/wallet/topup', { amount });
+  async getPaymentConfig() {
+    const response = await apiClient.get('/wallet/payment-config');
+    return response.data?.data || response.data;
+  },
+
+  async createCoinOrder(amount) {
+    const response = await apiClient.post('/wallet/buy-coins', { amount });
+    return response.data?.data || response.data;
+  },
+
+  async verifyPayment(paymentDetails) {
+    const response = await apiClient.post('/wallet/verify-payment', paymentDetails);
     return response.data?.data || response.data;
   },
 

@@ -61,7 +61,7 @@ export const influencerService = {
 
   async buyCoins(amount) {
     const response = await apiClient.post('/wallet/buy-coins', { amount });
-    return response.data;
+    return response.data?.data || response.data;
   },
 
   async withdrawEarnings(amount, details) {

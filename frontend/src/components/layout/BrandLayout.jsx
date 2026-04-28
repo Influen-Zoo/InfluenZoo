@@ -121,7 +121,8 @@ export const BrandLayout = () => {
         <TopUpModal 
           showTopUp={dashboard.showTopUp}
           setShowTopUp={dashboard.setShowTopUp}
-          onTopUp={dashboard.handleTopUp}
+          onPaymentSuccess={dashboard.handleTopUp}
+          user={dashboard.user}
         />
       )}
 

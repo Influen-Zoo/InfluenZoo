@@ -157,7 +157,7 @@ class ApiClient {
 
   // Financials & Wallet
   async buyCoins(amount) {
-    const response = await this.client.post('/wallet/topup', { amount });
+    const response = await this.client.post('/wallet/buy-coins', { amount });
     return response.data?.data || response.data;
   }
 

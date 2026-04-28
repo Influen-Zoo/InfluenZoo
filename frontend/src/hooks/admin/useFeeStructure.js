@@ -4,7 +4,7 @@ import adminService from '../../services/admin.service';
 
 export const useFeeStructure = () => {
   const { 
-    feeStructure, stats, loading, toast, showToast, withdrawals, campaigns, posts, loadAllData
+    feeStructure, razorpaySettings, stats, loading, toast, showToast, withdrawals, campaigns, posts, loadAllData
   } = useAdminDashboard();
 
   const handleUpdateFeeStructure = async (fees) => {
@@ -17,15 +17,27 @@ export const useFeeStructure = () => {
     }
   };
 
+  const handleUpdateRazorpaySettings = async (settings) => {
+    try {
+      await adminService.updateRazorpaySettings(settings);
+      showToast('Razorpay settings updated successfully!');
+      loadAllData();
+    } catch (e) {
+      showToast(e.message, 'danger');
+    }
+  };
+
   return {
     feeStructure,
+    razorpaySettings,
     stats,
     loading,
     toast,
     withdrawals,
     campaigns,
     posts,
-    handleUpdateFeeStructure
+    handleUpdateFeeStructure,
+    handleUpdateRazorpaySettings
   };
 };
 

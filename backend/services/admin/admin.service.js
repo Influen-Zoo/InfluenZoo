@@ -453,6 +453,43 @@ const adminService = {
     return await adminService.getFeeStructure();
   },
 
+  getRazorpaySettings: async () => {
+    const setting = await AppSetting.findOne({ key: 'payment.razorpay' });
+    const value = setting?.value || {};
+
+    return {
+      enabled: Boolean(value.enabled),
+      keyId: value.keyId || '',
+      keySecretConfigured: Boolean(value.keySecret),
+      coinRate: Number(value.coinRate) > 0 ? Number(value.coinRate) : 1,
+      currency: value.currency || 'INR'
+    };
+  },
+
+  updateRazorpaySettings: async (payload = {}) => {
+    const existing = await AppSetting.findOne({ key: 'payment.razorpay' });
+    const current = existing?.value || {};
+    const coinRate = Number(payload.coinRate);
+    const nextValue = {
+      enabled: Boolean(payload.enabled),
+      keyId: typeof payload.keyId === 'string' ? payload.keyId.trim() : current.keyId || '',
+      keySecret: payload.keySecret ? String(payload.keySecret).trim() : current.keySecret || '',
+      coinRate: Number.isFinite(coinRate) && coinRate > 0 ? coinRate : (Number(current.coinRate) || 1),
+      currency: 'INR'
+    };
+
+    await AppSetting.findOneAndUpdate(
+      { key: 'payment.razorpay' },
+      {
+        value: nextValue,
+        description: 'Razorpay credentials and coin purchase settings'
+      },
+      { upsert: true }
+    );
+
+    return adminService.getRazorpaySettings();
+  },
+
   blockPost: async (postId, userId, blockedReason = 'Not meeting community standards') => {
     const post = await Post.findByIdAndUpdate(
       postId,

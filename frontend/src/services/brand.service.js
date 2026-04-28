@@ -74,8 +74,8 @@ export const brandService = {
   },
 
   async buyCoins(amount) {
-    const response = await apiClient.post('/wallet/topup', { amount });
-    return response.data;
+    const response = await apiClient.post('/wallet/buy-coins', { amount });
+    return response.data?.data || response.data;
   },
 
   // Profile Management

@@ -23,6 +23,7 @@ export const useInfluencerDashboard = () => {
   const [investigateId, setInvestigateId] = useState(null);
   const [filters, setFilters] = useState({ category: '', platform: '', type: '' });
   const [loading, setLoading] = useState(false);
+  const [showTopUp, setShowTopUp] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Compose Domain Hooks
@@ -66,6 +67,7 @@ export const useInfluencerDashboard = () => {
     searchQuery, setSearchQuery,
     toast: analytics.toast,
     showToast: analytics.showToast,
+    showTopUp, setShowTopUp,
 
     // Analytics & Notifications & Wallet
     coinBalance: analytics.coinBalance,

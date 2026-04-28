@@ -109,6 +109,9 @@ router.get('/fee-structure', adminController.getFeeStructure);
  */
 router.put('/fee-structure', adminController.updateFeeStructure);
 
+router.get('/razorpay-settings', adminController.getRazorpaySettings);
+router.put('/razorpay-settings', adminController.updateRazorpaySettings);
+
 /**
  * @route   PUT /api/admin/posts/:id/block
  * @desc    Block a post from public view

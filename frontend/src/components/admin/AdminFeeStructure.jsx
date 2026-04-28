@@ -4,13 +4,21 @@ import LiquidButton from '../common/LiquidButton/LiquidButton';
 
 export default function AdminFeeStructure({ 
   feeStructure = {},
+  razorpaySettings = {},
   onUpdateFees,
+  onUpdateRazorpaySettings,
   loading = false 
 }) {
   const [campaignFee, setCampaignFee] = useState(0);
   const [applicationFee, setApplicationFee] = useState(0);
+  const [razorpayEnabled, setRazorpayEnabled] = useState(false);
+  const [razorpayKeyId, setRazorpayKeyId] = useState('');
+  const [razorpayKeySecret, setRazorpayKeySecret] = useState('');
+  const [coinRate, setCoinRate] = useState(1);
   const [editMode, setEditMode] = useState(false);
+  const [paymentEditMode, setPaymentEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [savingPayment, setSavingPayment] = useState(false);
 
   useEffect(() => {
     if (feeStructure) {
@@ -18,6 +26,15 @@ export default function AdminFeeStructure({
       setApplicationFee(feeStructure.applicationFee || 0);
     }
   }, [feeStructure]);
+
+  useEffect(() => {
+    if (razorpaySettings) {
+      setRazorpayEnabled(Boolean(razorpaySettings.enabled));
+      setRazorpayKeyId(razorpaySettings.keyId || '');
+      setRazorpayKeySecret('');
+      setCoinRate(razorpaySettings.coinRate || 1);
+    }
+  }, [razorpaySettings]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -31,6 +48,24 @@ export default function AdminFeeStructure({
       console.error('Error saving fees:', error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePaymentSave = async () => {
+    setSavingPayment(true);
+    try {
+      await onUpdateRazorpaySettings({
+        enabled: razorpayEnabled,
+        keyId: razorpayKeyId,
+        keySecret: razorpayKeySecret,
+        coinRate: Number(coinRate)
+      });
+      setPaymentEditMode(false);
+      setRazorpayKeySecret('');
+    } catch (error) {
+      console.error('Error saving Razorpay settings:', error);
+    } finally {
+      setSavingPayment(false);
     }
   };
 
@@ -201,6 +236,112 @@ export default function AdminFeeStructure({
                 style={{ flex: 1 }}
               >
                 {saving ? '⏳ Saving...' : '💾 Save Changes'}
+              </LiquidButton>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="chart-card" style={{ padding: '1.5rem', marginTop: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div>
+            <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem 0' }}>Razorpay Coin Purchases</h3>
+            <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', margin: 0 }}>
+              Configure Razorpay credentials before users can buy coins from their wallet.
+            </p>
+          </div>
+          {!paymentEditMode && (
+            <LiquidButton variant="secondary" onClick={() => setPaymentEditMode(true)}>
+              Edit
+            </LiquidButton>
+          )}
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: paymentEditMode ? '1.5rem' : 0 }}>
+          <div style={{ background: 'var(--surface-alt)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Status</div>
+            <div style={{ fontSize: '1.125rem', fontWeight: 800, color: razorpaySettings.enabled ? 'var(--success)' : 'var(--warning)' }}>
+              {razorpaySettings.enabled ? 'Enabled' : 'Disabled'}
+            </div>
+          </div>
+          <div style={{ background: 'var(--surface-alt)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Key ID</div>
+            <div style={{ fontSize: '1rem', fontWeight: 700, wordBreak: 'break-word' }}>{razorpaySettings.keyId || 'Not set'}</div>
+          </div>
+          <div style={{ background: 'var(--surface-alt)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Secret</div>
+            <div style={{ fontSize: '1rem', fontWeight: 700 }}>{razorpaySettings.keySecretConfigured ? 'Configured' : 'Not set'}</div>
+          </div>
+          <div style={{ background: 'var(--surface-alt)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Coin Rate</div>
+            <div style={{ fontSize: '1rem', fontWeight: 700 }}>1 INR = {Number(razorpaySettings.coinRate || 1)} coins</div>
+          </div>
+        </div>
+
+        {paymentEditMode && (
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 700 }}>
+              <input
+                type="checkbox"
+                checked={razorpayEnabled}
+                onChange={(e) => setRazorpayEnabled(e.target.checked)}
+              />
+              Enable Razorpay coin purchases
+            </label>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Razorpay Key ID</label>
+                <input
+                  className="input"
+                  value={razorpayKeyId}
+                  onChange={(e) => setRazorpayKeyId(e.target.value)}
+                  placeholder="rzp_live_..."
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Razorpay Key Secret</label>
+                <input
+                  className="input"
+                  type="password"
+                  value={razorpayKeySecret}
+                  onChange={(e) => setRazorpayKeySecret(e.target.value)}
+                  placeholder={razorpaySettings.keySecretConfigured ? 'Leave blank to keep current secret' : 'Enter key secret'}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Coins Per INR</label>
+                <input
+                  className="input"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={coinRate}
+                  onChange={(e) => setCoinRate(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <LiquidButton
+                variant="secondary"
+                onClick={() => {
+                  setPaymentEditMode(false);
+                  setRazorpayEnabled(Boolean(razorpaySettings.enabled));
+                  setRazorpayKeyId(razorpaySettings.keyId || '');
+                  setRazorpayKeySecret('');
+                  setCoinRate(razorpaySettings.coinRate || 1);
+                }}
+                disabled={savingPayment}
+              >
+                Cancel
+              </LiquidButton>
+              <LiquidButton
+                variant="primary"
+                onClick={handlePaymentSave}
+                disabled={savingPayment || loading}
+              >
+                {savingPayment ? 'Saving...' : 'Save Razorpay Settings'}
               </LiquidButton>
             </div>
           </div>

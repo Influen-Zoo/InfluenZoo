@@ -33,7 +33,6 @@ export const useInfluencerAnalytics = (user) => {
 
   const handleTopUp = async (amount) => {
     try {
-      await influencerService.buyCoins(amount);
       showToast(`Purchased ${amount} coins successfully! ✨`);
       loadWallet();
       return true;
