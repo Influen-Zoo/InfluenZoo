@@ -9,6 +9,7 @@ services:
       - ./nginx/gateway.conf:/etc/nginx/conf.d/default.conf
       - ./nginx/proxy.conf:/etc/nginx/proxy.conf
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro
     depends_on:
       - frontend
       - backend
