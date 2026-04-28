@@ -105,6 +105,24 @@ exports.updateUserFollowers = async (req, res) => {
 };
 
 /**
+ * PUT /api/admin/posts/:id/likes
+ * Set post like count
+ */
+exports.updatePostLikes = async (req, res) => {
+  try {
+    const post = await adminService.updatePostLikes(req.params.id, req.body.likes);
+    res.json({
+      success: true,
+      data: post,
+      message: `Likes updated to ${req.body.likes}`
+    });
+  } catch (error) {
+    const status = error.message.includes('not found') ? 404 : 400;
+    res.status(status).json({ error: error.message });
+  }
+};
+
+/**
  * GET /api/admin/analytics
  * Platform analytics overview
  */

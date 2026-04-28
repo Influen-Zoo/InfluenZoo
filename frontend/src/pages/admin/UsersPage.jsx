@@ -4,13 +4,15 @@ import UserStats from '../../components/admin/UserStats';
 import UserFilters from '../../components/admin/UserFilters';
 import UserTable from '../../components/admin/UserTable';
 import CoinEditModal from '../../components/admin/modals/CoinEditModal';
+import FollowerEditModal from '../../components/admin/modals/FollowerEditModal';
 import useUsers from '../../hooks/admin/useUsers';
 
 export const UsersPage = () => {
   const { 
     filteredUsers, stats, loading, toast, withdrawals, campaigns, posts,
     userFilter, setUserFilter, coinEditModal, setCoinEditModal,
-    handleUserStatus, handleUpdateCoins
+    followerEditModal, setFollowerEditModal,
+    handleUserStatus, handleUpdateCoins, handleUpdateFollowers
   } = useUsers();
 
   const sidebarItems = [
@@ -46,6 +48,7 @@ export const UsersPage = () => {
             filteredUsers={filteredUsers} 
             handleUserStatus={handleUserStatus} 
             setCoinEditModal={setCoinEditModal} 
+            setFollowerEditModal={setFollowerEditModal}
           />
         )}
 
@@ -54,6 +57,13 @@ export const UsersPage = () => {
           onClose={() => setCoinEditModal(null)}
           user={coinEditModal}
           onUpdate={handleUpdateCoins}
+        />
+
+        <FollowerEditModal
+          isOpen={!!followerEditModal}
+          onClose={() => setFollowerEditModal(null)}
+          user={followerEditModal}
+          onUpdate={handleUpdateFollowers}
         />
       </div>
     </AdminLayout>

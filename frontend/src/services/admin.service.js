@@ -34,6 +34,11 @@ export const adminService = {
     return response.data;
   },
 
+  async updateUserFollowers(id, followers) {
+    const response = await apiClient.put(`/admin/users/${id}/followers`, { followers });
+    return response.data?.data || response.data;
+  },
+
   async getDisputes() {
     const response = await apiClient.get('/admin/disputes');
     return response.data?.data || [];
@@ -91,6 +96,11 @@ export const adminService = {
 
   async unblockPost(postId) {
     const response = await apiClient.put(`/admin/posts/${postId}/unblock`);
+    return response.data?.data || response.data;
+  },
+
+  async updatePostLikes(postId, likes) {
+    const response = await apiClient.put(`/admin/posts/${postId}/likes`, { likes });
     return response.data?.data || response.data;
   },
 

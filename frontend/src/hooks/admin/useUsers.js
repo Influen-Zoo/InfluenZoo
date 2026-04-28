@@ -14,6 +14,7 @@ export const useUsers = () => {
     status: ''
   });
   const [coinEditModal, setCoinEditModal] = useState(null);
+  const [followerEditModal, setFollowerEditModal] = useState(null);
 
   const filteredUsers = useMemo(() => filterAdminUsers(users, userFilter), [users, userFilter]);
 
@@ -48,6 +49,26 @@ export const useUsers = () => {
     }
   };
 
+  const handleUpdateFollowers = async (e) => {
+    e.preventDefault();
+    if (!followerEditModal) return;
+
+    const formData = new FormData(e.target);
+    const amount = Number(formData.get('amount'));
+    const nextFollowers = (Number(followerEditModal.currentFollowers) || 0) + amount;
+
+    try {
+      await adminService.updateUserFollowers(followerEditModal.userId, nextFollowers);
+      showToast('Followers updated successfully!');
+      setFollowerEditModal(null);
+      const [u, s] = await Promise.all([adminService.getUsers(), adminService.getStats()]);
+      setUsers(u);
+      setStats(s);
+    } catch (e) {
+      showToast(e.response?.data?.error || e.message, 'danger');
+    }
+  };
+
   return {
     users,
     filteredUsers,
@@ -62,8 +83,11 @@ export const useUsers = () => {
     setUserFilter,
     coinEditModal,
     setCoinEditModal,
+    followerEditModal,
+    setFollowerEditModal,
     handleUserStatus,
-    handleUpdateCoins
+    handleUpdateCoins,
+    handleUpdateFollowers
   };
 };
 

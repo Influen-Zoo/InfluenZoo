@@ -1,8 +1,10 @@
 import React from 'react';
-import { Check, Ban } from 'lucide-react';
+import { Check, Ban, Heart } from 'lucide-react';
 import LiquidButton from '../common/LiquidButton/LiquidButton';
 
-const PostTable = ({ posts, setSelectedPost, handleUnblockPost, setBlockingPost }) => {
+const getCount = (value) => Array.isArray(value) ? value.length : (Number(value) || 0);
+
+const PostTable = ({ posts, setSelectedPost, handleUnblockPost, setBlockingPost, setLikesEditModal }) => {
   const truncate = (text, length = 30) => {
     if (!text) return '-';
     return text.length > length ? text.substring(0, length) + '...' : text;
@@ -10,7 +12,7 @@ const PostTable = ({ posts, setSelectedPost, handleUnblockPost, setBlockingPost 
 
   const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString('en-IN', { 
+    return new Date(date).toLocaleDateString('en-IN', {
       day: '2-digit',
       month: '2-digit'
     });
@@ -27,15 +29,19 @@ const PostTable = ({ posts, setSelectedPost, handleUnblockPost, setBlockingPost 
             <th style={{ minWidth: '80px' }}>Date</th>
             <th style={{ minWidth: '80px' }}>Likes</th>
             <th style={{ minWidth: '80px' }}>Status</th>
-            <th style={{ minWidth: '100px' }}>Actions</th>
+            <th style={{ minWidth: '100px' }}>Moderation</th>
+            <th style={{ minWidth: '140px' }}>Growth</th>
           </tr>
         </thead>
         <tbody>
           {posts.map(post => {
             const isBlocked = post.blocked;
+            const likeCount = getCount(post.likes);
+            const postId = post._id || post.id;
+
             return (
-              <tr 
-                key={post._id} 
+              <tr
+                key={post._id}
                 style={{ opacity: isBlocked ? 0.6 : 1, cursor: 'pointer' }}
                 onClick={() => setSelectedPost(post)}
               >
@@ -61,28 +67,28 @@ const PostTable = ({ posts, setSelectedPost, handleUnblockPost, setBlockingPost 
                 </td>
                 <td>
                   <span style={{ fontSize: '0.8125rem' }}>
-                    ❤️ {Array.isArray(post.likes) ? post.likes.length : 0}
+                    {likeCount.toLocaleString('en-IN')}
                   </span>
                 </td>
                 <td>
                   <span className={`badge ${isBlocked ? 'badge-danger' : 'badge-success'}`} style={{ fontSize: '0.75rem' }}>
-                    {isBlocked ? '🚫' : '✓'}
+                    {isBlocked ? 'Blocked' : 'Live'}
                   </span>
                 </td>
                 <td style={{ display: 'flex', gap: '0.4rem' }}>
                   {isBlocked ? (
-                    <LiquidButton 
-                      circular 
-                      variant="success" 
-                      onClick={(e) => { e.stopPropagation(); handleUnblockPost(post._id); }}
+                    <LiquidButton
+                      circular
+                      variant="success"
+                      onClick={(e) => { e.stopPropagation(); handleUnblockPost(postId); }}
                       title="Unblock post"
                     >
                       <Check size={18} />
                     </LiquidButton>
                   ) : (
-                    <LiquidButton 
-                      circular 
-                      variant="error" 
+                    <LiquidButton
+                      circular
+                      variant="error"
                       onClick={(e) => {
                         e.stopPropagation();
                         setBlockingPost(post);
@@ -93,11 +99,25 @@ const PostTable = ({ posts, setSelectedPost, handleUnblockPost, setBlockingPost 
                     </LiquidButton>
                   )}
                 </td>
+                <td>
+                  <LiquidButton
+                    variant="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLikesEditModal({ postId, currentLikes: likeCount });
+                    }}
+                    title="Add likes"
+                    style={{ whiteSpace: 'nowrap', padding: '0.45rem 0.85rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                  >
+                    <Heart size={18} />
+                    Add Likes
+                  </LiquidButton>
+                </td>
               </tr>
             );
           })}
           {posts.length === 0 && (
-            <tr><td colSpan="7" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No posts found</td></tr>
+            <tr><td colSpan="8" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No posts found</td></tr>
           )}
         </tbody>
       </table>

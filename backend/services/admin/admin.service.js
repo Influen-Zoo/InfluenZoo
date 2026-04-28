@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const User = require('../../models/User');
 const Campaign = require('../../models/Campaign');
 const Application = require('../../models/Application');
@@ -7,6 +8,22 @@ const Dispute = require('../../models/Dispute');
 const Post = require('../../models/Post');
 const AppSetting = require('../../models/AppSetting');
 const CampaignRevenue = require('../../models/CampaignRevenue');
+
+const resizeObjectIdArray = (items = [], targetCount = 0) => {
+  const nextCount = Math.max(0, Number(targetCount) || 0);
+  const existing = Array.isArray(items)
+    ? items
+        .filter((item) => mongoose.Types.ObjectId.isValid(String(item)))
+        .map((item) => new mongoose.Types.ObjectId(String(item)))
+        .slice(0, nextCount)
+    : [];
+
+  while (existing.length < nextCount) {
+    existing.push(new mongoose.Types.ObjectId());
+  }
+
+  return existing;
+};
 
 const adminService = {
   getStats: async () => {
@@ -326,19 +343,50 @@ const adminService = {
   },
 
   updateUserFollowers: async (userId, followers) => {
-    if (followers === undefined || followers === null || followers < 0) {
+    if (!mongoose.Types.ObjectId.isValid(String(userId))) {
+      throw new Error('Invalid user id');
+    }
+
+    const followerCount = Number(followers);
+    if (!Number.isInteger(followerCount) || followerCount < 0) {
       throw new Error('Followers must be a non-negative number');
     }
 
-    const user = await User.findById(userId);
+    const userObjectId = new mongoose.Types.ObjectId(String(userId));
+    const user = await User.collection.findOne(
+      { _id: userObjectId },
+      { projection: { followers: 1 } }
+    );
     if (!user) throw new Error('User not found');
-    if (user.role !== 'influencer') {
-      throw new Error('Only influencers can have followers updated');
+
+    const followersList = resizeObjectIdArray(user.followers, followerCount);
+    await User.collection.updateOne(
+      { _id: userObjectId },
+      { $set: { followers: followersList } }
+    );
+
+    return await User.findById(userObjectId).select('-password -refreshToken');
+  },
+
+  updatePostLikes: async (postId, likes) => {
+    if (!mongoose.Types.ObjectId.isValid(String(postId))) {
+      throw new Error('Invalid post id');
     }
 
-    user.followers = followers;
-    await user.save();
-    return user;
+    const likeCount = Number(likes);
+    if (!Number.isInteger(likeCount) || likeCount < 0) {
+      throw new Error('Likes must be a non-negative number');
+    }
+
+    const post = await Post.findById(postId);
+    if (!post) throw new Error('Post not found');
+
+    post.likes = resizeObjectIdArray(post.likes, likeCount);
+    await post.save();
+
+    return await Post.findById(postId)
+      .populate('author', 'name email avatar')
+      .populate('likes', 'name');
   },
 
   getAnalytics: async () => {

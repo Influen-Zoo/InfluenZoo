@@ -1,13 +1,15 @@
 import React from 'react';
-import { CheckCircle, Ban, Coins } from 'lucide-react';
+import { CheckCircle, Ban, Coins, Users } from 'lucide-react';
 import LiquidButton from '../common/LiquidButton/LiquidButton';
 
-const UserTable = ({ filteredUsers, handleUserStatus, setCoinEditModal }) => {
+const getCount = (value) => Array.isArray(value) ? value.length : (Number(value) || 0);
+
+const UserTable = ({ filteredUsers, handleUserStatus, setCoinEditModal, setFollowerEditModal }) => {
   return (
     <div className="table-container">
       <table className="table">
         <thead>
-          <tr><th>User</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+          <tr><th>User</th><th>Role</th><th>Followers</th><th>Status</th><th>Moderation</th><th>Growth</th></tr>
         </thead>
         <tbody>
           {filteredUsers.map(u => (
@@ -24,9 +26,10 @@ const UserTable = ({ filteredUsers, handleUserStatus, setCoinEditModal }) => {
                 </div>
               </td>
               <td><span className={`badge ${u.role === 'influencer' ? 'badge-accent' : u.role === 'brand' ? 'badge-primary' : 'badge-warning'}`}>{u.role}</span></td>
+              <td>{getCount(u.followers).toLocaleString('en-IN')}</td>
               <td><span className={`badge ${u.status === 'active' ? 'badge-success' : u.status === 'banned' ? 'badge-danger' : u.status === 'inactive' ? 'badge-paid' : 'badge-warning'}`}>{u.status}</span></td>
               <td>
-                <div style={{ display: 'flex', gap: '0.25rem' }}>
+                <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
                   {u.status !== 'active' && u.role !== 'admin' && (
                     <LiquidButton circular variant="success" onClick={() => handleUserStatus(u.id, 'active')} title="Approve User">
                       <CheckCircle size={20} />
@@ -44,10 +47,23 @@ const UserTable = ({ filteredUsers, handleUserStatus, setCoinEditModal }) => {
                   )}
                 </div>
               </td>
+              <td>
+                  {u.role !== 'admin' && (
+                    <LiquidButton
+                      variant="primary"
+                      title="Add Followers"
+                      onClick={() => setFollowerEditModal({ userId: u._id, name: u.name, currentFollowers: getCount(u.followers) })}
+                      style={{ whiteSpace: 'nowrap', padding: '0.45rem 0.85rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                    >
+                      <Users size={20} />
+                      Add Followers
+                    </LiquidButton>
+                  )}
+              </td>
             </tr>
           ))}
           {filteredUsers.length === 0 && (
-            <tr><td colSpan="4" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No users found matching filters</td></tr>
+            <tr><td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No users found matching filters</td></tr>
           )}
         </tbody>
       </table>

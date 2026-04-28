@@ -5,6 +5,7 @@ import PostFilters from '../../components/admin/PostFilters';
 import PostTable from '../../components/admin/PostTable';
 import PostDetailsModal from '../../components/admin/modals/PostDetailsModal';
 import PostBlockModal from '../../components/admin/modals/PostBlockModal';
+import PostLikesEditModal from '../../components/admin/modals/PostLikesEditModal';
 import usePosts from '../../hooks/admin/usePosts';
 
 export const PostsPage = () => {
@@ -12,7 +13,8 @@ export const PostsPage = () => {
     filteredPosts, stats, loading, toast, withdrawals, campaigns,
     postFilter, setPostFilter, blockingPost, setBlockingPost,
     blockReason, setBlockReason, selectedPost, setSelectedPost,
-    handleBlockPost, handleUnblockPost, statsData
+    likesEditModal, setLikesEditModal,
+    handleBlockPost, handleUnblockPost, handleUpdatePostLikes, statsData
   } = usePosts();
 
   const sidebarItems = [
@@ -49,6 +51,7 @@ export const PostsPage = () => {
             setSelectedPost={setSelectedPost}
             handleUnblockPost={handleUnblockPost}
             setBlockingPost={setBlockingPost}
+            setLikesEditModal={setLikesEditModal}
           />
         )}
 
@@ -63,6 +66,13 @@ export const PostsPage = () => {
           blockReason={blockReason}
           setBlockReason={setBlockReason}
           onConfirm={handleBlockPost}
+        />
+
+        <PostLikesEditModal
+          isOpen={!!likesEditModal}
+          onClose={() => setLikesEditModal(null)}
+          post={likesEditModal}
+          onUpdate={handleUpdatePostLikes}
         />
       </div>
     </AdminLayout>

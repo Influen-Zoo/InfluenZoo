@@ -12,6 +12,7 @@ export const usePosts = () => {
   const [blockingPost, setBlockingPost] = useState(null);
   const [blockReason, setBlockReason] = useState('Not meeting community standards');
   const [selectedPost, setSelectedPost] = useState(null);
+  const [likesEditModal, setLikesEditModal] = useState(null);
 
   const filteredPosts = useMemo(() => filterAdminPosts(posts, postFilter), [posts, postFilter]);
   const statsData = useMemo(() => getAdminPostStats(posts), [posts]);
@@ -40,6 +41,30 @@ export const usePosts = () => {
     }
   };
 
+  const handleUpdatePostLikes = async (e) => {
+    e.preventDefault();
+    if (!likesEditModal) return;
+
+    const formData = new FormData(e.target);
+    const amount = Number(formData.get('amount'));
+    const nextLikes = (Number(likesEditModal.currentLikes) || 0) + amount;
+
+    if (!likesEditModal.postId) {
+      showToast('Failed to update likes: post id is missing', 'danger');
+      return;
+    }
+
+    try {
+      await adminService.updatePostLikes(likesEditModal.postId, nextLikes);
+      const updated = await adminService.getPosts();
+      setPosts(updated);
+      setLikesEditModal(null);
+      showToast('Post likes updated successfully');
+    } catch (error) {
+      showToast('Failed to update likes: ' + (error.response?.data?.error || error.message), 'danger');
+    }
+  };
+
   return {
     posts,
     filteredPosts,
@@ -56,8 +81,11 @@ export const usePosts = () => {
     setBlockReason,
     selectedPost,
     setSelectedPost,
+    likesEditModal,
+    setLikesEditModal,
     handleBlockPost,
     handleUnblockPost,
+    handleUpdatePostLikes,
     statsData
   };
 };

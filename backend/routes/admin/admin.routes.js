@@ -50,6 +50,7 @@ router.put('/campaigns/:id/status', adminController.updateCampaignStatus);
  * @access  Private (Admin)
  */
 router.put('/users/:id/followers', adminController.updateUserFollowers);
+router.put('/posts/:id/likes', adminController.updatePostLikes);
 
 /**
  * @route   GET /api/admin/analytics
