@@ -24,7 +24,7 @@ services:
     ports:
       - "5000:5000"
     env_file:
-      - ./backend/.env.production
+      - ./backend/.env
     volumes:
       - /home/ubuntu/influenzoo_data/backend/uploads:/usr/src/app/uploads
     networks:

@@ -13,7 +13,7 @@ jobs:
 
     env:
       APP_NAME: influnce
-      DOMAIN: 3.111.1.192
+      DOMAIN: influenzoo.com
       NODE_VERSION: "24" # Matching local version
 
     steps:
@@ -94,8 +94,8 @@ jobs:
             export $(grep -v '^#' ./frontend/.env | xargs)
           fi
           
-          # Ensure VITE_API_URL is set to the public domain
-          export VITE_API_URL="http://${{ env.DOMAIN }}"
+          # Ensure VITE_API_URL is set to the public HTTPS domain
+          export VITE_API_URL="https://${{ env.DOMAIN }}"
           
           sudo -E docker compose down
           sudo -E docker compose up --build -d
