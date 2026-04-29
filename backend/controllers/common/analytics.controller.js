@@ -1,6 +1,7 @@
 const Analytics = require('../../models/Analytics');
 const Campaign = require('../../models/Campaign');
 const mongoose = require('mongoose');
+const analyticsAggregationService = require('../../services/common/analyticsAggregation.service');
 
 const analyticsController = {
   getBrandAnalytics: async (req, res) => {
@@ -211,6 +212,124 @@ const analyticsController = {
         }
       });
     } catch (error) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  },
+
+  ingestEvent: async (req, res) => {
+    try {
+      const event = await analyticsAggregationService.recordEvent({
+        ...req.body,
+        actorId: req.userId,
+        actorRole: req.role,
+      });
+
+      res.status(202).json({
+        success: true,
+        data: {
+          eventId: event._id,
+          status: event.status,
+        },
+      });
+    } catch (error) {
+      if (error.name === 'ValidationError') return res.status(400).json({ error: error.message });
+      console.error('ingestEvent error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  },
+
+  runAggregation: async (req, res) => {
+    try {
+      if (req.role !== 'admin') return res.status(403).json({ error: 'Insufficient permissions' });
+      const result = await analyticsAggregationService.aggregateEvents({
+        limit: Number(req.body.limit || req.query.limit || 500),
+      });
+      res.json({ success: true, data: result });
+    } catch (error) {
+      console.error('runAggregation error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  },
+
+  getUserAnalyticsV2: async (req, res) => {
+    try {
+      const data = await analyticsAggregationService.getUserAnalytics({
+        userId: req.params.userId,
+        role: req.query.role,
+        startDate: req.query.startDate,
+        endDate: req.query.endDate,
+        granularity: req.query.granularity,
+      });
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error('getUserAnalyticsV2 error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  },
+
+  getContentAnalyticsV2: async (req, res) => {
+    try {
+      const data = await analyticsAggregationService.getContentAnalytics({
+        contentId: req.params.contentId,
+        contentType: req.params.contentType,
+        startDate: req.query.startDate,
+        endDate: req.query.endDate,
+        granularity: req.query.granularity,
+      });
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error('getContentAnalyticsV2 error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  },
+
+  getAdminDashboardAnalyticsV2: async (req, res) => {
+    try {
+      if (req.role !== 'admin') return res.status(403).json({ error: 'Insufficient permissions' });
+      const data = await analyticsAggregationService.getAdminDashboardAnalytics({
+        entityType: req.query.entityType,
+        entityId: req.query.entityId,
+        contentType: req.query.contentType,
+        contentId: req.query.contentId,
+        startDate: req.query.startDate,
+        endDate: req.query.endDate,
+        granularity: req.query.granularity,
+      });
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error('getAdminDashboardAnalyticsV2 error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  },
+
+  getTrending: async (req, res) => {
+    try {
+      const data = await analyticsAggregationService.getTrendingContent({
+        contentType: req.query.contentType,
+        startDate: req.query.startDate,
+        endDate: req.query.endDate,
+        limit: req.query.limit,
+      });
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error('getTrending error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  },
+
+  getComparison: async (req, res) => {
+    try {
+      const data = await analyticsAggregationService.getPeriodComparison({
+        userId: req.params.userId,
+        role: req.query.role,
+        currentStartDate: req.query.currentStartDate,
+        currentEndDate: req.query.currentEndDate,
+        previousStartDate: req.query.previousStartDate,
+        previousEndDate: req.query.previousEndDate,
+      });
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error('getComparison error:', error);
       res.status(500).json({ error: 'Server error' });
     }
   }

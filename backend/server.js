@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/database');
 const { requestLogger } = require('./middleware/common/logger.middleware');
 const { errorMiddleware, notFoundHandler } = require('./middleware/common/error.middleware');
+const { startAnalyticsWorker, stopAnalyticsWorker } = require('./services/common/analyticsWorker.service');
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
 
 // Connect to database
 connectDB();
+startAnalyticsWorker();
 
 // Middleware
 app.use(cors({
@@ -251,6 +253,7 @@ server.on('error', (err) => {
 // Graceful shutdown - SIGTERM
 process.on('SIGTERM', () => {
   console.log('\n📴 SIGTERM signal received: closing HTTP server');
+  stopAnalyticsWorker();
   if (server) {
     server.close(() => {
       console.log('✅ HTTP server closed');
@@ -264,6 +267,7 @@ process.on('SIGTERM', () => {
 // Graceful shutdown - SIGINT (Ctrl+C)
 process.on('SIGINT', () => {
   console.log('\n📴 SIGINT signal received: closing HTTP server');
+  stopAnalyticsWorker();
   if (server) {
     server.close(() => {
       console.log('✅ HTTP server closed');
