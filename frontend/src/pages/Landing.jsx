@@ -1,54 +1,124 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Moon, Sun } from "lucide-react";
+import {
+  ArrowRight,
+  Briefcase,
+  Camera,
+  CheckCircle,
+  MessageCircle,
+  Moon,
+  Search,
+  Shield,
+  Sparkles,
+  Sun,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import LiquidButton from "../components/common/LiquidButton/LiquidButton";
 import logo from "../assets/influenzoo-logo.png";
-import heroImage from "../assets/hero.png";
+import heroImage from "../assets/hero-marketplace.png";
 import "./Landing.css";
 
-const steps = [
+const flowSteps = [
   {
-    num: "01",
-    title: "Create Your Profile",
-    desc: "Sign up as a brand or influencer and build a profile with your best work, social proof, and collaboration goals.",
+    icon: Camera,
+    label: "Creator Posts",
+    title: "Influencers showcase content",
+    desc: "Creators build their profile with posts, portfolio work, audience proof, and niche signals.",
   },
   {
-    num: "02",
-    title: "Discover and Connect",
-    desc: "Brands post campaigns while creators find opportunities that match their niche, audience, and content style.",
+    icon: Briefcase,
+    label: "Campaign Live",
+    title: "Brands publish campaigns",
+    desc: "Brands define budgets, platforms, deliverables, campaign timelines, and eligibility.",
   },
   {
-    num: "03",
-    title: "Collaborate and Grow",
-    desc: "Apply, chat, deliver content, manage wallet coins, and build long-term partnerships from one place.",
+    icon: Zap,
+    label: "Applications",
+    title: "Influencers apply",
+    desc: "Qualified creators apply with context, pricing, and content ideas for each opportunity.",
+  },
+  {
+    icon: CheckCircle,
+    label: "Selection",
+    title: "Brands select and collaborate",
+    desc: "Teams review creator fit, approve applications, coordinate work, and measure outcomes.",
   },
 ];
 
 const features = [
-  { icon: "Match", title: "Smart Matching", desc: "Find brand and creator fits faster with profile, niche, and campaign signals." },
-  { icon: "Pay", title: "Secure Payments", desc: "Wallet coins and payment workflows keep campaign access and payouts organized." },
-  { icon: "Data", title: "Real Analytics", desc: "Track engagement, campaign performance, posts, and platform activity." },
-  { icon: "Trust", title: "Verified Profiles", desc: "Admin moderation and profile tools help maintain platform quality." },
-  { icon: "Chat", title: "In-App Messaging", desc: "Brands and creators can coordinate campaign details without leaving the app." },
-  { icon: "AI", title: "AI Assistance", desc: "Use AI-powered helpers for bios, scripts, content ideas, and campaign communication." },
+  {
+    icon: Briefcase,
+    title: "Campaign Management",
+    desc: "Create, price, publish, review, and manage campaign applications from a single workflow.",
+  },
+  {
+    icon: Search,
+    title: "Influencer Discovery",
+    desc: "Find creators by niche, content style, audience size, social footprint, and platform fit.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Performance Tracking",
+    desc: "Track posts, engagement, clicks, wallet activity, and campaign momentum through analytics.",
+  },
+  {
+    icon: MessageCircle,
+    title: "Collaboration Tools",
+    desc: "Keep brand and creator coordination moving with messaging, approvals, and profile context.",
+  },
+];
+
+const showcaseItems = [
+  {
+    type: "Creator Post",
+    title: "Travel reel concept for boutique stays",
+    meta: "42K reach - 8.4% engagement",
+    tag: "Influencer",
+  },
+  {
+    type: "Brand Campaign",
+    title: "Skincare launch with micro-creators",
+    meta: "INR 75K budget - 18 applicants",
+    tag: "Campaign",
+  },
+  {
+    type: "Creator Post",
+    title: "Tech unboxing with conversion CTA",
+    meta: "91K reach - 312 saves",
+    tag: "Content",
+  },
+  {
+    type: "Brand Campaign",
+    title: "Cafe opening weekend creator drive",
+    meta: "Barter + paid - 9 shortlisted",
+    tag: "Collab",
+  },
+];
+
+const proofStats = [
+  { value: "2,500+", label: "Active creators" },
+  { value: "800+", label: "Brands onboarded" },
+  { value: "4.2Cr", label: "Creator payouts" },
+  { value: "12K+", label: "Campaign actions" },
 ];
 
 const testimonials = [
   {
-    text: "InfluenZoo helped me land my first paid brand deal within a week. The workflow is clear and the brand quality is strong.",
+    text: "InfluenZoo helped me move from scattered DMs to a real creator workflow. I can show proof, apply faster, and track every opportunity.",
     name: "Priya Sharma",
-    role: "Lifestyle Creator - 125K followers",
+    role: "Lifestyle Creator",
   },
   {
-    text: "We found the right micro creators for our product launch and tracked the campaign from one dashboard.",
+    text: "We launched with creators in three niches and reviewed every application from one place. It feels built for campaign teams.",
     name: "NovaSkin Cosmetics",
     role: "Beauty Brand",
   },
   {
-    text: "The analytics and wallet flow make influencer collaborations easier to manage than spreadsheets and DMs.",
+    text: "The platform makes collaborations feel structured without slowing down the creator side. The wallet and analytics flow is clear.",
     name: "Arjun Mehta",
-    role: "Tech Creator - 89K followers",
+    role: "Tech Creator",
   },
 ];
 
@@ -62,6 +132,29 @@ export default function Landing() {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    const elements = document.querySelectorAll(".landing-reveal");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add("is-visible");
+        });
+      },
+      { threshold: 0.14 }
+    );
+
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
+
+  const handleGlowMove = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    event.currentTarget.style.setProperty("--glow-x", `${event.clientX - rect.left}px`);
+    event.currentTarget.style.setProperty("--glow-y", `${event.clientY - rect.top}px`);
+  };
+
+  const goSignup = () => navigate("/auth?mode=signup");
 
   return (
     <div className="landing" data-theme={theme}>
@@ -77,7 +170,8 @@ export default function Landing() {
           <div className="landing-nav-links">
             <a href="#how-it-works">How It Works</a>
             <a href="#features">Features</a>
-            <a href="#testimonials">Testimonials</a>
+            <a href="#showcase">Showcase</a>
+            <a href="#testimonials">Proof</a>
           </div>
 
           <div className="landing-auth-buttons">
@@ -92,101 +186,162 @@ export default function Landing() {
             <LiquidButton variant="primary" size="small" onClick={() => navigate("/auth")}>
               Log in
             </LiquidButton>
-            <LiquidButton variant="primary" size="small" onClick={() => navigate("/auth?mode=signup")}>
+            <LiquidButton variant="primary" size="small" onClick={goSignup}>
               Get Started
             </LiquidButton>
           </div>
         </div>
       </nav>
 
-      <section
-        className="hero"
-        style={{ backgroundImage: `linear-gradient(180deg, rgba(4, 12, 22, 0.58), rgba(4, 12, 22, 0.9)), url(${heroImage})` }}
-      >
-        <div className="hero-content">
-          <div className="hero-badge">
-            <span className="dot" />
-            <span>Trusted by brands and creators across India</span>
-          </div>
-          <h1>
-            Where Brands Meet
-            <br />
-            <span className="gradient-text">Top Creators</span>
-          </h1>
-          <p>
-            Launch campaigns, discover talent, manage wallet coins, track engagement, and build creator partnerships from a focused collaboration platform.
-          </p>
-          <div className="hero-cta">
-            <LiquidButton variant="primary" onClick={() => navigate("/auth?mode=signup")}>
-              Start Free Today
-            </LiquidButton>
-            <LiquidButton
-              variant="secondary"
-              onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
-            >
-              See how it works
-            </LiquidButton>
-          </div>
-          <div className="hero-stats">
-            <div className="hero-stat">
-              <div className="hero-stat-value">2,500+</div>
-              <div className="hero-stat-label">Active Creators</div>
+      <section className="hero">
+        <div className="hero-media" aria-hidden="true" style={{ backgroundImage: `url(${heroImage})` }} />
+        <div className="hero-grid">
+          <div className="hero-content landing-reveal">
+            <div className="hero-badge">
+              <span className="dot" />
+              <span>Premium influencer marketplace for India</span>
             </div>
-            <div className="hero-stat">
-              <div className="hero-stat-value">800+</div>
-              <div className="hero-stat-label">Brands</div>
+            <h1>
+              Build creator campaigns that move
+              <span className="gradient-text"> from discovery to delivery</span>
+            </h1>
+            <p>
+              InfluenZoo connects brands and influencers with posts, campaigns, applications, selection tools, wallet flows, and analytics in one polished marketplace.
+            </p>
+            <div className="hero-cta">
+              <LiquidButton variant="primary" onClick={goSignup}>
+                Join as Influencer <ArrowRight size={18} />
+              </LiquidButton>
+              <LiquidButton variant="secondary" onClick={goSignup}>
+                Start Campaign <Briefcase size={18} />
+              </LiquidButton>
             </div>
-            <div className="hero-stat">
-              <div className="hero-stat-value">INR 4.2Cr</div>
-              <div className="hero-stat-label">Creator Payouts</div>
+            <div className="hero-trust-row">
+              <span><Shield size={16} /> Verified profiles</span>
+              <span><Sparkles size={16} /> AI-assisted content</span>
+              <span><TrendingUp size={16} /> Live performance signals</span>
+            </div>
+          </div>
+
+          <div className="hero-action-panel hero-signal-panel landing-glow-card landing-reveal" onPointerMove={handleGlowMove}>
+            <div className="panel-header">
+              <span className="panel-status" />
+              <span>Creator signals</span>
+            </div>
+            <div className="signal-list">
+              <div className="signal-row">
+                <div className="signal-icon"><Camera size={18} /></div>
+                <div className="signal-copy">
+                  <strong>128 posts</strong>
+                  <span>Creator content ready for campaigns</span>
+                </div>
+              </div>
+              <div className="signal-row">
+                <div className="signal-icon"><TrendingUp size={18} /></div>
+                <div className="signal-copy">
+                  <strong>42K views</strong>
+                  <span>Reach across showcase posts</span>
+                </div>
+              </div>
+              <div className="signal-row">
+                <div className="signal-icon"><MessageCircle size={18} /></div>
+                <div className="signal-copy">
+                  <strong>8.4% engagement</strong>
+                  <span>Likes, comments, and saves</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="how-it-works" className="how-it-works">
-        <div className="section-header">
-          <div className="overline">Simple Process</div>
-          <h2>How InfluenZoo Works</h2>
-          <p>Get started in minutes whether you are building campaigns or applying to them.</p>
+      <section id="how-it-works" className="how-it-works landing-section">
+        <div className="section-header landing-reveal">
+          <div className="overline">Marketplace Flow</div>
+          <h2>One flow for creators and brands</h2>
+          <p>Every step explains how content, campaigns, applications, and selection come together inside InfluenZoo.</p>
         </div>
-        <div className="steps-grid">
-          {steps.map((step) => (
-            <div className="step-card" key={step.num}>
-              <div className="step-number">{step.num}</div>
-              <h3>{step.title}</h3>
-              <p>{step.desc}</p>
-            </div>
-          ))}
+        <div className="flow-track landing-reveal">
+          {flowSteps.map((step, index) => {
+            const Icon = step.icon;
+            return (
+              <div className="flow-step landing-glow-card" onPointerMove={handleGlowMove} style={{ "--step": index }} key={step.title}>
+                <div className="flow-index">{String(index + 1).padStart(2, "0")}</div>
+                <div className="flow-icon"><Icon size={22} /></div>
+                <span>{step.label}</span>
+                <h3>{step.title}</h3>
+                <p>{step.desc}</p>
+              </div>
+            );
+          })}
         </div>
       </section>
 
-      <section id="features" className="features-section">
-        <div className="section-header">
-          <div className="overline">Why InfluenZoo</div>
-          <h2>Built for Serious Collaboration</h2>
-          <p>Every feature is designed to make brand-influencer partnerships easier to run and measure.</p>
+      <section id="features" className="features-section landing-section">
+        <div className="section-header landing-reveal">
+          <div className="overline">Platform Power</div>
+          <h2>Built for serious collaboration</h2>
+          <p>Modern workflows for brands that need control and influencers that need opportunity.</p>
         </div>
         <div className="features-grid">
-          {features.map((feature) => (
-            <div className="feature-card" key={feature.title}>
-              <div className="feature-icon">{feature.icon}</div>
-              <h4>{feature.title}</h4>
-              <p>{feature.desc}</p>
-            </div>
-          ))}
+          {features.map((feature, index) => {
+            const Icon = feature.icon;
+            return (
+              <div className="feature-card landing-glow-card landing-reveal" onPointerMove={handleGlowMove} style={{ "--delay": `${index * 80}ms` }} key={feature.title}>
+                <div className="feature-icon"><Icon size={22} /></div>
+                <h4>{feature.title}</h4>
+                <p>{feature.desc}</p>
+                <span className="feature-link">Explore workflow <ArrowRight size={14} /></span>
+              </div>
+            );
+          })}
         </div>
       </section>
 
-      <section id="testimonials" className="testimonials">
-        <div className="section-header">
-          <div className="overline">Testimonials</div>
-          <h2>Loved by Creators and Brands</h2>
-          <p>Real workflows for creator discovery, campaign execution, and performance tracking.</p>
+      <section id="showcase" className="showcase-section landing-section">
+        <div className="showcase-layout">
+          <div className="section-header showcase-copy landing-reveal">
+            <div className="overline">Showcase Preview</div>
+            <h2>Content and campaigns feel alive before users sign in</h2>
+            <p>Use the homepage to show the product promise: creators publish sharp content, brands launch campaigns, and both sides move faster.</p>
+            <LiquidButton variant="secondary" onClick={() => document.getElementById("testimonials")?.scrollIntoView({ behavior: "smooth" })}>
+              View social proof
+            </LiquidButton>
+          </div>
+          <div className="showcase-grid landing-reveal">
+            {showcaseItems.map((item) => (
+              <article className="showcase-card landing-glow-card" onPointerMove={handleGlowMove} key={item.title}>
+                <div className="showcase-image">
+                  <span>{item.tag}</span>
+                </div>
+                <div className="showcase-card-body">
+                  <div className="preview-label">{item.type}</div>
+                  <h3>{item.title}</h3>
+                  <p>{item.meta}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="testimonials" className="testimonials landing-section">
+        <div className="section-header landing-reveal">
+          <div className="overline">Social Proof</div>
+          <h2>Designed to earn trust quickly</h2>
+          <p>Premium presentation, operational clarity, and conversion-focused journeys for both sides of the marketplace.</p>
+        </div>
+        <div className="proof-grid landing-reveal">
+          {proofStats.map((stat) => (
+            <div className="proof-stat landing-glow-card" onPointerMove={handleGlowMove} key={stat.label}>
+              <strong>{stat.value}</strong>
+              <span>{stat.label}</span>
+            </div>
+          ))}
         </div>
         <div className="testimonial-grid">
-          {testimonials.map((testimonial) => (
-            <div className="testimonial-card" key={testimonial.name}>
+          {testimonials.map((testimonial, index) => (
+            <div className="testimonial-card landing-glow-card landing-reveal" onPointerMove={handleGlowMove} style={{ "--delay": `${index * 80}ms` }} key={testimonial.name}>
               <div className="testimonial-stars">*****</div>
               <p className="testimonial-text">"{testimonial.text}"</p>
               <div className="testimonial-author">
@@ -201,13 +356,19 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="cta-section">
-        <div className="cta-content">
-          <h2>Ready to Grow?</h2>
-          <p>Join brands and creators already managing collaborations on InfluenZoo.</p>
-          <LiquidButton variant="primary" onClick={() => navigate("/auth?mode=signup")}>
-            Create Free Account
-          </LiquidButton>
+      <section className="cta-section landing-section">
+        <div className="cta-content landing-glow-card landing-reveal" onPointerMove={handleGlowMove}>
+          <div className="overline">Start Building</div>
+          <h2>Turn creator discovery into measurable campaigns</h2>
+          <p>Join InfluenZoo to showcase content, launch campaigns, review applications, select collaborators, and track outcomes.</p>
+          <div className="hero-cta">
+            <LiquidButton variant="primary" onClick={goSignup}>
+              Create Free Account <ArrowRight size={18} />
+            </LiquidButton>
+            <LiquidButton variant="secondary" onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}>
+              See the flow
+            </LiquidButton>
+          </div>
         </div>
       </section>
 

@@ -160,18 +160,30 @@ export default function CampaignCard({ campaign, applied, onApply, saved, onSave
             </div>
           </div>
 
-          {!applied ? (
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
             <button 
-              onClick={handleApplyClick}
-              style={{ padding: '0.5rem 1.25rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-pill)', fontWeight: '600', cursor: 'pointer' }}
+              onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}
+              style={{ padding: '0.5rem 1.25rem', background: 'var(--surface-alt)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-pill)', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-light)'; e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'var(--accent-light)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface-alt)'; e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
             >
-              Apply Now
+              Collab
             </button>
-          ) : (
-             <span style={{ padding: '0.5rem 1rem', background: 'var(--success)', color: 'white', borderRadius: 'var(--radius-pill)', fontSize: '0.875rem', fontWeight: '600' }}>
-               ✓ Applied
-             </span>
-          )}
+            {!applied ? (
+              <button 
+                onClick={handleApplyClick}
+                style={{ padding: '0.5rem 1.25rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-pill)', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.3)' }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                Apply Now
+              </button>
+            ) : (
+               <span style={{ padding: '0.5rem 1rem', background: 'var(--success)', color: 'white', borderRadius: 'var(--radius-pill)', fontSize: '0.875rem', fontWeight: '600' }}>
+                 ✓ Applied
+               </span>
+            )}
+          </div>
       </div>
 
       {/* Social Engagement Section - Matching Image */}
