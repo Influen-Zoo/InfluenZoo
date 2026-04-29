@@ -159,11 +159,13 @@ const userController = {
       if (
         error.message.includes('required to fetch') ||
         error.message.includes('Unable to fetch') ||
+        error.message.includes('Unable to count') ||
         error.message.includes('Unable to find') ||
         error.message === 'Social account identifier is required'
       ) {
         return res.status(400).json({ error: error.message });
       }
+      console.error('Social media connect failed:', error);
       res.status(500).json({ error: 'Server error' });
     }
   },

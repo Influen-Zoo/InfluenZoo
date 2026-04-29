@@ -2,6 +2,36 @@
 
 This guide explains how to set up YouTube, Instagram, and Facebook API access so the app can automatically fetch social account counts when a user connects an account from the profile page.
 
+---
+
+## 🐣 Beginner's Guide: How to Setup & Fetch Data (Layman's Terms)
+
+If you are new to this, don't worry! Here is the "Big Picture" of how we get social media numbers (like followers) into the app.
+
+### 1. The Big Picture
+Social media companies (Google/Meta) don't just let anyone see private data. You need a **"Secret Key"** (called an API Key) to ask them for information. 
+1. You create a developer account on Google/Meta.
+2. You get your **Secret Keys**.
+3. You paste those keys into your app's hidden settings file (`.env`).
+4. Once the keys are in, your users can click "Connect" in the app, and the app will automatically go and get their follower counts.
+
+### 2. The 3 Steps to Success
+Follow these three main milestones:
+
+*   **Phase A: YouTube (Google)** - Easiest to start with. You'll create a project in "Google Cloud Console" and get a "Client ID".
+*   **Phase B: Instagram & Facebook (Meta)** - A bit more complex. You need a "Meta for Developers" account and a Facebook "Business" page to act as the bridge.
+*   **Phase C: The Secret Settings (.env)** - This is where you paste all your keys. Think of it as the "Brain" of your app where all the passwords live.
+
+### 3. How to Test If It's Working
+Once you have put your keys in the `backend/.env` file:
+1. **Restart the App**: In your terminal, run `docker compose restart backend`.
+2. **Log In as a User**: Open the app and log in to any account (or create a new one).
+3. **Go to Profile**: Click on your profile name/icon.
+4. **Click "Add Social Account"**: Choose a platform (like Instagram) and type in a username (e.g., `@cristiano`).
+5. **Watch the Magic**: If the keys are correct, the app will spin for a second and then show the exact follower count it fetched from the API!
+
+---
+
 ## What The App Fetches
 
 The app stores these values in `User.socialMediaAccounts`:
@@ -209,137 +239,66 @@ Important:
 - Public subscriber count from YouTube Data API is rounded by YouTube.
 - Use YouTube Data API v3 for this feature. YouTube Analytics API is for private analytics reports like views/watch time/subscribers gained over time. YouTube Reporting API is for bulk reporting jobs and is overkill here.
 
-## Instagram API Setup
+## Instagram API Setup (The "Business Discovery" Method)
 
-Use this for Instagram followers count and post count.
+Instagram is the most protective platform. You **cannot** just use a simple password to get data. Instead, we use a method called "Business Discovery." 
 
-Instagram public account stats are not available with a simple API key. Meta requires an app, a Facebook Page, an Instagram Business or Creator account, and an access token.
+**Think of it like this:** You (the admin) create a "Business Bridge" using your own account. Once the bridge is built, the app can look up any public Instagram user's follower count.
 
-The backend uses Meta Graph API Business Discovery:
+### Phase 1: The Setup (Prerequisites)
+Before you touch any code, you need these 3 things connected:
+1.  **Instagram Business/Creator Account**: Go to your Instagram App > Settings > Account Type > Switch to Professional Account. (Personal accounts will not work).
+2.  **A Facebook Page**: You must have a Facebook Page (it can be empty).
+3.  **The Link**: Go to your Facebook Page > Settings > Linked Accounts > Connect your Instagram account there.
 
-```text
-GET https://graph.facebook.com/v19.0/{INSTAGRAM_BUSINESS_ACCOUNT_ID}
-  ?fields=business_discovery.username({targetUsername}){id,username,name,followers_count,media_count}
-  &access_token={META_ACCESS_TOKEN}
+### Phase 2: Create your Meta "App"
+1.  Go to the [Meta for Developers](https://developers.facebook.com/) site and log in.
+2.  Click **My Apps** > **Create App**.
+3.  Choose **"Other"** or **"Business"** as the use case.
+4.  Give it a name like `InfluenZoo Data Fetcher`.
+5.  Once created, look at the left sidebar and click **Add Product**. Find **"Instagram Graph API"** and click **Set Up**.
+
+### Phase 3: Generate your Secret Token
+This is the "Password" your backend will use.
+1.  Open the [Graph API Explorer](https://developers.facebook.com/tools/explorer/).
+2.  In the top right dropdown, select the **App** you just created.
+3.  Under **Permissions**, add these four (IMPORTANT):
+    *   `instagram_basic`
+    *   `instagram_manage_insights`
+    *   `pages_read_engagement`
+    *   `pages_show_list`
+4.  Click **Generate Access Token**. Follow the popups to log in and select your Page.
+5.  **Copy the Token**: This is a short-lived token. To make it permanent, you usually need to use the [Access Token Tool](https://developers.facebook.com/tools/accesstoken/).
+
+### Phase 4: Get your ID and Token into the App
+You need two values for your `.env` file:
+
+**1. The Instagram Business ID**:
+In the Graph API Explorer, type this in the top bar and click Submit:
+`me?fields=accounts{instagram_business_account}`
+This will show a long number. **That is your `INSTAGRAM_BUSINESS_ACCOUNT_ID`**.
+
+**2. The Access Token**:
+Copy the long string of letters and numbers you generated in Phase 3. **That is your `META_ACCESS_TOKEN`**.
+
+Add them to `backend/.env`:
+```env
+META_ACCESS_TOKEN=your_long_token_here
+INSTAGRAM_BUSINESS_ACCOUNT_ID=your_id_number_here
 ```
 
-Official docs:
+### What Users Can Enter
+Once setup is complete, users just type their handle in the app:
+*   `@cristiano` or `cristiano` or the full URL `https://instagram.com/cristiano`
 
-- Instagram Graph API: https://developers.facebook.com/docs/instagram-api/
-- Business Discovery: https://developers.facebook.com/docs/instagram-api/guides/business-discovery/
-
-### Before You Start
-
-You need:
-
-- A Facebook account
-- A Meta Developer account
-- A Facebook Page
-- An Instagram Business or Creator account connected to that Facebook Page
-- A Meta app
-- A Meta access token
-
-Personal Instagram accounts will not work for this API flow.
-
-### Step-by-step
-
-1. Convert your Instagram account to Business or Creator:
-
-   ```text
-   Instagram app > Settings and privacy > Account type and tools
-   ```
-
-2. Create or use a Facebook Page.
-
-3. Connect the Instagram account to the Facebook Page:
-
-   ```text
-   Facebook Page settings > Linked accounts > Instagram
-   ```
-
-4. Go to Meta for Developers:
-
-   ```text
-   https://developers.facebook.com/
-   ```
-
-5. Create a Meta app:
-
-   ```text
-   My Apps > Create App
-   ```
-
-6. Choose an app type suitable for your use case. For most dashboard/server API testing, choose a business-style app if available in your Meta account.
-
-7. Add products/features needed for Instagram Graph API access.
-
-8. Open Graph API Explorer:
-
-   ```text
-   https://developers.facebook.com/tools/explorer/
-   ```
-
-9. Select your Meta app from the app dropdown.
-
-10. Generate a user access token with permissions such as:
-
-   ```text
-   instagram_basic
-   instagram_manage_insights
-   pages_read_engagement
-   pages_show_list
-   ```
-
-   Meta may show slightly different permission names depending on app mode and product setup.
-
-11. Use the token to list your Facebook Pages:
-
-   ```text
-   GET /me/accounts
-   ```
+### Important Limitations
+*   **Public Only**: The API can only see Public accounts.
+*   **Business/Creator Only**: The API can only see accounts that have switched to "Professional" mode in their Instagram settings.
+*   **App Review**: While you are testing, it works for you. Before you launch to thousands of people, Meta requires an "App Review" (this is a separate process on their site).
 
 12. Find the Facebook Page connected to your Instagram Business/Creator account.
 
-13. Get the Instagram Business Account ID from that Page:
 
-   ```text
-   GET /{page-id}?fields=instagram_business_account
-   ```
-
-14. Copy:
-
-   - the access token
-   - the Instagram Business Account ID
-
-15. Add them to `backend/.env`:
-
-   ```env
-   META_ACCESS_TOKEN=EAAB...
-   INSTAGRAM_BUSINESS_ACCOUNT_ID=1784...
-   ```
-
-16. Restart the backend.
-
-### What Users Can Enter
-
-The app can look up Instagram by:
-
-- Account URL: `https://instagram.com/username`
-- Username/handle: `username` or `@username`
-
-### What Gets Saved
-
-- Instagram `followers_count` -> saved as `followers`
-- Instagram `media_count` -> saved as count of `posts`
-- Instagram `username` / `name` -> saved as `accountName`
-- Instagram `id` -> saved as `accountId`
-
-### Important Instagram Limitations
-
-- Target accounts should be public Business or Creator accounts.
-- Private accounts will not work.
-- Personal Instagram accounts usually will not work.
-- For production users, Meta may require app review before data can be fetched reliably outside developer/test users.
 
 ## Facebook API Setup
 

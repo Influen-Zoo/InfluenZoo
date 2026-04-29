@@ -11,6 +11,12 @@ import './UserProfile.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+const formatCompactCount = (value) => {
+  const count = Number(value) || 0;
+  if (count < 1000) return String(count);
+  return `${(count / 1000).toFixed(1)}K`;
+};
+
 export default function UserProfile({ forcedUserId = null, embedded = false, onEditProfile = null }) {
   const params = useParams();
   const userId = forcedUserId || params.userId;
@@ -363,7 +369,7 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
                   <h1>{profile.name} {profile.username ? `(${profile.username})` : ''}</h1>
                 </div>
                 <div className="profile-stats-inline">
-                  {stats?.followersCount >= 1000 ? (stats.followersCount / 1000).toFixed(1) + 'K' : (stats?.followersCount || 0)} followers • {stats?.postsCount || 0} posts • {stats?.followingCount >= 1000 ? (stats.followingCount / 1000).toFixed(1) + 'K' : (stats?.followingCount || 0)} following
+                  {formatCompactCount(stats?.followersCount)} followers • {formatCompactCount(stats?.postsCount)} posts • {formatCompactCount(stats?.followingCount)} following
                 </div>
                 
                 {profile.role ? <div style={{ fontSize: '1rem', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '0.5rem', textTransform: 'capitalize' }}>{profile.role}{profile.category ? ` || ${profile.category}` : ''}</div> : null}
@@ -455,11 +461,11 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
                         <span className="stat-label">
                           {account.platform === 'youtube' ? 'Subscribers' : 'Followers'}
                         </span>
-                        <span className="stat-value">{(audienceCount / 1000).toFixed(1)}K</span>
+                        <span className="stat-value">{formatCompactCount(audienceCount)}</span>
                       </div>
                       <div className="account-stat">
                         <span className="stat-label">{account.platform === 'youtube' ? 'Videos' : 'Posts'}</span>
-                        <span className="stat-value">{account.platform === 'youtube' ? account.videos : account.posts}</span>
+                        <span className="stat-value">{formatCompactCount(account.platform === 'youtube' ? account.videos : account.posts)}</span>
                       </div>
                     </div>
 
