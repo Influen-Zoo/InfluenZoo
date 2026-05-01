@@ -30,6 +30,27 @@ const brandLogoUpload = multer({
   },
 });
 
+const badgeIconStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = 'uploads/badges/';
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const safeName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '-');
+    cb(null, `${Date.now()}-${safeName}`);
+  },
+});
+
+const badgeIconUpload = multer({
+  storage: badgeIconStorage,
+  limits: { fileSize: 1 * 1024 * 1024 }, // 1MB for badges
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only image files are allowed for badges'));
+  },
+});
+
 const trimBrandLogo = async (req, res, next) => {
   if (!req.file) return next();
 
@@ -196,5 +217,19 @@ router.put('/campaigns/:id/block', adminController.blockCampaign);
 router.put('/campaigns/:id/unblock', adminController.unblockCampaign);
 
 router.get('/campaigns/:id/applications', adminController.getCampaignApplications);
+
+/**
+ * Badge Routes
+ */
+router.get('/badges', adminController.getBadges);
+router.post('/badges', badgeIconUpload.single('icon'), adminController.createBadge);
+router.put('/badges/:id', badgeIconUpload.single('icon'), adminController.updateBadge);
+router.delete('/badges/:id', adminController.deleteBadge);
+
+/**
+ * User Badge Assignment
+ */
+router.post('/users/:userId/badges/:badgeId', adminController.assignBadge);
+router.delete('/users/:userId/badges/:badgeId', adminController.removeBadge);
 
 module.exports = router;

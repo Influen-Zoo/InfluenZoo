@@ -31,6 +31,7 @@ import AdminDisputes from './pages/admin/DisputesPage'
 import AdminWithdrawals from './pages/admin/WithdrawalsPage'
 import AdminProfile from './pages/admin/AdminProfilePage'
 import AdminBrandLogos from './pages/admin/BrandLogosPage'
+import AdminBadges from './pages/admin/BadgesPage'
 
 
 function ProtectedRoute({ children, roles }) {
@@ -107,6 +108,7 @@ export default function App() {
             <Route path="campaigns" element={<AdminCampaigns />} />
             <Route path="posts" element={<AdminPosts />} />
             <Route path="brand-logos" element={<AdminBrandLogos />} />
+            <Route path="badges" element={<AdminBadges />} />
             <Route path="fee-structure" element={<AdminFees />} />
             <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="disputes" element={<AdminDisputes />} />

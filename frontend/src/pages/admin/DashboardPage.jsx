@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
 import AdminOverview from '../../components/admin/AdminOverview';
+import { getAdminSidebarItems } from '../../constants/adminSidebarItems';
 import useAdminDashboard from '../../hooks/admin/useAdminDashboard';
 
 export const DashboardPage = () => {
@@ -8,18 +9,7 @@ export const DashboardPage = () => {
     stats, loading, toast, withdrawals, campaigns, posts 
   } = useAdminDashboard();
 
-  // sidebarItems definition moved here or to a constant
-  const sidebarItems = [
-    { key: 'overview', icon: '📊', label: 'Overview' },
-    { key: 'withdrawals', icon: '🏦', label: 'Withdrawals', badge: withdrawals.length || undefined },
-    { key: 'users', icon: '👥', label: 'Users', badge: Number(stats?.totalUsers) || 0 },
-    { key: 'campaigns', icon: '📢', label: 'Campaigns', badge: campaigns.length || 0 },
-    { key: 'posts', icon: '📸', label: 'Posts', badge: posts.length || 0 },
-    { key: 'brand-logos', icon: 'B', label: 'Brand Logos' },
-    { key: 'fee-structure', icon: '💰', label: 'Fee Structure' },
-    { key: 'analytics', icon: '📈', label: 'Analytics' },
-    { key: 'disputes', icon: '⚖️', label: 'Disputes', badge: Number(stats?.openDisputes) || 0 },
-  ];
+  const sidebarItems = getAdminSidebarItems({ stats, withdrawals, campaigns, posts });
 
   const [activeSection, setActiveSection] = useState('overview');
 

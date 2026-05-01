@@ -6,6 +6,7 @@ import { useTheme } from '../context/ThemeContext';
 import api from '../services/api';
 import LiquidButton from '../components/common/LiquidButton/LiquidButton';
 import BrandProfile from './brand/BrandProfile';
+import UserBadge from '../components/common/UserBadge/UserBadge';
 import { normalizeProfile } from '../features/common/profileNormalizer';
 import './UserProfile.css';
 
@@ -365,13 +366,17 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
               </div>
 
               <div className="profile-header-info">
-                <div className="header-name-section">
+                <div className="header-name-section" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <h1>{profile.name} {profile.username ? `(${profile.username})` : ''}</h1>
+                  <div className="profile-badges" style={{ display: 'flex', gap: '4px' }}>
+                    {profile.badges?.map(badge => (
+                      <UserBadge key={badge._id} badge={badge} />
+                    ))}
+                  </div>
                 </div>
                 <div className="profile-stats-inline">
                   {formatCompactCount(stats?.followersCount)} followers • {formatCompactCount(stats?.postsCount)} posts • {formatCompactCount(stats?.followingCount)} following
                 </div>
-                
                 {profile.role ? <div style={{ fontSize: '1rem', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '0.5rem', textTransform: 'capitalize' }}>{profile.role}{profile.category ? ` || ${profile.category}` : ''}</div> : null}
                 <div className="profile-actions">
                   {!isOwnProfile && (

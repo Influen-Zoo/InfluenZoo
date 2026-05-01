@@ -1,5 +1,6 @@
 import React from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
+import { getAdminSidebarItems } from '../../constants/adminSidebarItems';
 import PostStats from '../../components/admin/PostStats';
 import PostFilters from '../../components/admin/PostFilters';
 import PostTable from '../../components/admin/PostTable';
@@ -17,17 +18,7 @@ export const PostsPage = () => {
     handleBlockPost, handleUnblockPost, handleUpdatePostLikes, statsData
   } = usePosts();
 
-  const sidebarItems = [
-    { key: 'overview', icon: '📊', label: 'Overview' },
-    { key: 'withdrawals', icon: '🏦', label: 'Withdrawals', badge: withdrawals.length || undefined },
-    { key: 'users', icon: '👥', label: 'Users', badge: Number(stats?.totalUsers) || 0 },
-    { key: 'campaigns', icon: '📢', label: 'Campaigns', badge: campaigns.length || 0 },
-    { key: 'posts', icon: '📸', label: 'Posts', badge: filteredPosts.length || 0 },
-    { key: 'brand-logos', icon: 'B', label: 'Brand Logos' },
-    { key: 'fee-structure', icon: '💰', label: 'Fee Structure' },
-    { key: 'analytics', icon: '📈', label: 'Analytics' },
-    { key: 'disputes', icon: '⚖️', label: 'Disputes', badge: Number(stats?.openDisputes) || 0 },
-  ];
+  const sidebarItems = getAdminSidebarItems({ stats, withdrawals, campaigns, posts: filteredPosts });
 
   return (
     <AdminLayout 

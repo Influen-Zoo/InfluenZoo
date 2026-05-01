@@ -245,7 +245,7 @@
   min-height: 96vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: 7.5rem 1.25rem 2rem;
   overflow: visible;
@@ -255,7 +255,7 @@
   .hero {
     margin-bottom: 4rem;
     align-items: flex-start;
-    padding-left: 3rem;
+    padding-left: 10rem;
     padding-right: 3rem;
   }
 }
@@ -278,18 +278,14 @@
   position: relative;
   z-index: 1;
   width: min(100%, var(--max-width));
-  margin: 0 auto;
+  margin: 0;
   display: grid;
   grid-template-columns: minmax(0, 0.94fr) minmax(230px, 0.32fr);
   align-items: center;
   gap: clamp(1.5rem, 3vw, 3rem);
 }
 
-@media (min-width: 761px) {
-  .hero-grid {
-    transform: translateX(-30rem);
-  }
-}
+
 
 .hero-content {
   color: #fff;
@@ -431,16 +427,7 @@
   width: 100%;
 }
 
-@media (min-width: 761px) {
-  .brand-logo-strip {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    transform: translateY(50%);
-  }
-}
+
 
 .brand-logo-strip-mobile {
   display: none;
@@ -1503,9 +1490,10 @@
   }
 
   .hero {
-    min-height: auto;
-    display: block;
-    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 6.5rem 0 0;
     overflow: visible;
   }
 
@@ -1542,7 +1530,7 @@
   }
 
   .hero-grid {
-    padding: 0 0.95rem;
+    padding: 0 1.5rem;
     gap: 1.4rem;
   }
 
@@ -1596,8 +1584,8 @@
   .hero-action-panel {
     width: 100%;
     max-width: 340px;
-    justify-self: center;
-    margin: 0 auto;
+    justify-self: flex-start;
+    margin: 0;
   }
 
   .hero h1 {
@@ -1630,12 +1618,12 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.5rem;
     align-items: stretch;
-    text-align: center;
+    text-align: left;
   }
 
   .hero-trust-row span {
     min-width: 0;
-    justify-content: center;
+    justify-content: flex-start;
     flex-direction: column;
     gap: 0.28rem;
     padding: 0.65rem 0.35rem;

@@ -47,7 +47,7 @@
 /* 💧 THE DROPLET */
 .curved-navbar-droplet {
   position: absolute;
-  top: 12x;
+  top: 20px;
   width: 58px;
   height: 58px;
   z-index: 30;
@@ -207,7 +207,7 @@
   .curved-navbar-droplet {
     width: 60px;
     height: 60px;
-    top: -10px;
+    top: 5px;
   }
   
   .droplet-label {

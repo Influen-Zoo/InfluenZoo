@@ -33,7 +33,7 @@ app.use('/api/auth', require('./routes/auth/auth.routes'));
 app.use('/api/brand', require('./routes/brand/brand.routes'));
 app.use('/api/influencer', require('./routes/influencer/influencer.routes'));
 app.use('/api/users', require('./routes/common/user.routes'));
-app.use('/api/admin', require('./routes/admin/admin.routes'));
+app.use('/api/admin', require('./routes/admin/admin.routes')); // Badge routes included here
 app.use('/api/admin/wallet', require('./routes/admin/wallet.admin.routes'));
 app.use('/api/chatbot', require('./routes/common/chatbot.routes'));
 app.use('/api/brand-logos', require('./routes/common/brandLogo.routes'));

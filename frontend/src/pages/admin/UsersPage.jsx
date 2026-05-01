@@ -3,8 +3,10 @@ import AdminLayout from '../../components/layout/AdminLayout';
 import UserStats from '../../components/admin/UserStats';
 import UserFilters from '../../components/admin/UserFilters';
 import UserTable from '../../components/admin/UserTable';
+import { getAdminSidebarItems } from '../../constants/adminSidebarItems';
 import CoinEditModal from '../../components/admin/modals/CoinEditModal';
 import FollowerEditModal from '../../components/admin/modals/FollowerEditModal';
+import UserBadgeModal from '../../components/admin/modals/UserBadgeModal';
 import useUsers from '../../hooks/admin/useUsers';
 
 export const UsersPage = () => {
@@ -12,20 +14,11 @@ export const UsersPage = () => {
     filteredUsers, stats, loading, toast, withdrawals, campaigns, posts,
     userFilter, setUserFilter, coinEditModal, setCoinEditModal,
     followerEditModal, setFollowerEditModal,
-    handleUserStatus, handleUpdateCoins, handleUpdateFollowers
+    badgeModal, setBadgeModal,
+    handleUserStatus, handleUpdateCoins, handleUpdateFollowers, handleBulkUpdateBadges
   } = useUsers();
 
-  const sidebarItems = [
-    { key: 'overview', icon: '📊', label: 'Overview' },
-    { key: 'withdrawals', icon: '🏦', label: 'Withdrawals', badge: withdrawals.length || undefined },
-    { key: 'users', icon: '👥', label: 'Users', badge: Number(stats?.totalUsers) || 0 },
-    { key: 'campaigns', icon: '📢', label: 'Campaigns', badge: campaigns.length || 0 },
-    { key: 'posts', icon: '📸', label: 'Posts', badge: posts.length || 0 },
-    { key: 'brand-logos', icon: 'B', label: 'Brand Logos' },
-    { key: 'fee-structure', icon: '💰', label: 'Fee Structure' },
-    { key: 'analytics', icon: '📈', label: 'Analytics' },
-    { key: 'disputes', icon: '⚖️', label: 'Disputes', badge: Number(stats?.openDisputes) || 0 },
-  ];
+  const sidebarItems = getAdminSidebarItems({ stats, withdrawals, campaigns, posts });
 
   return (
     <AdminLayout 
@@ -50,6 +43,7 @@ export const UsersPage = () => {
             handleUserStatus={handleUserStatus} 
             setCoinEditModal={setCoinEditModal} 
             setFollowerEditModal={setFollowerEditModal}
+            setBadgeModal={setBadgeModal}
           />
         )}
 
@@ -65,6 +59,13 @@ export const UsersPage = () => {
           onClose={() => setFollowerEditModal(null)}
           user={followerEditModal}
           onUpdate={handleUpdateFollowers}
+        />
+
+        <UserBadgeModal
+          isOpen={!!badgeModal}
+          onClose={() => setBadgeModal(null)}
+          user={badgeModal}
+          onBulkUpdate={handleBulkUpdateBadges}
         />
       </div>
     </AdminLayout>

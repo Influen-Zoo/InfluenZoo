@@ -1,10 +1,11 @@
 import React from 'react';
-import { CheckCircle, Ban, Coins, Users } from 'lucide-react';
+import { CheckCircle, Ban, Coins, Users, Award } from 'lucide-react';
 import LiquidButton from '../common/LiquidButton/LiquidButton';
+import UserBadge from '../common/UserBadge/UserBadge';
 
 const getCount = (value) => Array.isArray(value) ? value.length : (Number(value) || 0);
 
-const UserTable = ({ filteredUsers, handleUserStatus, setCoinEditModal, setFollowerEditModal }) => {
+const UserTable = ({ filteredUsers, handleUserStatus, setCoinEditModal, setFollowerEditModal, setBadgeModal }) => {
   return (
     <div className="table-container">
       <table className="table">
@@ -20,7 +21,14 @@ const UserTable = ({ filteredUsers, handleUserStatus, setCoinEditModal, setFollo
                     {u.avatar ? <img src={u.avatar} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : u.name?.[0]}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: '0.8125rem' }}>{u.name}</div>
+                    <div style={{ fontWeight: 600, fontSize: '0.8125rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {u.name}
+                      <div className="user-badges-list" style={{ display: 'flex', gap: '2px' }}>
+                        {u.badges?.map(badge => (
+                          <UserBadge key={badge._id} badge={badge} />
+                        ))}
+                      </div>
+                    </div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.email}</div>
                   </div>
                 </div>
@@ -31,18 +39,23 @@ const UserTable = ({ filteredUsers, handleUserStatus, setCoinEditModal, setFollo
               <td>
                 <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
                   {u.status !== 'active' && u.role !== 'admin' && (
-                    <LiquidButton circular variant="success" onClick={() => handleUserStatus(u.id, 'active')} title="Approve User">
+                    <LiquidButton circular variant="success" onClick={() => handleUserStatus(u._id, 'active')} title="Approve User">
                       <CheckCircle size={20} />
                     </LiquidButton>
                   )}
                   {u.status !== 'banned' && u.role !== 'admin' && (
-                    <LiquidButton circular variant="error" onClick={() => handleUserStatus(u.id, 'banned')} title="Ban User">
+                    <LiquidButton circular variant="error" onClick={() => handleUserStatus(u._id, 'banned')} title="Ban User">
                       <Ban size={20} />
                     </LiquidButton>
                   )}
                   {u.role === 'influencer' && (
                     <LiquidButton circular variant="secondary" title="Manage Coins" onClick={() => setCoinEditModal({ userId: u._id, name: u.name, currentCoins: Number(u.coins) || 0, amount: 100, action: 'credit', reason: '' })}>
                       <Coins size={20} />
+                    </LiquidButton>
+                  )}
+                  {u.role !== 'admin' && (
+                    <LiquidButton circular variant="accent" title="Manage Badges" onClick={() => setBadgeModal(u)}>
+                      <Award size={20} />
                     </LiquidButton>
                   )}
                 </div>

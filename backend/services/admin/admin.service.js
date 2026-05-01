@@ -8,6 +8,7 @@ const Dispute = require('../../models/Dispute');
 const Post = require('../../models/Post');
 const AppSetting = require('../../models/AppSetting');
 const CampaignRevenue = require('../../models/CampaignRevenue');
+const Badge = require('../../models/Badge');
 
 const resizeObjectIdArray = (items = [], targetCount = 0) => {
   const nextCount = Math.max(0, Number(targetCount) || 0);
@@ -146,6 +147,14 @@ const adminService = {
             campaignData: 0
           }
         },
+        {
+          $lookup: {
+            from: 'badges',
+            localField: 'badges',
+            foreignField: '_id',
+            as: 'badges'
+          }
+        },
         { $sort: { totalSpent: -1 } },
         { $limit: 100 }
       ]);
@@ -222,6 +231,14 @@ const adminService = {
             transactionData: 0
           }
         },
+        {
+          $lookup: {
+            from: 'badges',
+            localField: 'badges',
+            foreignField: '_id',
+            as: 'badges'
+          }
+        },
         { $sort: { totalEarnings: -1 } },
         { $limit: 100 }
       ]);
@@ -230,6 +247,7 @@ const adminService = {
     // Default fetch for others
     return await User.find(filter)
       .select('-password -refreshToken')
+      .populate('badges')
       .sort({ createdAt: -1 })
       .limit(100);
   },
@@ -596,6 +614,54 @@ const adminService = {
     ).populate('author', 'name email');
     if (!campaign) throw new Error('Campaign not found');
     return campaign;
+  },
+
+  // Badge Management
+  getBadges: async () => {
+    return await Badge.find().sort({ createdAt: -1 });
+  },
+
+  createBadge: async (badgeData) => {
+    return await Badge.create(badgeData);
+  },
+
+  updateBadge: async (badgeId, badgeData) => {
+    const badge = await Badge.findByIdAndUpdate(badgeId, badgeData, { new: true });
+    if (!badge) throw new Error('Badge not found');
+    return badge;
+  },
+
+  deleteBadge: async (badgeId) => {
+    const badge = await Badge.findByIdAndDelete(badgeId);
+    if (!badge) throw new Error('Badge not found');
+    
+    // Remove this badge from all users
+    await User.updateMany(
+      { badges: badgeId },
+      { $pull: { badges: badgeId } }
+    );
+    
+    return badge;
+  },
+
+  assignBadgeToUser: async (userId, badgeId) => {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { badges: badgeId } },
+      { new: true }
+    ).populate('badges');
+    if (!user) throw new Error('User not found');
+    return user;
+  },
+
+  removeBadgeFromUser: async (userId, badgeId) => {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { badges: badgeId } },
+      { new: true }
+    ).populate('badges');
+    if (!user) throw new Error('User not found');
+    return user;
   }
 };
 

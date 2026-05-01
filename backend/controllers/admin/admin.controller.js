@@ -323,3 +323,94 @@ exports.unblockCampaign = async (req, res) => {
     res.status(error.message === 'Campaign not found' ? 404 : 500).json({ error: error.message });
   }
 };
+
+/**
+ * GET /api/admin/badges
+ * List all badges
+ */
+exports.getBadges = async (req, res) => {
+  try {
+    const badges = await adminService.getBadges();
+    res.json({ success: true, data: badges });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+/**
+ * POST /api/admin/badges
+ * Create a new badge
+ */
+exports.createBadge = async (req, res) => {
+  try {
+    const badgeData = { ...req.body };
+    if (req.file) {
+      badgeData.icon = req.file.path;
+      badgeData.isCustomIcon = true;
+    }
+    const badge = await adminService.createBadge(badgeData);
+    res.json({ success: true, data: badge });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * PUT /api/admin/badges/:id
+ * Update a badge
+ */
+exports.updateBadge = async (req, res) => {
+  try {
+    const badgeData = { ...req.body };
+    if (req.file) {
+      badgeData.icon = req.file.path;
+      badgeData.isCustomIcon = true;
+    } else if (badgeData.isCustomIcon === 'false') {
+      badgeData.isCustomIcon = false;
+    }
+    
+    const badge = await adminService.updateBadge(req.params.id, badgeData);
+    res.json({ success: true, data: badge });
+  } catch (error) {
+    res.status(error.message === 'Badge not found' ? 404 : 400).json({ error: error.message });
+  }
+};
+
+/**
+ * DELETE /api/admin/badges/:id
+ * Delete a badge
+ */
+exports.deleteBadge = async (req, res) => {
+  try {
+    await adminService.deleteBadge(req.params.id);
+    res.json({ success: true, message: 'Badge deleted successfully' });
+  } catch (error) {
+    res.status(error.message === 'Badge not found' ? 404 : 500).json({ error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/users/:userId/badges/:badgeId
+ * Assign badge to user
+ */
+exports.assignBadge = async (req, res) => {
+  try {
+    const user = await adminService.assignBadgeToUser(req.params.userId, req.params.badgeId);
+    res.json({ success: true, data: user });
+  } catch (error) {
+    res.status(error.message === 'User not found' ? 404 : 400).json({ error: error.message });
+  }
+};
+
+/**
+ * DELETE /api/admin/users/:userId/badges/:badgeId
+ * Remove badge from user
+ */
+exports.removeBadge = async (req, res) => {
+  try {
+    const user = await adminService.removeBadgeFromUser(req.params.userId, req.params.badgeId);
+    res.json({ success: true, data: user });
+  } catch (error) {
+    res.status(error.message === 'User not found' ? 404 : 400).json({ error: error.message });
+  }
+};

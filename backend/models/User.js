@@ -120,6 +120,10 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Campaign',
     }],
+    badges: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Badge',
+    }],
   },
   { timestamps: true }
 );

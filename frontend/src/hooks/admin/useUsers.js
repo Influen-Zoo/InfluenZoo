@@ -15,6 +15,7 @@ export const useUsers = () => {
   });
   const [coinEditModal, setCoinEditModal] = useState(null);
   const [followerEditModal, setFollowerEditModal] = useState(null);
+  const [badgeModal, setBadgeModal] = useState(null);
 
   const filteredUsers = useMemo(() => filterAdminUsers(users, userFilter), [users, userFilter]);
 
@@ -69,6 +70,46 @@ export const useUsers = () => {
     }
   };
 
+  const handleUpdateBadges = async (userId, badgeId, isRemoving = false) => {
+    try {
+      if (isRemoving) {
+        await adminService.removeBadgeFromUser(userId, badgeId);
+      } else {
+        await adminService.assignBadgeToUser(userId, badgeId);
+      }
+      showToast(isRemoving ? 'Badge removed' : 'Badge assigned');
+      const updatedUsers = await adminService.getUsers();
+      setUsers(updatedUsers);
+      return true;
+    } catch (e) {
+      showToast(e.message, 'danger');
+      return false;
+    }
+  };
+
+  const handleBulkUpdateBadges = async (userId, toAdd, toRemove) => {
+    try {
+      // Execute all additions
+      for (const badgeId of toAdd) {
+        await adminService.assignBadgeToUser(userId, badgeId);
+      }
+      // Execute all removals
+      for (const badgeId of toRemove) {
+        await adminService.removeBadgeFromUser(userId, badgeId);
+      }
+      
+      if (toAdd.length > 0 || toRemove.length > 0) {
+        showToast('Privileges updated successfully');
+        const updatedUsers = await adminService.getUsers();
+        setUsers(updatedUsers);
+      }
+      return true;
+    } catch (e) {
+      showToast(e.message, 'danger');
+      return false;
+    }
+  };
+
   return {
     users,
     filteredUsers,
@@ -87,7 +128,11 @@ export const useUsers = () => {
     setFollowerEditModal,
     handleUserStatus,
     handleUpdateCoins,
-    handleUpdateFollowers
+    handleUpdateFollowers,
+    badgeModal,
+    setBadgeModal,
+    handleUpdateBadges,
+    handleBulkUpdateBadges
   };
 };
 

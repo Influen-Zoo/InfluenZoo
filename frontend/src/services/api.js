@@ -727,6 +727,41 @@ class ApiClient {
     const response = await this.client.get('/admin/analytics/revenue', { params });
     return response.data;
   }
+
+  // Badge Management
+  async getBadges() {
+    const response = await this.client.get('/admin/badges');
+    return response.data?.data || [];
+  }
+
+  async createBadge(formData) {
+    const response = await this.client.post('/admin/badges', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data?.data || response.data;
+  }
+
+  async updateBadge(id, formData) {
+    const response = await this.client.put(`/admin/badges/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data?.data || response.data;
+  }
+
+  async deleteBadge(id) {
+    const response = await this.client.delete(`/admin/badges/${id}`);
+    return response.data;
+  }
+
+  async assignBadgeToUser(userId, badgeId) {
+    const response = await this.client.post(`/admin/users/${userId}/badges/${badgeId}`);
+    return response.data?.data || response.data;
+  }
+
+  async removeBadgeFromUser(userId, badgeId) {
+    const response = await this.client.delete(`/admin/users/${userId}/badges/${badgeId}`);
+    return response.data?.data || response.data;
+  }
 }
 
 export default new ApiClient();

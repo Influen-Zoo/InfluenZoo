@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import api from '../../services/api';
 import LiquidButton from '../../components/common/LiquidButton/LiquidButton';
+import UserBadge from '../../components/common/UserBadge/UserBadge';
 import { resolveAssetUrl } from '../../utils/helpers';
 import './BrandProfile.css';
 
@@ -201,8 +202,13 @@ export default function BrandProfile({ forcedUserId = null, embedded = false, on
               </div>
 
               <div className="profile-header-info">
-                <div className="header-name-section">
+                <div className="header-name-section" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <h1>{brandInfo.brandName || profile.name}</h1>
+                  <div className="profile-badges" style={{ display: 'flex', gap: '4px' }}>
+                    {profile.badges?.map(badge => (
+                      <UserBadge key={badge._id} badge={badge} />
+                    ))}
+                  </div>
                 </div>
                 
                 <div className="profile-stats-inline">

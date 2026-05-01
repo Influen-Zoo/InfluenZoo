@@ -1,0 +1,87 @@
+.user-badge-container {
+  display: inline-flex;
+  height: 28px;
+  width: 28px; /* Force circle when not expanded */
+  border-radius: 14px;
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  cursor: pointer;
+  overflow: hidden;
+  vertical-align: middle;
+  margin-left: 6px;
+  backdrop-filter: blur(8px);
+  position: relative;
+  user-select: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  justify-content: center;
+  align-items: center;
+}
+
+.user-badge-container:hover {
+  border-color: rgba(var(--accent-rgb), 0.45);
+  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.12);
+}
+
+.user-badge-container.expanded {
+  width: auto;
+  padding-right: 12px;
+  border-color: rgba(var(--accent-rgb), 0.5);
+  justify-content: flex-start;
+}
+
+.badge-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.user-badge-container.expanded .badge-content {
+  padding: 0 8px;
+  justify-content: flex-start;
+}
+
+.badge-icon-wrapper {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--badge-color);
+  flex-shrink: 0;
+}
+
+.badge-custom-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.badge-name {
+  margin-left: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Animations like Dynamic Island */
+.user-badge-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(var(--accent-rgb), 0.1) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.user-badge-container:hover::after {
+  opacity: 1;
+}

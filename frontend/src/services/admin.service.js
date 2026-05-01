@@ -163,6 +163,41 @@ export const adminService = {
   async getAdminCampaignApplications(id) {
     const response = await apiClient.get(`/admin/campaigns/${id}/applications`);
     return response.data;
+  },
+
+  // Badge Management
+  async getBadges() {
+    const response = await apiClient.get('/admin/badges');
+    return response.data?.data || [];
+  },
+
+  async createBadge(formData) {
+    const response = await apiClient.post('/admin/badges', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data?.data || response.data;
+  },
+
+  async updateBadge(id, formData) {
+    const response = await apiClient.put(`/admin/badges/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data?.data || response.data;
+  },
+
+  async deleteBadge(id) {
+    const response = await apiClient.delete(`/admin/badges/${id}`);
+    return response.data;
+  },
+
+  async assignBadgeToUser(userId, badgeId) {
+    const response = await apiClient.post(`/admin/users/${userId}/badges/${badgeId}`);
+    return response.data?.data || response.data;
+  },
+
+  async removeBadgeFromUser(userId, badgeId) {
+    const response = await apiClient.delete(`/admin/users/${userId}/badges/${badgeId}`);
+    return response.data?.data || response.data;
   }
 };
 

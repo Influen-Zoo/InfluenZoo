@@ -10,7 +10,7 @@ const { fetchSocialMediaStats, SUPPORTED_PLATFORMS } = require('./socialMediaSta
 
 const userService = {
   getProfile: async (userId) => {
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).populate('badges');
     if (!user) throw new Error('User not found');
 
     const [userBio, education, work, brandProfile] = await Promise.all([
