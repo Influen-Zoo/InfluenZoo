@@ -368,9 +368,8 @@ export default function Landing() {
           </div>
         </div>
 
+        {renderBrandLogoCarousel()}
       </section>
-
-      {renderBrandLogoCarousel()}
 
       <section id="how-it-works" className="how-it-works landing-section">
         <div className="section-header landing-reveal">

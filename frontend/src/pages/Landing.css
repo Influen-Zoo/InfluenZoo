@@ -255,7 +255,7 @@
   .hero {
     margin-bottom: 4rem;
     align-items: flex-start;
-    padding-left: 10rem;
+    padding-left: 4rem;
     padding-right: 3rem;
   }
 }
@@ -324,9 +324,9 @@
   max-width: 760px;
   margin: 0 0 1.2rem;
   color: currentColor;
-  font-size: clamp(4rem, 8vw, 7.5rem);
-  line-height: 0.98;
-  letter-spacing: 0;
+  font-size: clamp(3.2rem, 6.5vw, 6rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
 }
 
 .gradient-text {
@@ -337,8 +337,8 @@
   max-width: 660px;
   margin: 0 0 2rem;
   color: rgba(255, 255, 255, 0.82);
-  font-size: 1.35rem;
-  line-height: 1.76;
+  font-size: 1.15rem;
+  line-height: 1.7;
 }
 
 
@@ -421,9 +421,10 @@
 
 .brand-logo-strip {
   position: relative;
-  z-index: 3;
-  padding: 1.4rem 1.25rem 0;
-  margin-top: 0rem;
+  z-index: 10;
+  padding: 0 1.25rem;
+  margin-top: 2rem;
+  margin-bottom: -4rem;
   width: 100%;
 }
 
@@ -1531,12 +1532,20 @@
 
   .hero-grid {
     padding: 0 1.5rem;
-    gap: 1.4rem;
+    gap: 2.5rem;
+    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .brand-logo-strip {
-    margin-top: 0;
-    padding: 1rem 0.75rem 0;
+    transform: translateY(-1.5rem);
+    margin-bottom: -1.5rem;
+    padding: 0 0.75rem;
+    position: relative;
+    z-index: 15;
+    order: 1;
   }
 
   .hero {
@@ -1579,13 +1588,15 @@
     border-color: rgba(var(--accent-rgb), 0.3);
     background: color-mix(in srgb, var(--surface) 78%, transparent);
     color: var(--text-primary);
+    white-space: nowrap;
+    font-size: 0.85rem;
   }
 
   .hero-action-panel {
     width: 100%;
     max-width: 340px;
-    justify-self: flex-start;
-    margin: 0;
+    margin: 0 auto;
+    align-self: center;
   }
 
   .hero h1 {
