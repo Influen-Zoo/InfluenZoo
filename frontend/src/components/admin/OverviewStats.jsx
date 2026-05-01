@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import { AreaChart, Area, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area } from 'recharts';
 
 const OverviewStats = ({ stats, kpis, handleCardClick, sparkData }) => {
   return (
@@ -21,12 +21,10 @@ const OverviewStats = ({ stats, kpis, handleCardClick, sparkData }) => {
             </span>
           </div>
           
-          <Box sx={{ width: '40%', height: 100, opacity: 0.4, minWidth: 0 }}>
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-              <AreaChart data={sparkData}>
-                <Area type="monotone" dataKey="v" stroke="rgba(255,255,255,0.8)" fill="rgba(255,255,255,0.2)" strokeWidth={3} />
-              </AreaChart>
-            </ResponsiveContainer>
+          <Box sx={{ width: { xs: 170, sm: 240 }, height: 100, opacity: 0.4, flex: '0 0 auto', overflow: 'hidden' }}>
+            <AreaChart width={240} height={100} data={sparkData}>
+              <Area type="monotone" dataKey="v" stroke="rgba(255,255,255,0.8)" fill="rgba(255,255,255,0.2)" strokeWidth={3} />
+            </AreaChart>
           </Box>
         </Box>
       </div>

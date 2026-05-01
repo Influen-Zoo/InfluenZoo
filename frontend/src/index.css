@@ -48,6 +48,12 @@
   --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
   --nav-height: 64px;
   --sidebar-width: 260px;
+
+  /* Brand Logo Sizing */
+  --brand-logo-item-width: 132px;
+  --brand-logo-item-height: 72px;
+  --brand-logo-image-width: 104px;
+  --brand-logo-image-height: 46px;
 }
 
 [data-theme='light'] {

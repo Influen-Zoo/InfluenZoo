@@ -3,11 +3,9 @@ const path = require('path');
 const { execFile } = require('child_process');
 const { promisify } = require('util');
 const sharp = require('sharp');
-const jpegtranBin = require('jpegtran-bin');
 const ffmpegBin = require('ffmpeg-static');
 
 const execFileAsync = promisify(execFile);
-const jpegtran = jpegtranBin.default || jpegtranBin;
 const ffmpeg = ffmpegBin.default || ffmpegBin;
 const MAX_IMAGE_DIMENSION = 2048;
 const VIDEO_MIN_SAVINGS_RATIO = 0.08;
@@ -114,31 +112,23 @@ const getImageMetadata = async (filePath) => sharp(filePath, { animated: false }
 const optimizeJpeg = async (file, tempPath, metadata) => {
   const shouldResize = (metadata.width || 0) > MAX_IMAGE_DIMENSION || (metadata.height || 0) > MAX_IMAGE_DIMENSION;
 
+  let pipeline = sharp(file.path, { animated: false }).rotate();
+
   if (shouldResize) {
-    await sharp(file.path, { animated: false })
-      .rotate()
-      .resize({
-        width: MAX_IMAGE_DIMENSION,
-        height: MAX_IMAGE_DIMENSION,
-        fit: 'inside',
-        withoutEnlargement: true
-      })
-      .jpeg({
-        quality: 85,
-        mozjpeg: true
-      })
-      .toFile(tempPath);
-    return;
+    pipeline = pipeline.resize({
+      width: MAX_IMAGE_DIMENSION,
+      height: MAX_IMAGE_DIMENSION,
+      fit: 'inside',
+      withoutEnlargement: true
+    });
   }
 
-  await execFileAsync(jpegtran, [
-    '-copy',
-    'none',
-    '-optimize',
-    '-outfile',
-    tempPath,
-    file.path
-  ]);
+  await pipeline
+    .jpeg({
+      quality: shouldResize ? 85 : 90,
+      mozjpeg: true
+    })
+    .toFile(tempPath);
 };
 
 const isVideoFile = (file) => file?.mimetype?.startsWith('video/');

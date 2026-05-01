@@ -1,9 +1,57 @@
 const express = require('express');
+const fs = require('fs');
+const multer = require('multer');
+const sharp = require('sharp');
 const adminController = require('../../controllers/admin/admin.controller');
+const brandLogoController = require('../../controllers/admin/brandLogo.controller');
 const { authMiddleware } = require('../../middleware/auth/auth.middleware');
 const { adminOnly } = require('../../middleware/admin/admin.middleware');
 
 const router = express.Router();
+
+const brandLogoStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = 'uploads/brand-logos/';
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const safeName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '-');
+    cb(null, `${Date.now()}-${safeName}`);
+  },
+});
+
+const brandLogoUpload = multer({
+  storage: brandLogoStorage,
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'image/png') cb(null, true);
+    else cb(new Error('Only transparent PNG logos are allowed'));
+  },
+});
+
+const trimBrandLogo = async (req, res, next) => {
+  if (!req.file) return next();
+
+  try {
+    const trimmed = await sharp(req.file.path)
+      .trim({
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+        threshold: 10,
+      })
+      .resize(400, 200, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .png({ compressionLevel: 9, adaptiveFiltering: true })
+      .toBuffer();
+
+    await fs.promises.writeFile(req.file.path, trimmed);
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+};
 
 // All admin routes require auth + admin role
 router.use(authMiddleware, adminOnly);
@@ -110,8 +158,14 @@ router.get('/fee-structure', adminController.getFeeStructure);
  */
 router.put('/fee-structure', adminController.updateFeeStructure);
 
+router.get('/carousel-settings', brandLogoController.getBrandLogoSettings);
+router.put('/carousel-settings', brandLogoController.updateBrandLogoSettings);
 router.get('/razorpay-settings', adminController.getRazorpaySettings);
 router.put('/razorpay-settings', adminController.updateRazorpaySettings);
+router.get('/brand-logos', brandLogoController.getAdminBrandLogos);
+router.post('/brand-logos', brandLogoUpload.single('logo'), trimBrandLogo, brandLogoController.createBrandLogo);
+router.put('/brand-logos/:id', brandLogoUpload.single('logo'), trimBrandLogo, brandLogoController.updateBrandLogo);
+router.delete('/brand-logos/:id', brandLogoController.deleteBrandLogo);
 
 /**
  * @route   PUT /api/admin/posts/:id/block

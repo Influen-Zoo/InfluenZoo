@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -16,8 +16,16 @@ import {
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import LiquidButton from "../components/common/LiquidButton/LiquidButton";
+import api from "../services/api";
+import { resolveAssetUrl } from "../utils/helpers";
 import logo from "../assets/influenzoo-logo.png";
 import heroImage from "../assets/hero-marketplace.png";
+import heroMobileImage from "../assets/hero-marketplace-mobile.jpg";
+import showcaseCafe from "../assets/showcase-cafe-realistic.jpg";
+import showcaseMobile from "../assets/showcase-mobile-hero-marketplace.jpg";
+import showcaseSkincare from "../assets/showcase-skincare-realistic.jpg";
+import showcaseTech from "../assets/showcase-tech-realistic.jpg";
+import showcaseTravel from "../assets/showcase-travel-realistic.jpg";
 import "./Landing.css";
 
 const flowSteps = [
@@ -76,24 +84,28 @@ const showcaseItems = [
     title: "Travel reel concept for boutique stays",
     meta: "42K reach - 8.4% engagement",
     tag: "Influencer",
+    image: showcaseTravel,
   },
   {
     type: "Brand Campaign",
     title: "Skincare launch with micro-creators",
     meta: "INR 75K budget - 18 applicants",
     tag: "Campaign",
+    image: showcaseSkincare,
   },
   {
     type: "Creator Post",
     title: "Tech unboxing with conversion CTA",
     meta: "91K reach - 312 saves",
     tag: "Content",
+    image: showcaseTech,
   },
   {
     type: "Brand Campaign",
     title: "Cafe opening weekend creator drive",
     meta: "Barter + paid - 9 shortlisted",
     tag: "Collab",
+    image: showcaseCafe,
   },
 ];
 
@@ -124,6 +136,11 @@ const testimonials = [
 
 export default function Landing() {
   const [scrolled, setScrolled] = useState(false);
+  const [brandLogos, setBrandLogos] = useState([]);
+  const [activeBrandLogo, setActiveBrandLogo] = useState(null);
+  const [scrollSpeed, setScrollSpeed] = useState(18);
+  const [spacing, setSpacing] = useState(40);
+  const [showSeparator, setShowSeparator] = useState(false);
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 
@@ -148,6 +165,32 @@ export default function Landing() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+    api.getBrandLogos()
+      .then((logos) => {
+        if (mounted) setBrandLogos(logos);
+      })
+      .catch(() => {
+        if (mounted) setBrandLogos([]);
+      });
+
+    api.getBrandLogoSettings()
+      .then(settings => {
+        console.log('Landing Page Settings:', settings);
+        if (mounted) {
+          setScrollSpeed(settings.scrollSpeed ?? 18);
+          setSpacing(settings.spacing ?? 40);
+          setShowSeparator(!!settings.showSeparator);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const handleGlowMove = (event) => {
     const rect = event.currentTarget.getBoundingClientRect();
     event.currentTarget.style.setProperty("--glow-x", `${event.clientX - rect.left}px`);
@@ -155,6 +198,66 @@ export default function Landing() {
   };
 
   const goSignup = () => navigate("/auth?mode=signup");
+  const renderBrandLogoCarousel = () => (
+    brandLogos.length > 0 && (
+      <section className="brand-logo-strip" aria-label="Featured brand logos">
+        <div
+          className={`brand-logo-carousel landing-glow-card ${activeBrandLogo ? "is-paused" : ""}`}
+          onPointerMove={handleGlowMove}
+          style={{
+            "--scroll-duration": `${scrollSpeed}s`,
+            "--logo-spacing": `${spacing}px`
+          }}
+        >
+          <div 
+            className="brand-logo-track"
+            style={{ 
+              animationDuration: `${scrollSpeed}s`,
+              gap: showSeparator ? '0' : `${spacing}px`
+            }}
+          >
+            {(() => {
+              const minCount = 10;
+              let items = [...brandLogos];
+              if (items.length > 0) {
+                while (items.length < minCount) {
+                  items = [...items, ...brandLogos];
+                }
+              }
+              const loopItems = [...items, ...items];
+              return loopItems.map((brand, index) => (
+                <Fragment key={`${brand._id}-${index}`}>
+                  <a
+                    className={`brand-logo-item ${activeBrandLogo === `${brand._id}-${index}` ? "is-active" : ""}`}
+                    href={brand.website || undefined}
+                    target={brand.website ? "_blank" : undefined}
+                    rel={brand.website ? "noreferrer" : undefined}
+                    onMouseEnter={() => setActiveBrandLogo(`${brand._id}-${index}`)}
+                    onMouseLeave={() => setActiveBrandLogo(null)}
+                    onClick={(event) => {
+                      if (!window.matchMedia("(hover: none)").matches) return;
+                      event.preventDefault();
+                      setActiveBrandLogo((current) => (
+                        current === `${brand._id}-${index}` ? null : `${brand._id}-${index}`
+                      ));
+                    }}
+                  >
+                    <img src={resolveAssetUrl(brand.image)} alt={brand.name} loading="lazy" />
+                  </a>
+                  {showSeparator && (
+                    <div 
+                      className="brand-logo-separator" 
+                      style={{ margin: `0 ${spacing / 2}px` }}
+                    />
+                  )}
+                </Fragment>
+              ));
+            })()}
+          </div>
+        </div>
+      </section>
+    )
+  );
 
   return (
     <div className="landing" data-theme={theme}>
@@ -175,14 +278,17 @@ export default function Landing() {
           </div>
 
           <div className="landing-auth-buttons">
-            <button
-              className="theme-toggle"
+            <LiquidButton
+              variant="secondary"
+              size="small"
+              circular
+              className="landing-theme-toggle"
               onClick={toggleTheme}
               aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
               title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
             >
               {theme === "dark" ? <Sun size={18} strokeWidth={2.4} /> : <Moon size={18} strokeWidth={2.4} />}
-            </button>
+            </LiquidButton>
             <LiquidButton variant="primary" size="small" onClick={() => navigate("/auth")}>
               Log in
             </LiquidButton>
@@ -194,7 +300,15 @@ export default function Landing() {
       </nav>
 
       <section className="hero">
-        <div className="hero-media" aria-hidden="true" style={{ backgroundImage: `url(${heroImage})` }} />
+        <div
+          className="hero-media"
+          aria-hidden="true"
+          style={{
+            "--hero-desktop-image": `url(${heroImage})`,
+            "--hero-mobile-image": `url(${heroMobileImage})`,
+          }}
+        />
+
         <div className="hero-grid">
           <div className="hero-content landing-reveal">
             <div className="hero-badge">
@@ -253,6 +367,8 @@ export default function Landing() {
             </div>
           </div>
         </div>
+
+        {renderBrandLogoCarousel()}
       </section>
 
       <section id="how-it-works" className="how-it-works landing-section">
@@ -312,6 +428,7 @@ export default function Landing() {
             {showcaseItems.map((item) => (
               <article className="showcase-card landing-glow-card" onPointerMove={handleGlowMove} key={item.title}>
                 <div className="showcase-image">
+                  <img src={item.image} alt="" aria-hidden="true" loading="lazy" />
                   <span>{item.tag}</span>
                 </div>
                 <div className="showcase-card-body">

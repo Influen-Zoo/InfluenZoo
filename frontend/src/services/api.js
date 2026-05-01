@@ -254,12 +254,6 @@ class ApiClient {
     return response.data?.data || response.data;
   }
 
-  async getInfluencers(params = {}) {
-    const response = await this.client.get('/users/influencers', { params });
-    const data = response.data;
-    return Array.isArray(data) ? data : (data?.data || []);
-  }
-
   async uploadFile(file) {
     const formData = new FormData();
     formData.append('file', file);
@@ -335,8 +329,6 @@ class ApiClient {
     return response.data?.data || { transactions: [], balance: 0 };
   }
 
-
-
   async uploadBanner(file) {
     const formData = new FormData();
     formData.append('file', file);
@@ -344,6 +336,68 @@ class ApiClient {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data?.url || response.data;
+  }
+
+  async getBrandLogos() {
+    try {
+      const response = await this.client.get('/brand-logos');
+      const data = response.data;
+      return Array.isArray(data) ? data : (data?.data || []);
+    } catch (error) {
+      if (error.response?.status === 404) return [];
+      throw error;
+    }
+  }
+
+  async getBrandLogoSettings() {
+    try {
+      const response = await this.client.get('/brand-logos/settings');
+      return response.data?.data || { scrollSpeed: 18, spacing: 40, showSeparator: false };
+    } catch (error) {
+      return { scrollSpeed: 18, spacing: 40, showSeparator: false };
+    }
+  }
+
+  async getAdminBrandLogos() {
+    try {
+      const response = await this.client.get('/admin/brand-logos');
+      const data = response.data;
+      return Array.isArray(data) ? data : (data?.data || []);
+    } catch (error) {
+      if (error.response?.status === 404) {
+        throw new Error('Brand logo API was not found. Restart the backend server so the new routes are loaded.');
+      }
+      throw error;
+    }
+  }
+
+  async createAdminBrandLogo(formData) {
+    const response = await this.client.post('/admin/brand-logos', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data?.data || response.data;
+  }
+
+  async updateAdminBrandLogo(id, formData) {
+    const response = await this.client.put(`/admin/brand-logos/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data?.data || response.data;
+  }
+
+  async deleteAdminBrandLogo(id) {
+    const response = await this.client.delete(`/admin/brand-logos/${id}`);
+    return response.data?.data || response.data;
+  }
+
+  async getAdminBrandLogoSettings() {
+    const response = await this.client.get('/admin/carousel-settings');
+    return response.data?.data || { scrollSpeed: 18, spacing: 40, showSeparator: false };
+  }
+
+  async updateAdminBrandLogoSettings(settings) {
+    const response = await this.client.put('/admin/carousel-settings', settings);
+    return response.data?.data || response.data;
   }
 
   async uploadProfilePicture(formData) {
