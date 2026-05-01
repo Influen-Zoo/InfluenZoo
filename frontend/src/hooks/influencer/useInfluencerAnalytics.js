@@ -5,6 +5,7 @@ export const useInfluencerAnalytics = (user) => {
   const [coinBalance, setCoinBalance] = useState(user?.coins || 0);
   const [walletTransactions, setWalletTransactions] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [paymentConfig, setPaymentConfig] = useState(null);
   const [toast, setToast] = useState(null);
 
   const showToast = useCallback((message, type = 'success') => {
@@ -18,6 +19,16 @@ export const useInfluencerAnalytics = (user) => {
       setNotifications(data);
     } catch (e) {
       console.error('Error loading notifications:', e);
+    }
+  }, []);
+
+  const loadPaymentConfig = useCallback(async () => {
+    try {
+      const walletService = (await import('../../services/wallet.service')).default;
+      const config = await walletService.getPaymentConfig();
+      setPaymentConfig(config);
+    } catch (e) {
+      console.error('Error loading payment config:', e);
     }
   }, []);
 
@@ -58,17 +69,20 @@ export const useInfluencerAnalytics = (user) => {
     if (user) {
       loadNotifications();
       loadWallet();
+      loadPaymentConfig();
     }
-  }, [user, loadNotifications, loadWallet]);
+  }, [user, loadNotifications, loadWallet, loadPaymentConfig]);
 
   return {
     coinBalance,
     walletTransactions,
     notifications,
+    paymentConfig,
     toast,
     showToast,
     loadNotifications,
     loadWallet,
+    loadPaymentConfig,
     handleTopUp,
     handleWithdraw
   };

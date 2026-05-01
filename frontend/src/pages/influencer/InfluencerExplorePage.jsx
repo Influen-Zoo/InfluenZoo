@@ -48,6 +48,8 @@ export const InfluencerExplorePage = () => {
           onClose={() => dashboard.setApplyModal(null)}
           onApply={() => dashboard.handleApply(dashboard.applyModal._id || dashboard.applyModal.id, dashboard.applyMsg, dashboard.applyOutlet)}
           loading={dashboard.loading}
+          paymentConfig={dashboard.paymentConfig}
+          coinBalance={dashboard.coinBalance}
         />
       )}
 

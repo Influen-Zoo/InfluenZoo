@@ -71,6 +71,7 @@ export const useInfluencerDashboard = () => {
 
     // Analytics & Notifications & Wallet
     coinBalance: analytics.coinBalance,
+    paymentConfig: analytics.paymentConfig,
     walletTransactions: analytics.walletTransactions,
     notifications: analytics.notifications,
     loadWallet: analytics.loadWallet,

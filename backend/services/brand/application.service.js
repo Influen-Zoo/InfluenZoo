@@ -62,6 +62,32 @@ const brandApplicationService = {
       }
     }
 
+    // If marked as rejected, refund the application cost to the influencer
+    if (status === 'rejected' && previousStatus !== 'rejected') {
+      const User = require('../../models/User');
+      const Transaction = require('../../models/Transaction');
+      
+      const influencer = await User.findById(application.influencerId);
+      if (influencer) {
+        const cost = Number(campaign.coinCost) || 0;
+        if (cost > 0) {
+          influencer.coins = (influencer.coins || 0) + cost;
+          await influencer.save();
+
+          await Transaction.create({
+            user: influencer._id,
+            type: 'earning',
+            amount: cost,
+            asset: 'coins',
+            status: 'completed',
+            description: `Refund for rejected campaign application: ${campaign.title}`,
+            referenceId: campaign._id,
+            referenceModel: 'Campaign'
+          });
+        }
+      }
+    }
+
     return application;
   }
 };

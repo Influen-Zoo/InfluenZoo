@@ -12,6 +12,7 @@ export const InfluencerDashboardPage = () => {
     setDashboardSubTab, 
     applications, 
     coinBalance, 
+    paymentConfig,
     walletTransactions,
     setShowTopUp,
     handleToggleSave,
@@ -71,6 +72,8 @@ export const InfluencerDashboardPage = () => {
           onClose={() => setApplyModal(null)}
           onApply={() => handleApply(applyModal._id || applyModal.id, applyMsg, applyOutlet)}
           loading={loading}
+          paymentConfig={paymentConfig}
+          coinBalance={coinBalance}
         />
       )}
 

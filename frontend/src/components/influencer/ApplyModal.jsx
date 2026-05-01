@@ -9,12 +9,24 @@ export default function ApplyModal({
   selectedOutlet,
   setSelectedOutlet,
   onApply,
-  loading
+  loading,
+  paymentConfig,
+  coinBalance = 0
 }) {
   if (!campaign) return null;
   const isMobile = typeof window !== 'undefined' ? window.innerWidth <= 768 : true;
   const outlets = Array.isArray(campaign.outlets) ? campaign.outlets : [];
   const outletRequired = outlets.length > 0;
+  
+  const cost = campaign.coinCost || 0;
+  const minBalance = paymentConfig?.minInfluencerBalance || 500;
+
+  let balanceError = null;
+  if (coinBalance < minBalance) {
+    balanceError = `Minimum wallet balance of ${minBalance} coins is required to apply.`;
+  } else if (coinBalance < cost) {
+    balanceError = `Insufficient balance. This campaign requires ${cost} coins.`;
+  }
 
   React.useEffect(() => {
     if (!outlets.includes(selectedOutlet)) setSelectedOutlet('');
@@ -26,9 +38,21 @@ export default function ApplyModal({
         <button className="modal-close" onClick={onClose}>×</button>
         <h3 style={{ marginBottom: '0.5rem' }}>Apply to Campaign</h3>
         <p style={{ fontSize: '0.8125rem', marginBottom: '0.5rem' }}>{campaign.title} by {campaign.brandName}</p>
-        <p style={{ fontSize: '0.875rem', fontWeight: 'bold', color: 'var(--accent)', marginBottom: '1.25rem' }}>
-          Application Fee: {campaign.coinCost || 0} Coins
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+          <p style={{ fontSize: '0.875rem', fontWeight: 'bold', color: 'var(--accent)', margin: 0 }}>
+            Application Fee: {cost} Coins
+          </p>
+          <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', margin: 0 }}>
+            Balance: {coinBalance} Coins
+          </p>
+        </div>
+
+        {balanceError && (
+          <div style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '0.75rem', borderRadius: 'var(--radius-md)', marginBottom: '1.25rem', fontSize: '0.8125rem' }}>
+            {balanceError}
+          </div>
+        )}
+
         {outlets.length > 0 && (
           <div className="input-group" style={{ marginBottom: '1.25rem' }}>
             <label>Outlet</label>
@@ -55,7 +79,7 @@ export default function ApplyModal({
         </div>
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '0.75rem' }}>
           <LiquidButton variant="secondary" onClick={onClose} size={isMobile ? 'small' : 'medium'} style={{ flex: '0 0 auto' }}>Cancel</LiquidButton>
-          <LiquidButton variant="primary" onClick={onApply} size={isMobile ? 'small' : 'medium'} style={{ flex: '0 0 auto', marginLeft: 'auto' }} disabled={loading || (outletRequired && !selectedOutlet)}>
+          <LiquidButton variant="primary" onClick={onApply} size={isMobile ? 'small' : 'medium'} style={{ flex: '0 0 auto', marginLeft: 'auto' }} disabled={loading || (outletRequired && !selectedOutlet) || !!balanceError}>
             {loading ? 'Applying...' : 'Pay & Apply'}
           </LiquidButton>
         </div>

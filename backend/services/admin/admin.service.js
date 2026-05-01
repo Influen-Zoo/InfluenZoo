@@ -496,25 +496,49 @@ const adminService = {
   getFeeStructure: async () => {
     const campaignFeeSetting = await AppSetting.findOne({ key: 'platformFeeStructure.campaignFee' });
     const applicationFeeSetting = await AppSetting.findOne({ key: 'platformFeeStructure.applicationFee' });
+    const minInfluencerBalanceSetting = await AppSetting.findOne({ key: 'platformFeeStructure.minInfluencerBalance' });
+    const minRechargeAmountSetting = await AppSetting.findOne({ key: 'platformFeeStructure.minRechargeAmount' });
 
     return {
       campaignFee: campaignFeeSetting?.value || 0,
-      applicationFee: applicationFeeSetting?.value || 0
+      applicationFee: applicationFeeSetting?.value || 0,
+      minInfluencerBalance: minInfluencerBalanceSetting?.value !== undefined ? minInfluencerBalanceSetting.value : 500,
+      minRechargeAmount: minRechargeAmountSetting?.value !== undefined ? minRechargeAmountSetting.value : 500
     };
   },
 
-  updateFeeStructure: async (campaignFee, applicationFee) => {
-    await AppSetting.findOneAndUpdate(
-      { key: 'platformFeeStructure.campaignFee' },
-      { value: Number(campaignFee) || 0, description: 'Fee charged to brands when creating a campaign' },
-      { upsert: true }
-    );
+  updateFeeStructure: async (campaignFee, applicationFee, minInfluencerBalance, minRechargeAmount) => {
+    if (campaignFee !== undefined) {
+      await AppSetting.findOneAndUpdate(
+        { key: 'platformFeeStructure.campaignFee' },
+        { value: Number(campaignFee) || 0, description: 'Fee charged to brands when creating a campaign' },
+        { upsert: true }
+      );
+    }
 
-    await AppSetting.findOneAndUpdate(
-      { key: 'platformFeeStructure.applicationFee' },
-      { value: Number(applicationFee) || 0, description: 'Fee charged to influencers when applying to a campaign' },
-      { upsert: true }
-    );
+    if (applicationFee !== undefined) {
+      await AppSetting.findOneAndUpdate(
+        { key: 'platformFeeStructure.applicationFee' },
+        { value: Number(applicationFee) || 0, description: 'Fee charged to influencers when applying to a campaign' },
+        { upsert: true }
+      );
+    }
+
+    if (minInfluencerBalance !== undefined) {
+      await AppSetting.findOneAndUpdate(
+        { key: 'platformFeeStructure.minInfluencerBalance' },
+        { value: Number(minInfluencerBalance) || 0, description: 'Minimum wallet balance an influencer must have to apply for a campaign' },
+        { upsert: true }
+      );
+    }
+
+    if (minRechargeAmount !== undefined) {
+      await AppSetting.findOneAndUpdate(
+        { key: 'platformFeeStructure.minRechargeAmount' },
+        { value: Number(minRechargeAmount) || 0, description: 'Minimum INR amount an influencer can recharge' },
+        { upsert: true }
+      );
+    }
 
     return await adminService.getFeeStructure();
   },

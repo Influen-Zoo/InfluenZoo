@@ -218,13 +218,15 @@ exports.getFeeStructure = async (req, res) => {
  */
 exports.updateFeeStructure = async (req, res) => {
   try {
-    const { campaignFee, applicationFee } = req.body;
-    if (campaignFee === undefined && applicationFee === undefined) {
-      return res.status(400).json({ error: 'Please provide at least one fee to update' });
+    const { campaignFee, applicationFee, minInfluencerBalance, minRechargeAmount } = req.body;
+    if (campaignFee === undefined && applicationFee === undefined && minInfluencerBalance === undefined && minRechargeAmount === undefined) {
+      return res.status(400).json({ error: 'Please provide at least one fee/setting to update' });
     }
     const feeStructure = await adminService.updateFeeStructure(
       campaignFee !== undefined ? campaignFee : undefined,
-      applicationFee !== undefined ? applicationFee : undefined
+      applicationFee !== undefined ? applicationFee : undefined,
+      minInfluencerBalance !== undefined ? minInfluencerBalance : undefined,
+      minRechargeAmount !== undefined ? minRechargeAmount : undefined
     );
     res.json({ success: true, data: feeStructure });
   } catch (error) {

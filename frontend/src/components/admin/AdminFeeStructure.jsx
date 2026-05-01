@@ -11,6 +11,8 @@ export default function AdminFeeStructure({
 }) {
   const [campaignFee, setCampaignFee] = useState(0);
   const [applicationFee, setApplicationFee] = useState(0);
+  const [minInfluencerBalance, setMinInfluencerBalance] = useState(500);
+  const [minRechargeAmount, setMinRechargeAmount] = useState(500);
   const [razorpayEnabled, setRazorpayEnabled] = useState(false);
   const [razorpayKeyId, setRazorpayKeyId] = useState('');
   const [razorpayKeySecret, setRazorpayKeySecret] = useState('');
@@ -24,6 +26,8 @@ export default function AdminFeeStructure({
     if (feeStructure) {
       setCampaignFee(feeStructure.campaignFee || 0);
       setApplicationFee(feeStructure.applicationFee || 0);
+      setMinInfluencerBalance(feeStructure.minInfluencerBalance !== undefined ? feeStructure.minInfluencerBalance : 500);
+      setMinRechargeAmount(feeStructure.minRechargeAmount !== undefined ? feeStructure.minRechargeAmount : 500);
     }
   }, [feeStructure]);
 
@@ -41,7 +45,9 @@ export default function AdminFeeStructure({
     try {
       await onUpdateFees({
         campaignFee: Number(campaignFee),
-        applicationFee: Number(applicationFee)
+        applicationFee: Number(applicationFee),
+        minInfluencerBalance: Number(minInfluencerBalance),
+        minRechargeAmount: Number(minRechargeAmount)
       });
       setEditMode(false);
     } catch (error) {
@@ -200,6 +206,129 @@ export default function AdminFeeStructure({
               💡 Platform earns this % of the influencer's proposed price when they apply to a campaign.
             </div>
           </div>
+
+
+          {/* Min Balance Card */}
+          <div className="chart-card" style={{ padding: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>💼 Minimum Balance</h3>
+              {!editMode && (
+                <button
+                  onClick={() => setEditMode(true)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1.25rem',
+                    color: 'var(--accent)'
+                  }}
+                  title="Edit"
+                >
+                  ✎
+                </button>
+              )}
+            </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                Minimum wallet balance required to apply for campaigns
+              </p>
+              <div style={{ 
+                fontSize: '2rem', 
+                fontWeight: 800, 
+                color: 'var(--accent)',
+                marginBottom: '1rem'
+              }}>
+                {Number(minInfluencerBalance)}
+              </div>
+              {editMode && (
+                <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    className="input"
+                    value={minInfluencerBalance}
+                    onChange={(e) => setMinInfluencerBalance(e.target.value)}
+                    placeholder="Enter amount (e.g. 500)"
+                    style={{ paddingRight: '2.5rem' }}
+                  />
+                  <span style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontWeight: 700 }}>🪙</span>
+                </div>
+              )}
+            </div>
+
+            <div style={{ 
+              background: 'var(--surface-alt)',
+              padding: '0.75rem',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '0.75rem',
+              color: 'var(--text-muted)'
+            }}>
+              💡 Influencers must maintain this balance to submit applications.
+            </div>
+          </div>
+
+          {/* Min Recharge Card */}
+          <div className="chart-card" style={{ padding: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>💳 Minimum Recharge</h3>
+              {!editMode && (
+                <button
+                  onClick={() => setEditMode(true)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1.25rem',
+                    color: 'var(--accent)'
+                  }}
+                  title="Edit"
+                >
+                  ✎
+                </button>
+              )}
+            </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                Minimum amount (INR) an influencer can top-up
+              </p>
+              <div style={{ 
+                fontSize: '2rem', 
+                fontWeight: 800, 
+                color: 'var(--accent)',
+                marginBottom: '1rem'
+              }}>
+                ₹{Number(minRechargeAmount)}
+              </div>
+              {editMode && (
+                <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    className="input"
+                    value={minRechargeAmount}
+                    onChange={(e) => setMinRechargeAmount(e.target.value)}
+                    placeholder="Enter amount (e.g. 500)"
+                    style={{ paddingLeft: '1.5rem' }}
+                  />
+                  <span style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontWeight: 700 }}>₹</span>
+                </div>
+              )}
+            </div>
+
+            <div style={{ 
+              background: 'var(--surface-alt)',
+              padding: '0.75rem',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '0.75rem',
+              color: 'var(--text-muted)'
+            }}>
+              💡 The lowest allowed top-up value in the wallet modal.
+            </div>
+          </div>
         </div>
 
         {editMode && (
@@ -223,6 +352,8 @@ export default function AdminFeeStructure({
                   setEditMode(false);
                   setCampaignFee(feeStructure.campaignFee || 0);
                   setApplicationFee(feeStructure.applicationFee || 0);
+                  setMinInfluencerBalance(feeStructure.minInfluencerBalance !== undefined ? feeStructure.minInfluencerBalance : 500);
+                  setMinRechargeAmount(feeStructure.minRechargeAmount !== undefined ? feeStructure.minRechargeAmount : 500);
                 }}
                 disabled={saving}
                 style={{ flex: 1 }}

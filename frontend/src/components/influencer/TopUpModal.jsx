@@ -84,6 +84,13 @@ export default function TopUpModal({
         throw new Error('Coin purchases are not enabled yet');
       }
 
+      const minRechargeAmount = config.minRechargeAmount || 500;
+      if (amount < minRechargeAmount) {
+        setError(`Minimum recharge amount is ₹${minRechargeAmount}`);
+        setProcessing(false);
+        return;
+      }
+
       await loadRazorpayCheckout();
       const order = await walletService.createCoinOrder(amount);
 

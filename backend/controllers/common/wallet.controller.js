@@ -83,6 +83,12 @@ const walletController = {
     try {
       const settings = await getRazorpaySettings();
       const ready = settings.enabled && settings.keyId && settings.keySecret;
+      
+      const minRechargeSetting = await AppSetting.findOne({ key: 'platformFeeStructure.minRechargeAmount' });
+      const minRechargeAmount = minRechargeSetting?.value !== undefined ? Number(minRechargeSetting.value) : 500;
+
+      const minBalanceSetting = await AppSetting.findOne({ key: 'platformFeeStructure.minInfluencerBalance' });
+      const minInfluencerBalance = minBalanceSetting?.value !== undefined ? Number(minBalanceSetting.value) : 500;
 
       res.json({
         success: true,
@@ -90,7 +96,9 @@ const walletController = {
           enabled: Boolean(ready),
           keyId: ready ? settings.keyId : '',
           coinRate: settings.coinRate,
-          currency: settings.currency
+          currency: settings.currency,
+          minRechargeAmount,
+          minInfluencerBalance
         }
       });
     } catch (error) {
