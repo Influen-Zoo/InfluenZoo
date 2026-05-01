@@ -1,5 +1,10 @@
 const Campaign = require('../../models/Campaign');
 const campaignRevenueService = require('../campaignRevenue.service');
+const {
+  parseStringList,
+  normalizePlatforms,
+  normalizeCampaignForResponse,
+} = require('../../utils/campaignPayload');
 
 const parseMedia = (files) => {
   if (!files || files.length === 0) return [];
@@ -23,8 +28,16 @@ const parseDeliverables = (deliverables) => {
   catch { return Array.isArray(deliverables) ? deliverables : [deliverables]; }
 };
 
+const isCampaignDetailsEnabled = (data) => data.campaignDetailsEnabled === true || data.campaignDetailsEnabled === 'true';
+
 const brandCampaignService = {
   createCampaign: async (authorId, data, files) => {
+    const platforms = normalizePlatforms(data.platforms, data.platform);
+    const outlets = parseStringList(data.outlets);
+    if (isCampaignDetailsEnabled(data) && platforms.length === 0) {
+      throw new Error('At least one platform is required');
+    }
+
     const newCampaign = await Campaign.create({
       author: authorId,
       title: data.title || undefined,
@@ -40,20 +53,23 @@ const brandCampaignService = {
       visibility: data.visibility || 'public',
       requirements: data.requirements || undefined,
       deliverables: parseDeliverables(data.deliverables),
+      ...(platforms.length > 0 ? { platforms, platform: platforms[0] } : {}),
+      outlets,
     });
 
     const populated = await Campaign.findById(newCampaign._id).populate('author', 'name avatar');
     // Record platform revenue snapshot with current fee rates (fire-and-forget)
     campaignRevenueService.recordCampaignCreation(newCampaign).catch(() => {});
-    return populated;
+    return normalizeCampaignForResponse(populated);
   },
 
   getMyCampaigns: async (authorId) => {
     // Brand should see all their campaigns including blocked ones
-    return await Campaign.find({ author: authorId })
+    const campaigns = await Campaign.find({ author: authorId })
       .populate('author', 'name avatar')
       .populate('comments.user', 'name avatar')
       .sort({ createdAt: -1 });
+    return campaigns.map(normalizeCampaignForResponse);
   },
 
   updateCampaign: async (campaignId, authorId, data, files) => {
@@ -78,15 +94,25 @@ const brandCampaignService = {
     if(data.endDate !== undefined) campaign.endDate = data.endDate;
     if(data.category !== undefined) campaign.category = data.category;
     if(data.compensation !== undefined) campaign.compensation = data.compensation;
+    if(data.platforms !== undefined) {
+      const platforms = normalizePlatforms(data.platforms, data.platform);
+      if (isCampaignDetailsEnabled(data) && platforms.length === 0) {
+        throw new Error('At least one platform is required');
+      }
+      campaign.platforms = platforms;
+      campaign.platform = platforms[0] || 'Other';
+    }
+    if(data.outlets !== undefined) campaign.outlets = parseStringList(data.outlets);
     if(data.status !== undefined) campaign.status = data.status;
     if(data.visibility !== undefined) campaign.visibility = data.visibility;
     if(data.requirements !== undefined) campaign.requirements = data.requirements;
 
     await campaign.save();
 
-    return await Campaign.findById(campaign._id)
+    const populated = await Campaign.findById(campaign._id)
       .populate('author', 'name avatar')
       .populate('comments.user', 'name avatar');
+    return normalizeCampaignForResponse(populated);
   },
 
   deleteCampaign: async (campaignId, userId, userRole) => {

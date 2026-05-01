@@ -2,6 +2,7 @@ import React from 'react';
 import { useOutletContext } from 'react-router-dom';
 import DashboardTab from '../../components/brand/tabs/DashboardTab';
 import CreateCampaign from '../../components/brand/CreateCampaign';
+import ProfileViewerModal from '../../components/common/ProfileViewerModal/ProfileViewerModal';
 
 export const BrandDashboardAnalyticsPage = () => {
   const { 
@@ -24,7 +25,9 @@ export const BrandDashboardAnalyticsPage = () => {
     jumpToCampaignId,
     setJumpToCampaignId,
     loadWallet,
-    loadCampaigns
+    loadCampaigns,
+    viewingProfileId,
+    setViewingProfileId
   } = useOutletContext();
 
   return (
@@ -46,6 +49,7 @@ export const BrandDashboardAnalyticsPage = () => {
         onAcceptReject={handleAcceptReject}
         jumpToId={jumpToCampaignId}
         onClearJump={() => setJumpToCampaignId(null)}
+        onViewProfile={setViewingProfileId}
       />
 
       {(showCreateForm || selectedCampaign) && (
@@ -60,6 +64,13 @@ export const BrandDashboardAnalyticsPage = () => {
             loadCampaigns();
           }}
           editData={selectedCampaign}
+        />
+      )}
+
+      {viewingProfileId && (
+        <ProfileViewerModal 
+          userId={viewingProfileId} 
+          onClose={() => setViewingProfileId(null)} 
         />
       )}
     </div>

@@ -22,6 +22,19 @@ export default function BrandCampaignCard({ campaign, onCampaignUpdated, onCampa
 
   const isLiked = user && likes.includes(user.id || user._id);
   const isAuthor = user && campaign.author && (user.id === campaign.author._id || user._id === campaign.author._id);
+  const platforms = Array.isArray(campaign.platforms) ? campaign.platforms.filter(Boolean) : [];
+  const outlets = Array.isArray(campaign.outlets) ? campaign.outlets.filter(Boolean) : [];
+  const hasCampaignDetails = Boolean(
+    campaign.budget ||
+    campaign.category ||
+    campaign.startDate ||
+    campaign.endDate ||
+    campaign.compensation ||
+    campaign.deliverables?.length ||
+    platforms.length ||
+    outlets.length ||
+    campaign.requirements
+  );
 
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this campaign?')) {
@@ -120,7 +133,7 @@ export default function BrandCampaignCard({ campaign, onCampaignUpdated, onCampa
                 {campaign.tags.map((tag, i) => <span key={i}>#{tag}</span>)}
               </div>
             )}
-            {campaign.budget && (
+            {hasCampaignDetails && (
               <div className="announcement-campaign-details" style={{
                 marginTop: '1rem', padding: '1.25rem',
                 borderRadius: '24px',
@@ -133,16 +146,18 @@ export default function BrandCampaignCard({ campaign, onCampaignUpdated, onCampa
                     <span style={{ fontSize: '1.1rem' }}>💰</span>
                     <div>
                       <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Budget</div>
-                      <div style={{ fontWeight: '600' }}>₹{campaign.budget?.toLocaleString()}</div>
+                      <div style={{ fontWeight: '600' }}>{campaign.budget ? `Rs ${campaign.budget?.toLocaleString()}` : 'Not set'}</div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '1.1rem' }}>🏷️</span>
-                    <div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Category</div>
-                      <div style={{ fontWeight: '600' }}>{campaign.category}</div>
+                  {campaign.category && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '1.1rem' }}>🏷️</span>
+                      <div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Category</div>
+                        <div style={{ fontWeight: '600' }}>{campaign.category}</div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                   {campaign.startDate && campaign.endDate && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <span style={{ fontSize: '1.1rem' }}>📅</span>
@@ -162,6 +177,28 @@ export default function BrandCampaignCard({ campaign, onCampaignUpdated, onCampa
                     </div>
                   </div>
                 </div>
+
+                {platforms.length > 0 && (
+                  <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Platforms</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                      {platforms.map((platform, i) => (
+                        <span key={`${platform}-${i}`} className="glass-indicator" style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem', fontWeight: 600 }}>{platform}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {outlets.length > 0 && (
+                  <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Outlets</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                      {outlets.map((outlet, i) => (
+                        <span key={`${outlet}-${i}`} className="glass-indicator" style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem', fontWeight: 600 }}>{outlet}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {campaign.deliverables && campaign.deliverables.length > 0 && (
                   <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>

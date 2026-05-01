@@ -11,8 +11,71 @@ import '../common/CreatePost/CreatePost.css';
 
 const MAX_VIDEO_SIZE_BYTES = 25 * 1024 * 1024;
 const MAX_VIDEO_SIZE_MESSAGE = 'Maximum video size allowed is 25 MB';
+const PLATFORM_OPTIONS = [
+  { name: 'YouTube' },
+  { name: 'Instagram' },
+  { name: 'Facebook' },
+];
+const PLATFORM_NAMES = PLATFORM_OPTIONS.map(({ name }) => name);
 
-export default function CreateCampaign({ onCampaignCreated, editData, onCancelEdit }) {
+const normalizeStringList = (value) => {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value
+      .map(item => {
+        if (item && typeof item === 'object') {
+          return item.name || item.label || item.value || item.outlet || item.platform || '';
+        }
+        return item;
+      })
+      .map(item => String(item).trim())
+      .filter(Boolean);
+  }
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return normalizeStringList(parsed);
+    } catch {}
+    return value.split(',').map(item => item.trim()).filter(Boolean);
+  }
+  if (typeof value === 'object') {
+    return normalizeStringList(value.name || value.label || value.value || value.outlet || value.platform);
+  }
+  return [];
+};
+
+const normalizePlatformList = (value) => {
+  const platforms = normalizeStringList(value);
+  return platforms
+    .map(platform => PLATFORM_NAMES.find(name => name.toLowerCase() === platform.toLowerCase()))
+    .filter(Boolean);
+};
+
+const PlatformIcon = ({ platform }) => {
+  if (platform === 'YouTube') {
+    return (
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M21.6 7.2a2.8 2.8 0 0 0-2-2C17.8 4.8 12 4.8 12 4.8s-5.8 0-7.6.4a2.8 2.8 0 0 0-2 2A29 29 0 0 0 2 12a29 29 0 0 0 .4 4.8 2.8 2.8 0 0 0 2 2c1.8.4 7.6.4 7.6.4s5.8 0 7.6-.4a2.8 2.8 0 0 0 2-2A29 29 0 0 0 22 12a29 29 0 0 0-.4-4.8ZM10 15.2V8.8l5.6 3.2L10 15.2Z" />
+      </svg>
+    );
+  }
+  if (platform === 'Instagram') {
+    return (
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+        <path fill="none" stroke="currentColor" strokeWidth="2" d="M7.5 2.8h9A4.7 4.7 0 0 1 21.2 7.5v9a4.7 4.7 0 0 1-4.7 4.7h-9a4.7 4.7 0 0 1-4.7-4.7v-9A4.7 4.7 0 0 1 7.5 2.8Z" />
+        <path fill="none" stroke="currentColor" strokeWidth="2" d="M8.5 12a3.5 3.5 0 1 0 7 0 3.5 3.5 0 0 0-7 0Z" />
+        <path fill="currentColor" d="M17.2 6.4a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M14 8.3V6.7c0-.8.2-1.2 1.3-1.2h1.5V2.8c-.7-.1-1.5-.2-2.2-.2-2.3 0-3.8 1.4-3.8 3.9v1.8H8.3v3h2.5v8.1H14v-8.1h2.5l.4-3H14Z" />
+    </svg>
+  );
+};
+
+export default function CreateCampaign({ onCampaignCreated, onSuccess, editData, onCancelEdit, onClose }) {
   const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -27,8 +90,12 @@ export default function CreateCampaign({ onCampaignCreated, editData, onCancelEd
   const [compensation, setCompensation] = useState('paid');
   const [requirements, setRequirements] = useState('');
   const [deliverables, setDeliverables] = useState('');
-  const [showCampaignFields, setShowCampaignFields] = useState(false);
+  const [platforms, setPlatforms] = useState([]);
+  const [outlets, setOutlets] = useState([]);
+  const [outletInput, setOutletInput] = useState('');
+  const [showCampaignFields, setShowCampaignFields] = useState(true);
   const [toast, setToast] = useState(null);
+  const campaignFieldsVisible = editData ? true : showCampaignFields;
 
   const imageRef = useRef(null);
   const videoRef = useRef(null);
@@ -71,11 +138,19 @@ export default function CreateCampaign({ onCampaignCreated, editData, onCancelEd
       setStartDate(editData.startDate ? new Date(editData.startDate).toISOString().split('T')[0] : '');
       setEndDate(editData.endDate ? new Date(editData.endDate).toISOString().split('T')[0] : '');
       setCompensation(editData.compensation || 'paid');
+      const nextPlatforms = normalizePlatformList(editData.platforms);
+      const fallbackPlatforms = normalizePlatformList(editData.platform);
+      const nextOutlets = normalizeStringList(editData.outlets);
+      const shouldUseFallbackPlatform = fallbackPlatforms.length > 0 && (
+        nextPlatforms.length === 0 ||
+        (nextPlatforms.length === 1 && nextPlatforms[0] === 'Other')
+      );
+      const hydratedPlatforms = shouldUseFallbackPlatform ? fallbackPlatforms : nextPlatforms;
+      setPlatforms(hydratedPlatforms);
+      setOutlets(nextOutlets);
       setRequirements(editData.requirements || '');
       setDeliverables(editData.deliverables ? editData.deliverables.join(', ') : '');
-      if (editData.budget || editData.startDate || editData.endDate) {
-        setShowCampaignFields(true);
-      }
+      setShowCampaignFields(true);
     }
   }, [editData]);
 
@@ -112,27 +187,67 @@ export default function CreateCampaign({ onCampaignCreated, editData, onCancelEd
     setShowEmojiPicker(false);
   };
 
+  const togglePlatform = (platform) => {
+    setPlatforms((current) => (
+      current.includes(platform)
+        ? current.filter((item) => item !== platform)
+        : [...current, platform]
+    ));
+  };
+
+  const addOutlet = () => {
+    const nextOutlet = outletInput.trim();
+      if (!nextOutlet || outlets.some(outlet => outlet.toLowerCase() === nextOutlet.toLowerCase())) return;
+    setOutlets((current) => [...current, nextOutlet]);
+    setOutletInput('');
+  };
+
+  const removeOutlet = (outlet) => {
+    setOutlets((current) => current.filter((item) => item !== outlet));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!content.trim() && mediaFiles.length === 0) return;
 
     setLoading(true);
     try {
+      const pendingOutlet = outletInput.trim();
+      const finalPlatforms = campaignFieldsVisible ? normalizePlatformList(platforms) : [];
+      const finalOutlets = campaignFieldsVisible
+        ? [...outlets, pendingOutlet]
+            .map(outlet => outlet.trim())
+            .filter(Boolean)
+            .filter((outlet, index, list) => list.findIndex(item => item.toLowerCase() === outlet.toLowerCase()) === index)
+        : [];
+
+      if (campaignFieldsVisible && finalPlatforms.length === 0) {
+        setToast({ message: 'Select at least one platform before publishing the campaign.', type: 'warning' });
+        return;
+      }
+
       const payload = {
         title, content, tags, mediaFiles, budget, category, 
-        startDate, endDate, compensation, requirements, deliverables
+        startDate, endDate, compensation, requirements, deliverables,
+        platforms: finalPlatforms,
+        outlets: finalOutlets,
+        campaignDetailsEnabled: campaignFieldsVisible
       };
       const formData = serializeCampaignPayload(payload);
 
       if (editData) {
         const updated = await api.updateCampaign(editData._id, formData);
         if (onCampaignCreated) onCampaignCreated(updated);
+        if (onSuccess) onSuccess(updated);
       } else {
         const created = await api.createCampaign(formData);
         setTitle(''); setContent(''); setMediaFiles([]); setTags('');
         setBudget(''); setCategory('Other'); setStartDate(''); setEndDate('');
         setCompensation('paid'); setRequirements(''); setDeliverables('');
+        setPlatforms([]); setOutlets([]); setOutletInput('');
+        setShowCampaignFields(true);
         if (onCampaignCreated) onCampaignCreated(created);
+        if (onSuccess) onSuccess(created);
       }
     } catch (err) {
       console.error(err);
@@ -197,6 +312,7 @@ export default function CreateCampaign({ onCampaignCreated, editData, onCancelEd
         </div>
       )}
 
+      {!editData && (
       <div className="create-post-campaign-toggle" style={{ margin: '0.5rem 0' }}>
         <button
           type="button"
@@ -218,8 +334,9 @@ export default function CreateCampaign({ onCampaignCreated, editData, onCancelEd
           {showCampaignFields ? '− Remove Campaign Details' : '+ Add Campaign Details (Budget, Dates, etc.)'}
         </button>
       </div>
+      )}
 
-      {showCampaignFields && (
+      {campaignFieldsVisible && (
         <div className="campaign-fields-grid" style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
@@ -263,21 +380,70 @@ export default function CreateCampaign({ onCampaignCreated, editData, onCancelEd
             </select>
           </div>
           <div className="input-group">
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem', display: 'block' }}>Platforms</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+              {PLATFORM_OPTIONS.map(({ name: platform }) => (
+                <button
+                  key={platform}
+                  type="button"
+                  onClick={() => togglePlatform(platform)}
+                  className="campaign-platform-option glass-indicator"
+                  style={{
+                    borderRadius: '999px',
+                    border: platforms.includes(platform) ? '1px solid var(--accent)' : '1px solid var(--border)',
+                    background: platforms.includes(platform) ? 'rgba(var(--accent-rgb), 0.14)' : 'var(--surface-alt)',
+                    color: platforms.includes(platform) ? 'var(--accent)' : 'var(--text-primary)',
+                    fontWeight: 800,
+                    cursor: 'pointer'
+                  }}
+                  aria-label={platform}
+                  title={platform}
+                >
+                  <PlatformIcon platform={platform} />
+                  <span>{platform}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="input-group">
             <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem', display: 'block' }}>Deliverables (comma separated)</label>
             <input type="text" className="input sm glass-indicator" placeholder="e.g. 1 Post, 2 Stories" value={deliverables} onChange={e => setDeliverables(e.target.value)}
               style={{ width: '100%', padding: '0.6rem 1rem', borderRadius: '20px', border: '1px solid var(--border)', background: 'var(--surface-alt)', color: 'var(--text-primary)' }} />
+          </div>
+          <div className="input-group">
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem', display: 'block' }}>Outlets</label>
+            <input
+              type="text"
+              className="input sm glass-indicator"
+              placeholder="Type outlet and press Enter"
+              value={outletInput}
+              onChange={e => setOutletInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addOutlet();
+                }
+              }}
+              style={{ width: '100%', padding: '0.6rem 1rem', borderRadius: '20px', border: '1px solid var(--border)', background: 'var(--surface-alt)', color: 'var(--text-primary)' }}
+            />
+            {outlets.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', marginTop: '0.65rem' }}>
+                {outlets.map((outlet) => (
+                  <span key={outlet} className="badge badge-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                    {outlet}
+                    <button type="button" onClick={() => removeOutlet(outlet)} style={{ border: 0, background: 'transparent', color: 'inherit', cursor: 'pointer', padding: 0, display: 'inline-flex' }}>
+                      <X size={13} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <div className="input-group" style={{ gridColumn: 'span 2' }}>
             <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem', display: 'block' }}>Requirements</label>
             <textarea className="input sm glass-indicator" placeholder="Min 5k followers, Tech niche preferred..." value={requirements} onChange={e => setRequirements(e.target.value)}
               rows={3} style={{ width: '100%', padding: '1rem', background: 'var(--surface-alt)', border: '1px solid var(--border)', borderRadius: '16px', color: 'var(--text-primary)', resize: 'none', outline: 'none' }} />
           </div>
-        </div>
-      )}
-
-      {tags && (
-        <div className="create-post-tags">
-          {tags.split(',').map((t, i) => t.trim() && <span key={i} className="badge badge-accent">#{t.trim()}</span>)}
         </div>
       )}
 
@@ -305,16 +471,16 @@ export default function CreateCampaign({ onCampaignCreated, editData, onCancelEd
           <input type="text" placeholder="Tags (comma separated)" value={tags} onChange={(e) => setTags(e.target.value)} className="tags-input glass-indicator" style={{ padding: '0.5rem 1rem', background: 'var(--surface-alt)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.8125rem' }} />
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', width: '100%' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', justifyContent: editData ? 'space-between' : 'flex-end', width: '100%' }}>
           {editData && (
-            <LiquidButton variant="secondary" onClick={onCancelEdit} disabled={loading}
-              style={{ padding: '0.5rem 1.5rem', display: 'flex', justifyContent: 'center' }}>
+            <LiquidButton variant="secondary" onClick={onCancelEdit || onClose} disabled={loading}
+              style={{ padding: '0.5rem 1.5rem', display: 'flex', justifyContent: 'center', flex: '0 0 auto' }}>
               Cancel
             </LiquidButton>
           )}
           <LiquidButton variant="primary" onClick={handleSubmit}
             disabled={loading || (!content.trim() && mediaFiles.length === 0)}
-            style={{ padding: '0.5rem 1.5rem', display: 'flex', justifyContent: 'center', flex: 1, width: '100%' }}>
+            style={{ padding: '0.5rem 1.5rem', display: 'flex', justifyContent: 'center', flex: editData ? '0 0 auto' : 1, minWidth: editData ? '120px' : undefined, width: editData ? 'auto' : '100%' }}>
             {loading ? (editData ? 'Saving...' : 'Publishing...') : (
               editData ? <><Check size={16} style={{marginRight:'0.5rem'}}/> Save</> : <><Send size={16} style={{marginRight:'0.5rem'}}/> Publish</>
             )}

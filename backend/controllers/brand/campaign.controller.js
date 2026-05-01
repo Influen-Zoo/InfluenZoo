@@ -9,6 +9,7 @@ const brandCampaignController = {
       res.status(201).json({ success: true, campaign, compression: getCompressionResults(req.files) });
     } catch (error) {
       console.error('Create Campaign Error:', error);
+      if (error.message === 'At least one platform is required') return res.status(400).json({ error: error.message });
       res.status(500).json({ error: 'Failed to create campaign' });
     }
   },
@@ -31,6 +32,7 @@ const brandCampaignController = {
       console.error('Update Campaign Error:', error);
       if (error.message === 'Campaign not found') return res.status(404).json({ error: error.message });
       if (error.message === 'Not authorized to edit this campaign') return res.status(403).json({ error: error.message });
+      if (error.message === 'At least one platform is required') return res.status(400).json({ error: error.message });
       res.status(500).json({ error: 'Failed to update campaign' });
     }
   },

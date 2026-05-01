@@ -7,7 +7,7 @@ const influencerApplicationController = {
       res.status(201).json({ success: true, data: application });
     } catch (error) {
       if (error.message.includes('not found')) return res.status(404).json({ error: error.message });
-      if (error.message.includes('already applied') || error.message.includes('not active')) return res.status(400).json({ error: error.message });
+      if (error.message.includes('already applied') || error.message.includes('not active') || error.message.includes('valid outlet')) return res.status(400).json({ error: error.message });
       res.status(500).json({ error: 'Server error' });
     }
   },

@@ -6,11 +6,19 @@ export default function ApplyModal({
   onClose,
   applyMsg,
   setApplyMsg,
+  selectedOutlet,
+  setSelectedOutlet,
   onApply,
   loading
 }) {
   if (!campaign) return null;
   const isMobile = typeof window !== 'undefined' ? window.innerWidth <= 768 : true;
+  const outlets = Array.isArray(campaign.outlets) ? campaign.outlets : [];
+  const outletRequired = outlets.length > 0;
+
+  React.useEffect(() => {
+    if (!outlets.includes(selectedOutlet)) setSelectedOutlet('');
+  }, [campaign?._id]);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -21,6 +29,21 @@ export default function ApplyModal({
         <p style={{ fontSize: '0.875rem', fontWeight: 'bold', color: 'var(--accent)', marginBottom: '1.25rem' }}>
           Application Fee: {campaign.coinCost || 0} Coins
         </p>
+        {outlets.length > 0 && (
+          <div className="input-group" style={{ marginBottom: '1.25rem' }}>
+            <label>Outlet</label>
+            <select
+              className="input"
+              value={selectedOutlet}
+              onChange={(e) => setSelectedOutlet(e.target.value)}
+            >
+              <option value="">Select outlet</option>
+              {outlets.map((outlet) => (
+                <option key={outlet} value={outlet}>{outlet}</option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="input-group" style={{ marginBottom: '1.25rem' }}>
           <label>Why are you a good fit?</label>
           <textarea
@@ -30,9 +53,9 @@ export default function ApplyModal({
             onChange={(e) => setApplyMsg(e.target.value)}
           />
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', flexDirection: isMobile ? 'column-reverse' : 'row' }}>
-          <LiquidButton variant="secondary" onClick={onClose} style={{ flex: 1 }}>Cancel</LiquidButton>
-          <LiquidButton variant="primary" onClick={onApply} style={{ flex: 1 }} disabled={loading}>
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '0.75rem' }}>
+          <LiquidButton variant="secondary" onClick={onClose} size={isMobile ? 'small' : 'medium'} style={{ flex: '0 0 auto' }}>Cancel</LiquidButton>
+          <LiquidButton variant="primary" onClick={onApply} size={isMobile ? 'small' : 'medium'} style={{ flex: '0 0 auto', marginLeft: 'auto' }} disabled={loading || (outletRequired && !selectedOutlet)}>
             {loading ? 'Applying...' : 'Pay & Apply'}
           </LiquidButton>
         </div>

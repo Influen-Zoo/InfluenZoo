@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart3, Megaphone, Wallet, Plus, Check, XCircle } from 'lucide-react';
+import { BarChart3, Megaphone, Wallet, Plus, Check, XCircle, Eye, X } from 'lucide-react';
 import api from '../../../services/api';
 import { resolveAssetUrl } from '../../../utils/helpers';
 import BrandDashboardAnalytics from './dashboard/BrandDashboardAnalytics';
@@ -20,11 +20,13 @@ export default function DashboardTab({
   onWithdraw,
   onAcceptReject,
   jumpToId,
-  onClearJump
+  onClearJump,
+  onViewProfile
 }) {
   const [expandedCamp, setExpandedCamp] = useState(null);
   const [applications, setApplications] = useState({});
   const [loadingApps, setLoadingApps] = useState(false);
+  const [viewingApplication, setViewingApplication] = useState(null);
 
   // Auto-expand campaign if jumpToId is provided
   React.useEffect(() => {
@@ -182,7 +184,14 @@ export default function DashboardTab({
                                   borderRadius: 'var(--radius-md)',
                                   border: '1px solid var(--border-light)'
                                 }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                  <div 
+                                    style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}
+                                    onClick={() => {
+                                      if (onViewProfile && app.influencerId?._id) {
+                                        onViewProfile(app.influencerId._id);
+                                      }
+                                    }}
+                                  >
                                     <div style={{ 
                                       width: '36px', 
                                       height: '36px', 
@@ -204,6 +213,14 @@ export default function DashboardTab({
                                     </div>
                                   </div>
                                   <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <button
+                                      className="btn-icon sm"
+                                      onClick={() => setViewingApplication(app)}
+                                      style={{ color: 'var(--accent)', background: 'rgba(255, 165, 0, 0.12)' }}
+                                      title="View application"
+                                    >
+                                      <Eye size={18} />
+                                    </button>
                                     {app.status === 'pending' && (
                                       <>
                                         <button 
@@ -246,6 +263,95 @@ export default function DashboardTab({
         )}
 
       </div>
+      {viewingApplication && (
+        <div className="modal-overlay" onClick={() => setViewingApplication(null)}>
+          <div
+            className="modal glass-panel"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '520px',
+              width: 'calc(100vw - 32px)',
+              padding: '1.5rem',
+              borderRadius: '24px',
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <button className="modal-close" onClick={() => setViewingApplication(null)} aria-label="Close">
+              <X size={18} />
+            </button>
+
+            <div 
+              style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', marginBottom: '1.25rem', cursor: 'pointer' }}
+              onClick={() => {
+                if (onViewProfile && viewingApplication?.influencerId?._id) {
+                  onViewProfile(viewingApplication.influencerId._id);
+                }
+              }}
+            >
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                overflow: 'hidden',
+                flexShrink: 0,
+                background: 'var(--accent-gradient)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontWeight: 800,
+              }}>
+                {viewingApplication.influencerId?.avatar ? (
+                  <img
+                    src={resolveAssetUrl(viewingApplication.influencerId.avatar)}
+                    alt={viewingApplication.influencerId?.name || 'Influencer'}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  viewingApplication.influencerId?.name?.[0] || 'I'
+                )}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <h3 style={{ margin: 0, fontSize: '1.05rem' }}>{viewingApplication.influencerId?.name || 'Influencer'}</h3>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>
+                  {viewingApplication.status}
+                </span>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gap: '0.9rem' }}>
+              <section style={{
+                background: 'var(--surface-alt)',
+                border: '1px solid var(--border)',
+                borderRadius: '16px',
+                padding: '1rem',
+              }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.35rem', fontWeight: 700 }}>
+                  Selected Outlet
+                </div>
+                <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {viewingApplication.selectedOutlet || 'No outlet selected'}
+                </div>
+              </section>
+
+              <section style={{
+                background: 'var(--surface-alt)',
+                border: '1px solid var(--border)',
+                borderRadius: '16px',
+                padding: '1rem',
+              }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.35rem', fontWeight: 700 }}>
+                  Creator comment
+                </div>
+                <p style={{ margin: 0, color: 'var(--text-primary)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
+                  {viewingApplication.coverLetter || 'No comment provided.'}
+                </p>
+              </section>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

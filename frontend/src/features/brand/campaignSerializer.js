@@ -14,9 +14,13 @@ export const serializeCampaignPayload = ({
   endDate,
   compensation,
   requirements,
-  deliverables
+  deliverables,
+  platforms,
+  outlets,
+  campaignDetailsEnabled
 }) => {
   const formData = new FormData();
+  formData.append('campaignDetailsEnabled', campaignDetailsEnabled ? 'true' : 'false');
   if (title?.trim()) formData.append('title', title);
   formData.append('content', content);
 
@@ -38,6 +42,11 @@ export const serializeCampaignPayload = ({
   if (startDate) formData.append('startDate', startDate);
   if (endDate) formData.append('endDate', endDate);
   if (compensation) formData.append('compensation', compensation);
+  if (Array.isArray(platforms)) {
+    formData.append('platforms', JSON.stringify(platforms));
+    if (platforms[0]) formData.append('platform', platforms[0]);
+  }
+  if (Array.isArray(outlets)) formData.append('outlets', JSON.stringify(outlets));
   if (requirements) formData.append('requirements', requirements);
   
   if (deliverables) {

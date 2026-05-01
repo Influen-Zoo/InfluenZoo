@@ -434,6 +434,10 @@
   display: none;
 }
 
+.brand-logo-strip-desktop {
+  display: block;
+}
+
 .brand-logo-carousel {
   width: min(100%, var(--max-width));
   margin: 0 auto;
@@ -459,6 +463,12 @@
   .brand-logo-strip {
     padding: 0;
     margin-top: 0;
+  }
+  .brand-logo-strip-desktop {
+    display: none;
+  }
+  .brand-logo-strip-mobile {
+    display: block;
   }
   .brand-logo-carousel {
     width: 100%;
@@ -486,6 +496,7 @@
   align-items: center;
   padding: 0;
   animation: brandLogoScroll var(--scroll-duration, 18s) linear infinite;
+  will-change: transform;
 }
 
 .brand-logo-carousel:hover .brand-logo-track,
@@ -533,10 +544,10 @@
 
 @keyframes brandLogoScroll {
   from {
-    transform: translateX(0);
+    transform: translateX(100%);
   }
   to {
-    transform: translateX(-50%);
+    transform: translateX(-100%);
   }
 }
 

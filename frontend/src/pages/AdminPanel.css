@@ -602,11 +602,12 @@
   width: max-content;
   gap: 0.7rem;
   animation: brandLogoScroll var(--scroll-duration, 18s) linear infinite;
+  will-change: transform;
 }
 
 @keyframes brandLogoScroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from { transform: translateX(100%); }
+  to { transform: translateX(-100%); }
 }
 
 .brand-logo-preview-separator {

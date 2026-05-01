@@ -3,11 +3,14 @@ const Campaign = require('../../models/Campaign');
 
 const influencerApplicationService = {
   applyToCampaign: async (influencerId, data) => {
-    const { campaignId, coverLetter, proposedPrice } = data;
+    const { campaignId, coverLetter, proposedPrice, selectedOutlet } = data;
 
     const campaign = await Campaign.findById(campaignId);
     if (!campaign) throw new Error('Campaign not found');
     if (campaign.status !== 'active') throw new Error('Campaign is not active');
+    if (campaign.outlets?.length && !campaign.outlets.includes(selectedOutlet)) {
+      throw new Error('Please select a valid outlet');
+    }
 
     const existing = await Application.findOne({ campaignId, influencerId });
     if (existing) throw new Error('You already applied to this campaign');
@@ -18,6 +21,7 @@ const influencerApplicationService = {
       influencerId,
       coverLetter,
       proposedPrice: proposedPrice || campaign.budget,
+      selectedOutlet: selectedOutlet || '',
     });
 
     await application.save();

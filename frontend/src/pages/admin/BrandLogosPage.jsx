@@ -288,29 +288,16 @@ export default function BrandLogosPage() {
                   gap: `${showSeparator ? spacing / 2 : spacing}px`
                 }}
               >
-                {(() => {
-                  const minCount = 10;
-                  let items = [...previewLogos];
-                  if (items.length > 0 && items[0]._id !== 'sample') {
-                    while (items.length < minCount) {
-                      items = [...items, ...previewLogos];
-                    }
-                  }
-                  const loopItems = [...items, ...items];
-                  return loopItems.map((logo, i) => (
-                    <React.Fragment key={`${logo._id}-${i}`}>
-                      <div 
-                        className="brand-logo-preview-chip" 
-                        style={{ margin: `0 ${spacing / 2}px` }}
-                      >
-                        {logo.image ? <img src={resolveAssetUrl(logo.image)} alt={logo.name} /> : <strong>PNG</strong>}
-                      </div>
-                      {showSeparator && (
-                        <div className="brand-logo-preview-separator" />
-                      )}
-                    </React.Fragment>
-                  ));
-                })()}
+                {previewLogos.map((logo, index) => (
+                  <React.Fragment key={logo._id}>
+                    <div className="brand-logo-preview-chip">
+                      {logo.image ? <img src={resolveAssetUrl(logo.image)} alt={logo.name} /> : <strong>PNG</strong>}
+                    </div>
+                    {showSeparator && index < previewLogos.length - 1 && (
+                      <div className="brand-logo-preview-separator" />
+                    )}
+                  </React.Fragment>
+                ))}
               </div>
             </div>
           </div>

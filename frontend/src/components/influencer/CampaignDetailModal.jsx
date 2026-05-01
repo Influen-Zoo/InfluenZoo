@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Heart, MessageCircle, Share2, Send, User } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Bookmark, Share2 } from 'lucide-react';
 import LiquidButton from '../common/LiquidButton/LiquidButton';
-import api from '../../services/api';
 import { resolveAssetUrl, getItemId } from '../../utils/helpers';
 
 export default function CampaignDetailModal({
@@ -11,18 +10,13 @@ export default function CampaignDetailModal({
   applied = false,
   saved = false,
   onSave,
-  onViewProfile,
-  currentUserId
+  onViewProfile
 }) {
   const [campaign, setCampaign] = useState(initialCampaign);
-  const [localLikes, setLocalLikes] = useState([]);
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSaved, setIsSaved] = useState(saved);
   const [loading, setLoading] = useState(false);
 
   const campaignId = getItemId(initialCampaign);
-  const isLiked = localLikes.includes(currentUserId);
   const isMobile = typeof window !== 'undefined' ? window.innerWidth <= 768 : true;
 
   useEffect(() => {
@@ -31,13 +25,9 @@ export default function CampaignDetailModal({
 
       try {
         setLoading(true);
-        if (typeof initialCampaign === 'object') {
-          setCampaign(initialCampaign);
-          setLocalLikes(initialCampaign.likes || []);
-          setComments(initialCampaign.comments || []);
-        }
-      } catch (e) {
-        console.error('Failed to load campaign details:', e);
+        if (typeof initialCampaign === 'object') setCampaign(initialCampaign);
+      } catch (error) {
+        console.error('Failed to load campaign details:', error);
       } finally {
         setLoading(false);
       }
@@ -45,6 +35,10 @@ export default function CampaignDetailModal({
 
     loadFullCampaign();
   }, [initialCampaign, campaignId]);
+
+  useEffect(() => {
+    setIsSaved(saved);
+  }, [saved]);
 
   if (!campaign || typeof campaign !== 'object') {
     if (loading) {
@@ -57,47 +51,6 @@ export default function CampaignDetailModal({
     return null;
   }
 
-  const handleLike = async () => {
-    try {
-      const resp = await api.likeCampaign(campaignId);
-      if (resp.success) setLocalLikes(resp.likes);
-    } catch (e) {
-      console.error('Like error:', e);
-    }
-  };
-
-  const handleComment = async (e) => {
-    e.preventDefault();
-    if (!newComment.trim() || isSubmitting) return;
-
-    try {
-      setIsSubmitting(true);
-      const resp = await api.commentOnCampaign(campaignId, newComment);
-      if (resp.success) {
-        setComments(resp.comments);
-        setNewComment('');
-      }
-    } catch (e) {
-      console.error('Comment error:', e);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleShare = () => {
-    const shareUrl = `${window.location.origin}/campaign/${campaignId}`;
-    if (navigator.share) {
-      navigator.share({
-        title: campaign.title,
-        text: campaign.description,
-        url: shareUrl,
-      }).catch(console.error);
-    } else {
-      navigator.clipboard.writeText(shareUrl);
-      alert('Link copied to clipboard!');
-    }
-  };
-
   const platformsArr = Array.isArray(campaign.platforms) && campaign.platforms.length > 0
     ? campaign.platforms
     : Array.isArray(campaign.platform)
@@ -108,12 +61,36 @@ export default function CampaignDetailModal({
 
   const isExpired = campaign.endDate && new Date(campaign.endDate) < new Date();
   const isNotActive = campaign.status && campaign.status !== 'active';
+  const brandAvatar = campaign.brandAvatar || campaign.author?.avatar;
+  const brandName = campaign.brandName || campaign.author?.name || 'Brand';
+  const compensationLabel = getCompensationLabel(campaign.compensation);
+
+  const handleSave = (event) => {
+    event.stopPropagation();
+    setIsSaved((current) => !current);
+    if (onSave) onSave(campaign);
+  };
+
+  const handleShare = (event) => {
+    event.stopPropagation();
+    const shareUrl = `${window.location.origin}/campaign/${campaignId}`;
+    if (navigator.share) {
+      navigator.share({
+        title: campaign.title,
+        text: campaign.description || campaign.content,
+        url: shareUrl,
+      }).catch(console.error);
+    } else {
+      navigator.clipboard.writeText(shareUrl);
+      alert('Link copied to clipboard!');
+    }
+  };
 
   return (
     <div className="modal-overlay" onClick={() => onClose(null)}>
       <div
         className="modal"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
         style={{
           maxWidth: isMobile ? '100%' : '1000px',
           width: isMobile ? 'calc(100vw - 16px)' : '95%',
@@ -137,7 +114,7 @@ export default function CampaignDetailModal({
             background: 'var(--surface)'
           }}
         >
-          ×
+          x
         </button>
 
         <div
@@ -155,46 +132,77 @@ export default function CampaignDetailModal({
             <div style={{ marginBottom: isMobile ? '1rem' : '1.75rem' }}>
               <div
                 style={{
-                  display: 'inline-flex',
+                  display: 'flex',
                   alignItems: 'center',
-                  gap: '0.75rem',
+                  justifyContent: 'space-between',
+                  gap: '0.65rem',
                   marginBottom: '1rem',
-                  background: 'var(--surface-alt)',
-                  padding: '0.6rem 0.9rem',
-                  borderRadius: '999px',
-                  border: '1px solid var(--border)',
-                  cursor: 'pointer',
                   maxWidth: '100%'
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onViewProfile && campaign.author?._id) onViewProfile(campaign.author._id);
                 }}
               >
                 <div
                   style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '10px',
-                    background: 'var(--accent-gradient)',
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    overflow: 'hidden',
-                    flexShrink: 0
+                    gap: '0.75rem',
+                    background: 'var(--surface-alt)',
+                    padding: '0.6rem 0.9rem',
+                    borderRadius: '999px',
+                    border: '1px solid var(--border)',
+                    cursor: 'pointer',
+                    maxWidth: '100%'
+                  }}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (onViewProfile && campaign.author?._id) onViewProfile(campaign.author._id);
                   }}
                 >
-                  {campaign.brandAvatar ? (
-                    <img src={resolveAssetUrl(campaign.brandAvatar)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="brand avatar" />
-                  ) : (
-                    campaign.brandName?.[0]
-                  )}
+                  <div
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '10px',
+                      background: 'var(--accent-gradient)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontWeight: 'bold',
+                      overflow: 'hidden',
+                      flexShrink: 0
+                    }}
+                  >
+                    {brandAvatar ? (
+                      <img src={resolveAssetUrl(brandAvatar)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="brand avatar" />
+                    ) : (
+                      brandName[0]
+                    )}
+                  </div>
+                  <span style={{ fontSize: '0.85rem', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {brandName} - <span style={{ color: 'var(--text-muted)', fontWeight: '500' }}>Verified Brand</span>
+                  </span>
                 </div>
-                <span style={{ fontSize: '0.85rem', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {campaign.brandName} • <span style={{ color: 'var(--text-muted)', fontWeight: '500' }}>Verified Brand</span>
-                </span>
+
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.55rem', flex: '0 0 auto', marginRight: isMobile ? '2.5rem' : 0 }}>
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    title={isSaved ? 'Saved' : 'Save campaign'}
+                    aria-label={isSaved ? 'Saved' : 'Save campaign'}
+                    style={detailIconButtonStyle('#facc15', isSaved)}
+                  >
+                    <Bookmark size={18} fill={isSaved ? 'currentColor' : 'none'} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    title="Share campaign"
+                    aria-label="Share campaign"
+                    style={detailIconButtonStyle('#22c55e')}
+                  >
+                    <Share2 size={18} />
+                  </button>
+                </div>
               </div>
 
               <h1
@@ -211,39 +219,12 @@ export default function CampaignDetailModal({
               </h1>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <span className={`badge ${campaign.type === 'paid' ? 'badge-paid' : 'badge-free'}`}>
-                  {campaign.type === 'paid' ? 'Paid Collaboration' : 'Barter / Free Collab'}
+                <span className={`badge ${campaign.compensation === 'product' ? 'badge-free' : 'badge-paid'}`}>
+                  {compensationLabel}
                 </span>
                 <span className="badge" style={{ background: 'var(--surface-alt)', border: '1px solid var(--border)' }}>
                   {campaign.category}
                 </span>
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginBottom: isMobile ? '1rem' : '1.5rem',
-                padding: isMobile ? '1rem' : '1.25rem',
-                background: 'var(--surface-alt)',
-                borderRadius: '22px',
-                border: '1px solid var(--border)'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '0.9rem', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '700' }}>
-                <span>{localLikes.length} Likes</span>
-                <span>{comments.length} Comments</span>
-              </div>
-              <div style={{ height: '1px', background: 'var(--border)', marginBottom: '0.9rem' }} />
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, minmax(0, 1fr))', gap: '0.5rem' }}>
-                <button onClick={handleLike} style={socialButtonStyle(isLiked ? 'var(--danger)' : 'var(--text-secondary)')}>
-                  <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} /> Like
-                </button>
-                <button style={socialButtonStyle('var(--text-secondary)')}>
-                  <MessageCircle size={18} /> Comment
-                </button>
-                <button onClick={handleShare} style={socialButtonStyle('var(--text-secondary)')}>
-                  <Share2 size={18} /> Share
-                </button>
               </div>
             </div>
 
@@ -258,12 +239,12 @@ export default function CampaignDetailModal({
               <div style={{ marginBottom: isMobile ? '1rem' : '1.5rem' }}>
                 <h4 style={sectionTitleStyle}>Campaign Visuals</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {campaign.media.map((m, i) => (
-                    <div key={i} style={{ borderRadius: '20px', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface-alt)' }}>
-                      {m.type === 'video' ? (
-                        <video src={resolveAssetUrl(m.url)} controls style={{ width: '100%', display: 'block' }} />
+                  {campaign.media.map((media, index) => (
+                    <div key={index} style={{ borderRadius: '20px', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface-alt)' }}>
+                      {media.type === 'video' ? (
+                        <video src={resolveAssetUrl(media.url)} controls style={{ width: '100%', display: 'block' }} />
                       ) : (
-                        <img src={resolveAssetUrl(m.url)} style={{ width: '100%', display: 'block' }} alt="reference" />
+                        <img src={resolveAssetUrl(media.url)} style={{ width: '100%', display: 'block' }} alt="reference" />
                       )}
                     </div>
                   ))}
@@ -294,83 +275,12 @@ export default function CampaignDetailModal({
                 <div style={{ paddingLeft: campaign.requirements && !isMobile ? '1rem' : 0, borderLeft: campaign.requirements && !isMobile ? '1px solid var(--border)' : 'none' }}>
                   <h4 style={miniLabelStyle}>Deliverables</h4>
                   <ul style={{ paddingLeft: '1rem', margin: 0, color: 'var(--text-secondary)' }}>
-                    {campaign.deliverables.map((d, i) => (
-                      <li key={i} style={{ marginBottom: '0.4rem' }}>{d}</li>
+                    {campaign.deliverables.map((deliverable, index) => (
+                      <li key={index} style={{ marginBottom: '0.4rem' }}>{deliverable}</li>
                     ))}
                   </ul>
                 </div>
               )}
-            </div>
-
-            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', fontWeight: '800' }}>Comments ({comments.length})</h3>
-
-              <form onSubmit={handleComment} style={{ marginBottom: '1rem' }}>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type="text"
-                    placeholder="Ask a question or express interest..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '1rem 3rem 1rem 1rem',
-                      background: 'var(--surface-alt)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '18px',
-                      color: 'var(--text)',
-                      fontSize: '0.95rem',
-                      outline: 'none'
-                    }}
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    style={{
-                      position: 'absolute',
-                      right: '0.6rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'var(--primary)',
-                      color: 'var(--text-inverse)',
-                      border: 'none',
-                      padding: '0.6rem',
-                      borderRadius: '999px',
-                      display: 'flex',
-                      cursor: 'pointer',
-                      opacity: newComment.trim() ? 1 : 0.5
-                    }}
-                  >
-                    <Send size={16} />
-                  </button>
-                </div>
-              </form>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                {comments.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-muted)', background: 'var(--surface-alt)', borderRadius: '18px', border: '1px dashed var(--border)' }}>
-                    No comments yet. Be the first to share your thoughts.
-                  </div>
-                ) : (
-                  comments.map((c, i) => (
-                    <div key={i} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                      <div style={{ width: '38px', height: '38px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0 }}>
-                        {c.user?.avatar ? (
-                          <img src={resolveAssetUrl(c.user.avatar)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                          <div style={{ width: '100%', height: '100%', background: 'var(--surface-alt)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <User size={16} />
-                          </div>
-                        )}
-                      </div>
-                      <div style={{ flex: 1, background: 'var(--surface-alt)', padding: '0.9rem 1rem', borderRadius: '0 18px 18px 18px', border: '1px solid var(--border)' }}>
-                        <div style={{ fontWeight: '700', fontSize: '0.85rem', marginBottom: '0.2rem' }}>{c.user?.name || 'User'}</div>
-                        <div style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{c.text}</div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
             </div>
           </div>
 
@@ -387,11 +297,7 @@ export default function CampaignDetailModal({
             <div style={{ background: 'var(--surface)', padding: isMobile ? '1rem' : '1.25rem', borderRadius: '22px', border: '1px solid var(--border)' }}>
               <span style={miniLabelStyle}>Estimated Compensation</span>
               <div style={{ fontSize: isMobile ? '1.35rem' : '1.7rem', fontWeight: '900', color: 'var(--success)', lineHeight: 1.1 }}>
-                {campaign.compensation === 'paid'
-                  ? `₹${(campaign.budget || 0).toLocaleString()}`
-                  : campaign.compensation === 'both'
-                    ? `₹${(campaign.budget || 0).toLocaleString()} + Prod.`
-                    : 'Product Only'}
+                {getCompensationValue(campaign)}
               </div>
             </div>
 
@@ -409,9 +315,9 @@ export default function CampaignDetailModal({
               <div style={infoCardStyle}>
                 <span style={miniLabelStyle}>Platforms</span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
-                  {platformsArr.slice(0, 3).map((p, i, arr) => (
-                    <span key={p} style={{ fontSize: '0.78rem', fontWeight: '700' }}>
-                      {p}{i < arr.length - 1 && ','}
+                  {platformsArr.slice(0, 3).map((platform, index, arr) => (
+                    <span key={platform} style={{ fontSize: '0.78rem', fontWeight: '700' }}>
+                      {platform}{index < arr.length - 1 && ','}
                     </span>
                   ))}
                   {platformsArr.length > 3 && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>+{platformsArr.length - 3} more</span>}
@@ -423,9 +329,9 @@ export default function CampaignDetailModal({
               <div style={infoCardStyle}>
                 <span style={miniLabelStyle}>Campaign Tags</span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
-                  {campaign.tags.map((t) => (
-                    <span key={t} style={{ fontSize: '0.75rem', padding: '0.38rem 0.7rem', background: 'var(--surface-alt)', borderRadius: '999px', color: 'var(--primary)', fontWeight: '600' }}>
-                      #{t}
+                  {campaign.tags.map((tag) => (
+                    <span key={tag} style={{ fontSize: '0.75rem', padding: '0.38rem 0.7rem', background: 'var(--surface-alt)', borderRadius: '999px', color: 'var(--primary)', fontWeight: '600' }}>
+                      #{tag}
                     </span>
                   ))}
                 </div>
@@ -458,6 +364,33 @@ export default function CampaignDetailModal({
   );
 }
 
+const getCompensationLabel = (compensation) => {
+  if (compensation === 'product') return 'Barter';
+  if (compensation === 'both') return 'Paid + Barter';
+  return 'Paid';
+};
+
+const getCompensationValue = (campaign) => {
+  const amount = Number(campaign.budget || 0).toLocaleString('en-IN');
+  if (campaign.compensation === 'product') return 'Barter';
+  if (campaign.compensation === 'both') return `INR ${amount} + Barter`;
+  return `INR ${amount}`;
+};
+
+const detailIconButtonStyle = (color, active = false) => ({
+  width: 40,
+  height: 40,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: `1px solid ${color}`,
+  borderRadius: 12,
+  background: active ? color : 'var(--surface-alt)',
+  color: active ? '#111827' : color,
+  cursor: 'pointer',
+  flex: '0 0 auto'
+});
+
 const sectionTitleStyle = {
   fontSize: '1.05rem',
   marginBottom: '0.85rem',
@@ -481,18 +414,3 @@ const infoCardStyle = {
   borderRadius: '18px',
   border: '1px solid var(--border)'
 };
-
-const socialButtonStyle = (color) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '8px',
-  minHeight: '44px',
-  background: 'transparent',
-  border: '1px solid var(--border)',
-  borderRadius: '14px',
-  color,
-  cursor: 'pointer',
-  fontSize: '0.9rem',
-  fontWeight: '700'
-});

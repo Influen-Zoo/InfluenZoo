@@ -28,6 +28,8 @@ export const InfluencerDashboardPage = () => {
     setApplyModal,
     applyMsg,
     setApplyMsg,
+    applyOutlet,
+    setApplyOutlet,
     handleApply,
     loading,
     viewingProfileId,
@@ -64,8 +66,10 @@ export const InfluencerDashboardPage = () => {
           campaign={applyModal}
           applyMsg={applyMsg}
           setApplyMsg={setApplyMsg}
+          selectedOutlet={applyOutlet}
+          setSelectedOutlet={setApplyOutlet}
           onClose={() => setApplyModal(null)}
-          onApply={() => handleApply(applyModal._id || applyModal.id, applyMsg)}
+          onApply={() => handleApply(applyModal._id || applyModal.id, applyMsg, applyOutlet)}
           loading={loading}
         />
       )}

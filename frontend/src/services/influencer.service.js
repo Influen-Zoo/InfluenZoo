@@ -35,10 +35,11 @@ export const influencerService = {
     return response.data?.brands || response.data?.data || (Array.isArray(response.data) ? response.data : []);
   },
 
-  async applyToCampaign(campaignId, message) {
+  async applyToCampaign(campaignId, message, selectedOutlet = '') {
     const response = await apiClient.post('/influencer/applications', { 
       campaignId, 
-      coverLetter: message 
+      coverLetter: message,
+      selectedOutlet
     });
     return response.data;
   },

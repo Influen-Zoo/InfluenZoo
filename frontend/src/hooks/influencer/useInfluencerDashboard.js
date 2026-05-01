@@ -95,13 +95,15 @@ export const useInfluencerDashboard = () => {
     setApplyModal: campaigns.setApplyModal,
     applyMsg: campaigns.applyMsg,
     setApplyMsg: campaigns.setApplyMsg,
+    applyOutlet: campaigns.applyOutlet,
+    setApplyOutlet: campaigns.setApplyOutlet,
     selectedCampaignDetail: campaigns.selectedCampaignDetail,
     setSelectedCampaignDetail: campaigns.setSelectedCampaignDetail,
     loadExploreItems: campaigns.loadExploreItems,
     loadApplications: campaigns.loadApplications,
     loadSavedCampaigns: campaigns.loadSavedCampaigns,
     handleToggleSave: campaigns.handleToggleSave,
-    handleApply: (itemId, msg) => campaigns.handleApply(itemId, msg),
+    handleApply: (itemId, msg, selectedOutlet) => campaigns.handleApply(itemId, msg, selectedOutlet),
 
     // Messages & Chat
     conversations: messages.conversations,

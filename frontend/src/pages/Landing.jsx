@@ -198,9 +198,9 @@ export default function Landing() {
   };
 
   const goSignup = () => navigate("/auth?mode=signup");
-  const renderBrandLogoCarousel = () => (
+  const renderBrandLogoCarousel = (className = "") => (
     brandLogos.length > 0 && (
-      <section className="brand-logo-strip" aria-label="Featured brand logos">
+      <section className={`brand-logo-strip ${className}`} aria-label="Featured brand logos">
         <div
           className={`brand-logo-carousel landing-glow-card ${activeBrandLogo ? "is-paused" : ""}`}
           onPointerMove={handleGlowMove}
@@ -216,43 +216,33 @@ export default function Landing() {
               gap: showSeparator ? '0' : `${spacing}px`
             }}
           >
-            {(() => {
-              const minCount = 10;
-              let items = [...brandLogos];
-              if (items.length > 0) {
-                while (items.length < minCount) {
-                  items = [...items, ...brandLogos];
-                }
-              }
-              const loopItems = [...items, ...items];
-              return loopItems.map((brand, index) => (
-                <Fragment key={`${brand._id}-${index}`}>
-                  <a
-                    className={`brand-logo-item ${activeBrandLogo === `${brand._id}-${index}` ? "is-active" : ""}`}
-                    href={brand.website || undefined}
-                    target={brand.website ? "_blank" : undefined}
-                    rel={brand.website ? "noreferrer" : undefined}
-                    onMouseEnter={() => setActiveBrandLogo(`${brand._id}-${index}`)}
-                    onMouseLeave={() => setActiveBrandLogo(null)}
-                    onClick={(event) => {
-                      if (!window.matchMedia("(hover: none)").matches) return;
-                      event.preventDefault();
-                      setActiveBrandLogo((current) => (
-                        current === `${brand._id}-${index}` ? null : `${brand._id}-${index}`
-                      ));
-                    }}
-                  >
-                    <img src={resolveAssetUrl(brand.image)} alt={brand.name} loading="lazy" />
-                  </a>
-                  {showSeparator && (
-                    <div 
-                      className="brand-logo-separator" 
-                      style={{ margin: `0 ${spacing / 2}px` }}
-                    />
-                  )}
-                </Fragment>
-              ));
-            })()}
+            {brandLogos.map((brand, index) => (
+              <Fragment key={brand._id}>
+                <a
+                  className={`brand-logo-item ${activeBrandLogo === brand._id ? "is-active" : ""}`}
+                  href={brand.website || undefined}
+                  target={brand.website ? "_blank" : undefined}
+                  rel={brand.website ? "noreferrer" : undefined}
+                  onMouseEnter={() => setActiveBrandLogo(brand._id)}
+                  onMouseLeave={() => setActiveBrandLogo(null)}
+                  onClick={(event) => {
+                    if (!window.matchMedia("(hover: none)").matches) return;
+                    event.preventDefault();
+                    setActiveBrandLogo((current) => (
+                      current === brand._id ? null : brand._id
+                    ));
+                  }}
+                >
+                  <img src={resolveAssetUrl(brand.image)} alt={brand.name} loading="lazy" />
+                </a>
+                {showSeparator && index < brandLogos.length - 1 && (
+                  <div
+                    className="brand-logo-separator"
+                    style={{ margin: `0 ${spacing / 2}px` }}
+                  />
+                )}
+              </Fragment>
+            ))}
           </div>
         </div>
       </section>
@@ -308,6 +298,7 @@ export default function Landing() {
             "--hero-mobile-image": `url(${heroMobileImage})`,
           }}
         />
+        {renderBrandLogoCarousel("brand-logo-strip-mobile")}
 
         <div className="hero-grid">
           <div className="hero-content landing-reveal">
@@ -368,7 +359,7 @@ export default function Landing() {
           </div>
         </div>
 
-        {renderBrandLogoCarousel()}
+        {renderBrandLogoCarousel("brand-logo-strip-desktop")}
       </section>
 
       <section id="how-it-works" className="how-it-works landing-section">

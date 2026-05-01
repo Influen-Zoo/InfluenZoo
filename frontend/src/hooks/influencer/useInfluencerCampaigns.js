@@ -11,6 +11,7 @@ export const useInfluencerCampaigns = (user, searchQuery, showToast) => {
   
   const [applyModal, setApplyModal] = useState(null);
   const [applyMsg, setApplyMsg] = useState('');
+  const [applyOutlet, setApplyOutlet] = useState('');
   const [selectedCampaignDetail, setSelectedCampaignDetail] = useState(null);
 
   const loadExploreItems = useCallback(async () => {
@@ -76,12 +77,13 @@ export const useInfluencerCampaigns = (user, searchQuery, showToast) => {
     }
   };
 
-  const handleApply = async (itemId, message) => {
+  const handleApply = async (itemId, message, selectedOutlet = '') => {
     try {
-      await influencerService.applyToCampaign(itemId, message);
+      await influencerService.applyToCampaign(itemId, message, selectedOutlet);
       showToast('Application submitted successfully! 🎉');
       setApplyModal(null);
       setApplyMsg('');
+      setApplyOutlet('');
       loadApplications();
       loadExploreItems();
       return true;
@@ -109,6 +111,8 @@ export const useInfluencerCampaigns = (user, searchQuery, showToast) => {
     setApplyModal,
     applyMsg,
     setApplyMsg,
+    applyOutlet,
+    setApplyOutlet,
     selectedCampaignDetail,
     setSelectedCampaignDetail,
     loadExploreItems,

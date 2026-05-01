@@ -28,6 +28,7 @@ const applicationSchema = new mongoose.Schema(
     proposedPrice: Number,
     deliveryDate: Date,
     proposedContent: String,
+    selectedOutlet: String,
   },
   { timestamps: true }
 );

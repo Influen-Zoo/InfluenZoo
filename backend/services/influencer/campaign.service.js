@@ -1,6 +1,7 @@
 const Campaign = require('../../models/Campaign');
 const User = require('../../models/User');
 const Analytics = require('../../models/Analytics');
+const { normalizeCampaignForResponse } = require('../../utils/campaignPayload');
 
 const influencerCampaignService = {
   getCampaigns: async (userId, type = 'all') => {
@@ -34,7 +35,8 @@ const influencerCampaignService = {
       dbQuery = dbQuery.limit(20);
     }
 
-    return await dbQuery;
+    const campaigns = await dbQuery;
+    return campaigns.map(normalizeCampaignForResponse);
   },
 
   likeCampaign: async (campaignId, userId) => {

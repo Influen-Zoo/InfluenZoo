@@ -65,11 +65,12 @@ const campaignSchema = new mongoose.Schema(
       enum: ['active', 'completed', 'cancelled', 'pending', 'rejected', 'draft'],
       default: 'pending',
     },
-    platforms: [{ 
-      type: String, 
-      enum: ['Instagram', 'YouTube', 'Twitter', 'TikTok', 'Facebook', 'Other'],
-      default: ['Other']
-    }],
+    platforms: {
+      type: [String],
+      enum: ['Instagram', 'YouTube', 'Facebook', 'Other'],
+      default: ['Other'],
+    },
+    outlets: [{ type: String, trim: true }],
     platform: { type: String, default: 'Other' }, // Legacy single-platform support
     visibility: {
       type: String,

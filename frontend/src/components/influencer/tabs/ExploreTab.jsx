@@ -87,6 +87,9 @@ export default function ExploreTab({
                 onClick={() => handleCardClick(item)}
                 onViewBrand={onViewProfile}
                 currentUserId={currentUserId}
+                isFollowing={followingIds.includes(getItemId(item.author))}
+                onFollow={handleFollow}
+                onUnfollow={handleUnfollow}
               />
             );
           })}

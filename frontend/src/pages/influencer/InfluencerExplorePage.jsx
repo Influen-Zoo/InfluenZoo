@@ -43,8 +43,10 @@ export const InfluencerExplorePage = () => {
           campaign={dashboard.applyModal}
           applyMsg={dashboard.applyMsg}
           setApplyMsg={dashboard.setApplyMsg}
+          selectedOutlet={dashboard.applyOutlet}
+          setSelectedOutlet={dashboard.setApplyOutlet}
           onClose={() => dashboard.setApplyModal(null)}
-          onApply={() => dashboard.handleApply(dashboard.applyModal._id || dashboard.applyModal.id, dashboard.applyMsg)}
+          onApply={() => dashboard.handleApply(dashboard.applyModal._id || dashboard.applyModal.id, dashboard.applyMsg, dashboard.applyOutlet)}
           loading={dashboard.loading}
         />
       )}
