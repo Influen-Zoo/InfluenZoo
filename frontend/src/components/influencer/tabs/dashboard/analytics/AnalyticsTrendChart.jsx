@@ -1,34 +1,77 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { Box, Typography, Skeleton, Paper } from '@mui/material';
+import React from 'react';
+import { Box, Typography, Skeleton } from '@mui/material';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
-const CHART_H = 180;
-const PAD_LEFT = 35;
-const PAD_RIGHT = 5;
-const PAD_TOP = 10;
-const PAD_BOTTOM = 28;
+const CHART_H = 274;
 
-const formatYLabel = (val) => {
-  if (val >= 10000000) return (val / 10000000).toFixed(1) + 'Cr';
-  if (val >= 100000) return (val / 100000).toFixed(1) + 'L';
-  if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
-  return val;
+const toSafeNumber = (value) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+};
+
+const formatValue = (metric, value) => {
+  const safeValue = toSafeNumber(value);
+  if (metric === 'earnings') {
+    return `₹${new Intl.NumberFormat('en-IN').format(safeValue)}`;
+  }
+  return new Intl.NumberFormat('en-IN').format(safeValue);
+};
+
+const formatYAxis = (value) => {
+  const safeValue = toSafeNumber(value);
+  if (safeValue >= 10000000) return `${(safeValue / 10000000).toFixed(1)}Cr`;
+  if (safeValue >= 100000) return `${(safeValue / 100000).toFixed(1)}L`;
+  if (safeValue >= 1000) return `${(safeValue / 1000).toFixed(1)}K`;
+  return Number.isInteger(safeValue) ? String(safeValue) : safeValue.toFixed(1);
+};
+
+const getTickIndexes = (count) => {
+  if (count <= 1) return [0];
+  if (count <= 8) return Array.from({ length: count }, (_, index) => index);
+
+  const targetTickCount = 6;
+  return Array.from({ length: targetTickCount }, (_, index) => (
+    Math.round((index / (targetTickCount - 1)) * (count - 1))
+  )).filter((tick, index, ticks) => ticks.indexOf(tick) === index);
+};
+
+const CustomTooltip = ({ active, payload, label, metric }) => {
+  if (!active || !payload?.length) return null;
+  const point = payload[0]?.payload;
+
+  return (
+    <Box
+      sx={{
+        px: 1.25,
+        py: 0.8,
+        borderRadius: 2,
+        background: 'rgba(20, 20, 20, 0.92)',
+        border: '1px solid rgba(255,255,255,0.12)',
+        color: '#fff',
+        boxShadow: '0 14px 34px rgba(0,0,0,0.28)',
+      }}
+    >
+      <Typography variant="caption" sx={{ display: 'block', color: 'rgba(255,255,255,0.68)', fontWeight: 700, lineHeight: 1.2 }}>
+        {point?.label ?? label}
+      </Typography>
+      <Typography variant="body2" sx={{ fontWeight: 900, lineHeight: 1.3 }}>
+        {formatValue(metric, point?.value)}
+      </Typography>
+    </Box>
+  );
 };
 
 export default function AnalyticsTrendChart({ data = [], metric, loading }) {
-  const containerRef = useRef(null);
-  const [width, setWidth] = useState(300);
-  const [hoverIndex, setHoverIndex] = useState(null);
-
-  useEffect(() => {
-    const obs = new ResizeObserver(entries => {
-      if (entries[0].contentRect.width > 0) setWidth(entries[0].contentRect.width);
-    });
-    if (containerRef.current) obs.observe(containerRef.current);
-    return () => obs.disconnect();
-  }, []);
-
   if (loading) {
-    return <Skeleton variant="rectangular" height={CHART_H + PAD_BOTTOM} sx={{ borderRadius: 3, opacity: 0.6 }} />;
+    return <Skeleton variant="rectangular" height={CHART_H} sx={{ borderRadius: 3, opacity: 0.6 }} />;
   }
 
   if (!data || data.length === 0) {
@@ -39,178 +82,69 @@ export default function AnalyticsTrendChart({ data = [], metric, loading }) {
     );
   }
 
-  // Ensure data has labels and values
-  const chartData = data.map(d => ({ label: d.label, value: d.value ?? 0 }));
-  const values = chartData.map(d => d.value);
-  const maxVal = Math.max(...values, 1);
-  const minVal = 0;
-  const range = maxVal - minVal || 1;
-
-  const chartW = width - PAD_LEFT - PAD_RIGHT;
-  const chartH = CHART_H - PAD_TOP - PAD_BOTTOM;
-
-  const toX = (i) => PAD_LEFT + (i / (chartData.length - 1)) * chartW;
-  const toY = (v) => PAD_TOP + chartH - ((v - minVal) / range) * chartH;
-
-  // Build smooth curve path using Cubic Bezier
-  const buildSmoothPath = (pts) => {
-    if (pts.length < 2) return '';
-    let d = `M ${pts[0].x},${pts[0].y}`;
-    for (let i = 0; i < pts.length - 1; i++) {
-        const p0 = pts[i];
-        const p1 = pts[i+1];
-        const cp1x = p0.x + (p1.x - p0.x) / 2;
-        const cp1y = p0.y;
-        const cp2x = p0.x + (p1.x - p0.x) / 2;
-        const cp2y = p1.y;
-        d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p1.x},${p1.y}`;
-    }
-    return d;
-  };
-
-  const points = chartData.map((d, i) => ({ x: toX(i), y: toY(d.value) }));
-  const smoothPath = buildSmoothPath(points);
-  const areaPath = `${smoothPath} L ${toX(chartData.length - 1)},${PAD_TOP + chartH} L ${toX(0)},${PAD_TOP + chartH} Z`;
-
-  // Grid lines
-  const GRID_LINES = 3;
-  const gridValues = Array.from({ length: GRID_LINES + 1 }, (_, i) =>
-    Math.round(minVal + (i / GRID_LINES) * range)
-  );
-
-  const step = Math.max(1, Math.floor(chartData.length / 5));
-
-  const handleMouseMove = (e) => {
-    const rect = containerRef.current.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left - PAD_LEFT;
-    const index = Math.round((mouseX / chartW) * (chartData.length - 1));
-    if (index >= 0 && index < chartData.length) setHoverIndex(index);
-    else setHoverIndex(null);
-  };
+  const chartData = data.map((item, index) => ({
+    x: index,
+    label: item.label,
+    value: toSafeNumber(item.value),
+  }));
+  const tickIndexes = getTickIndexes(chartData.length);
 
   return (
-    <Box 
-        ref={containerRef} 
-        onMouseMove={handleMouseMove}
-        onMouseLeave={() => setHoverIndex(null)}
-        sx={{ position: 'relative', width: '100%', cursor: 'crosshair' }}
-    >
-      <svg
-        width={width}
-        height={CHART_H + PAD_BOTTOM}
-        style={{ overflow: 'visible', display: 'block' }}
-      >
-        <defs>
-          <linearGradient id={`grad_${metric}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#1877f2" stopOpacity="0.15" />
-            <stop offset="100%" stopColor="#1877f2" stopOpacity="0.00" />
-          </linearGradient>
-        </defs>
-
-        {/* Grid lines */}
-        {gridValues.map((val, i) => {
-          const y = toY(val);
-          return (
-            <g key={i}>
-              <line
-                x1={PAD_LEFT} y1={y} x2={width - PAD_RIGHT} y2={y}
-                stroke="var(--border-light, rgba(0,0,0,0.05))"
-                strokeWidth="1"
-              />
-              <text
-                x={PAD_LEFT - 8} y={y + 3}
-                textAnchor="end"
-                fontSize="10"
-                fontWeight="500"
-                fill="var(--text-muted, #8a8d91)"
-              >
-                {formatYLabel(val)}
-              </text>
-            </g>
-          );
-        })}
-
-        {/* Area fill */}
-        <path d={areaPath} fill={`url(#grad_${metric})`} />
-
-        {/* Main Line */}
-        <path
-          d={smoothPath}
-          fill="none"
-          stroke="#1877f2"
-          strokeWidth="3"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-
-        {/* X axis labels */}
-        {chartData.map((d, i) => {
-          if (i === 0 || i === chartData.length - 1 || i % step === 0) {
-            return (
-              <text
-                key={i}
-                x={toX(i)}
-                y={CHART_H + PAD_BOTTOM - 6}
-                textAnchor="middle"
-                fontSize="10"
-                fontWeight="500"
-                fill="var(--text-muted, #8a8d91)"
-              >
-                {d.label}
-              </text>
-            );
-          }
-          return null;
-        })}
-
-        {/* Hover Indicator */}
-        {hoverIndex !== null && (
-            <g>
-                <line 
-                    x1={toX(hoverIndex)} y1={PAD_TOP} 
-                    x2={toX(hoverIndex)} y2={PAD_TOP + chartH} 
-                    stroke="var(--primary, #1877f2)" 
-                    strokeWidth="1" 
-                    strokeDasharray="4 2"
-                />
-                <circle 
-                    cx={toX(hoverIndex)} cy={toY(chartData[hoverIndex].value)} 
-                    r="5" 
-                    fill="var(--primary, #1877f2)" 
-                    stroke="#fff" 
-                    strokeWidth="2" 
-                    style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
-                />
-            </g>
-        )}
-      </svg>
-
-      {/* Hover Tooltip */}
-      {hoverIndex !== null && (
-        <Paper
-            elevation={4}
-            sx={{
-                position: 'absolute',
-                top: toY(chartData[hoverIndex].value) - 50,
-                left: toX(hoverIndex) + 10,
-                transform: toX(hoverIndex) > width / 2 ? 'translateX(-110%)' : 'none',
-                p: '4px 10px',
-                borderRadius: 2,
-                pointerEvents: 'none',
-                zIndex: 10,
-                background: 'rgba(28, 30, 33, 0.95)',
-                color: '#fff',
-                minWidth: 80
-            }}
+    <Box className="analytics-trend-chart" sx={{ width: '100%', height: CHART_H }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart
+          data={chartData}
+          margin={{ top: 18, right: 16, left: 4, bottom: 14 }}
         >
-            <Typography variant="caption" sx={{ display: 'block', fontWeight: 600, fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)' }}>
-                {chartData[hoverIndex].label}
-            </Typography>
-            <Typography variant="body2" sx={{ fontWeight: 800, fontSize: '0.85rem' }}>
-                {metric === 'earnings' ? `₹${new Intl.NumberFormat('en-IN').format(chartData[hoverIndex].value)}` : new Intl.NumberFormat('en-IN').format(chartData[hoverIndex].value)}
-            </Typography>
-        </Paper>
-      )}
+          <defs>
+            <linearGradient id={`analyticsArea_${metric}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#0ea5ff" stopOpacity={0.32} />
+              <stop offset="72%" stopColor="#0ea5ff" stopOpacity={0.05} />
+              <stop offset="100%" stopColor="#0ea5ff" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+
+          <CartesianGrid
+            stroke="rgba(148, 163, 184, 0.22)"
+            strokeDasharray="0"
+            vertical={false}
+          />
+          <XAxis
+            dataKey="x"
+            type="number"
+            domain={[0, chartData.length - 1]}
+            ticks={tickIndexes}
+            interval={0}
+            tickFormatter={(value) => chartData[value]?.label || ''}
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: 700 }}
+            dy={12}
+            padding={{ left: 8, right: 8 }}
+          />
+          <YAxis
+            width={42}
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: 700 }}
+            tickFormatter={formatYAxis}
+            allowDecimals
+          />
+          <Tooltip
+            cursor={{ stroke: 'var(--accent)', strokeWidth: 1, strokeDasharray: '4 3' }}
+            content={<CustomTooltip metric={metric} />}
+          />
+          <Area
+            type="monotone"
+            dataKey="value"
+            stroke="#0ea5ff"
+            strokeWidth={3}
+            fill={`url(#analyticsArea_${metric})`}
+            activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: '#0ea5ff' }}
+            dot={false}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
     </Box>
   );
 }

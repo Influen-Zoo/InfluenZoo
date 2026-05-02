@@ -18,15 +18,21 @@ const icons = {
   followers:  <PersonAddOutlinedIcon sx={{ fontSize: 22 }} />,
 };
 
+const toSafeNumber = (value) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+};
+
 const formatValue = (id, value) => {
+  const safeValue = toSafeNumber(value);
   if (id === 'earnings') {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 0,
-    }).format(value);
+    }).format(safeValue);
   }
-  return new Intl.NumberFormat('en-IN').format(value);
+  return new Intl.NumberFormat('en-IN').format(safeValue);
 };
 
 export default function AnalyticsSummaryCards({
@@ -40,17 +46,17 @@ export default function AnalyticsSummaryCards({
   ];
 
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5, mb: 3 }}>
+    <Box className="analytics-kpi-grid" sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5, mb: 3 }}>
       {cards.map(card => {
         const isSelected = selected === card.id;
-        const trend = card.trend ?? 0;
+        const trend = toSafeNumber(card.trend);
         const isUp = trend > 0;
         const isFlat = trend === 0;
 
         return (
           <Card
             key={card.id}
-            className="glass-panel"
+            className={`glass-panel analytics-kpi-card ${isSelected ? 'is-selected' : ''}`}
             onClick={() => onSelect(card.id)}
             elevation={0}
               sx={{
@@ -67,9 +73,9 @@ export default function AnalyticsSummaryCards({
                 },
               }}
           >
-            <CardContent sx={{ p: '1rem !important' }}>
+            <CardContent className="analytics-kpi-card-content" sx={{ p: '1rem !important' }}>
               {/* Icon Row */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, color: isSelected ? 'var(--primary, #1877f2)' : 'var(--text-secondary, #65676b)' }}>
+              <Box className="analytics-kpi-label-row" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, color: isSelected ? 'var(--primary, #1877f2)' : 'var(--text-secondary, #65676b)' }}>
                 {icons[card.id]}
                 <Typography variant="caption" sx={{ fontSize: '0.82rem', color: 'var(--text-secondary, #65676b)' }}>
                   {card.label}
@@ -82,6 +88,7 @@ export default function AnalyticsSummaryCards({
               ) : (
                 <Typography
                   variant="h6"
+                  className="analytics-kpi-value"
                   sx={{ fontWeight: 700, fontSize: '1.35rem', color: 'var(--text-primary, #1c1e21)', lineHeight: 1 }}
                 >
                   {formatValue(card.id, card.value ?? 0)}
@@ -90,7 +97,7 @@ export default function AnalyticsSummaryCards({
 
               {/* Trend badge */}
               {!loading && (
-                <Box sx={{ mt: 0.75, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box className="analytics-kpi-trend" sx={{ mt: 0.75, display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   {isFlat ? (
                     <Typography variant="caption" sx={{ color: 'var(--text-muted, #8a8d91)' }}>--</Typography>
                   ) : (

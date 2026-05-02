@@ -12,13 +12,24 @@ const metricLabels = {
   earnings: 'earnings',
 };
 
+const toSafeNumber = (value) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+};
+
+const formatCompactCount = (value) => {
+  const safeValue = toSafeNumber(value);
+  return safeValue >= 1000 ? `${(safeValue / 1000).toFixed(1)}K` : safeValue;
+};
+
 export default function AnalyticsInsights({ insights, selectedMetric, totals, loading }) {
   if (loading) {
     return <Skeleton variant="rectangular" height={60} sx={{ borderRadius: 2, mb: 2 }} />;
   }
 
-  const multiplier = insights?.topPostMultiplier ?? 0;
-  const totalViewers = insights?.totalViewers ?? 0;
+  const multiplier = toSafeNumber(insights?.topPostMultiplier);
+  const totalViewers = toSafeNumber(insights?.totalViewers);
+  const netFollowers = toSafeNumber(totals?.netFollowers);
   const label = metricLabels[selectedMetric] || selectedMetric;
 
   const messages = {
@@ -28,8 +39,8 @@ export default function AnalyticsInsights({ insights, selectedMetric, totals, lo
     engagement: multiplier > 1
       ? `Your top post earned ${multiplier}x more engagement than average.`
       : `Engage your audience with polls, questions, and stories to boost interaction.`,
-    followers: totals?.netFollowers > 0
-      ? `You have ${totals.netFollowers} followers. Keep growing by posting quality content.`
+    followers: netFollowers > 0
+      ? `You have ${netFollowers} followers. Keep growing by posting quality content.`
       : `Start building your audience by posting consistently and tagging relevant content.`,
     earnings: `Approximate earnings are calculated based on campaign payouts. Complete more campaigns to see earnings grow.`,
   };
@@ -43,7 +54,7 @@ export default function AnalyticsInsights({ insights, selectedMetric, totals, lo
             Viewers
           </Typography>
           <Typography variant="body1" sx={{ fontWeight: 700, color: 'var(--text-primary, #1c1e21)' }}>
-            {totalViewers >= 1000 ? (totalViewers / 1000).toFixed(1) + 'K' : totalViewers}
+            {formatCompactCount(totalViewers)}
           </Typography>
         </Box>
       )}

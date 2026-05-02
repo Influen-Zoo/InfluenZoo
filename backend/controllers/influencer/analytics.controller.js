@@ -20,7 +20,31 @@ const calcTrend = (current, previous) => {
   return Math.round(((current - previous) / previous) * 100);
 };
 
-const buildTimeSeries = (analytics, applications, days, currentFollowers = 1000) => {
+const getDailyNetFollowersSeries = (analytics, days) => {
+  const numPoints = Math.max(1, Math.min(days, 90));
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+
+  const followers = [];
+  for (let i = 0; i < numPoints; i++) {
+    const pointStart = new Date(startDate.getTime() + i * 86400000);
+    pointStart.setHours(0, 0, 0, 0);
+    const pointEnd = new Date(pointStart.getTime() + 86400000);
+    const label = `${pointStart.getMonth() + 1}/${pointStart.getDate()}`;
+
+    const slice = analytics.filter(a => a.timestamp >= pointStart && a.timestamp < pointEnd);
+    const eCount = slice.filter(a => a.type === 'engagement').reduce((acc, curr) => {
+      const m = curr.metadata || {};
+      return acc + (m.likes || 0) + (m.comments || 0) + (m.shares || 0) + (m.saves || 0);
+    }, 0);
+
+    followers.push({ label, value: Math.floor(eCount * 0.015), date: pointStart });
+  }
+
+  return followers;
+};
+
+const buildTimeSeries = (analytics, applications, days) => {
   const groupInterval = days === 1 ? 'hour' : 'day';
   const numPoints = days === 1 ? 24 : Math.min(days, 90); 
   const startDate = new Date();
@@ -28,12 +52,7 @@ const buildTimeSeries = (analytics, applications, days, currentFollowers = 1000)
 
   const views = [];
   const engagement = [];
-  const followers = [];
   const earnings = [];
-
-  // To simulate realistic growth, we distribute existing followers backwards
-  // proportionally to where engagement happened.
-  let runningFollowers = currentFollowers;
 
   for (let i = numPoints - 1; i >= 0; i--) {
     let pointStart, pointEnd, label;
@@ -60,18 +79,12 @@ const buildTimeSeries = (analytics, applications, days, currentFollowers = 1000)
     }, 0);
     const earnCount = sliceApps.reduce((acc, curr) => acc + (curr.proposedPrice || 0), 0);
 
-    // Derived follower growth based on engagement
-    // approx 0.5% - 2% of engagement converted to followers
-    const growth = Math.floor(eCount * 0.015); 
-    
     views.unshift({ label, value: vCount, date: pointStart });
     engagement.unshift({ label, value: eCount, date: pointStart });
     earnings.unshift({ label, value: earnCount, date: pointStart });
-    followers.unshift({ label, value: runningFollowers, date: pointStart });
-
-    runningFollowers -= growth;
   }
 
+  const followers = getDailyNetFollowersSeries(analytics, days);
   return { views, engagement, followers, earnings };
 };
 
@@ -124,11 +137,11 @@ const getDashboardAnalytics = async (req, res) => {
     const prevEarnings   = prevApplications.reduce((acc, curr) => acc + (curr.proposedPrice || 0), 0);
 
     // ── Time Series ────────────────────────────────────────────────────────────
-    const timeSeries = buildTimeSeries(analytics, applications, days, totalCurrentFollowers);
+    const timeSeries = buildTimeSeries(analytics, applications, days);
 
     // net followers trend
     const netFollowers = totalCurrentFollowers;
-    const prevNetFollowers = timeSeries.followers[0]?.value || totalCurrentFollowers;
+    const prevNetFollowers = totalCurrentFollowers;
 
     // ── Breakdowns ─────────────────────────────────────────────────────────────
     const followerViews = analytics.filter(a => a.type === 'impression' && a.metadata?.isFollower === true).length;

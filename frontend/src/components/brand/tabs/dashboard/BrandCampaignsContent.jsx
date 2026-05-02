@@ -7,6 +7,16 @@ import './BrandCampaignsContent.css';
 
 const CAMPAIGNS_PER_PAGE = 5;
 
+const toSafeNumber = (value) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+};
+
+const formatCompactCount = (value) => {
+  const safeValue = toSafeNumber(value);
+  return safeValue >= 1000 ? `${(safeValue / 1000).toFixed(1)}K` : safeValue;
+};
+
 export default function BrandCampaignsContent({ user }) {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,10 +65,10 @@ export default function BrandCampaignsContent({ user }) {
   // Format the campaign details for display
   const getCampaignStats = (campaign) => {
     return {
-      views: campaign?.analytics?.views || campaign?.metadata?.views || 0,
-      likes: campaign?.likes?.length || campaign?.metadata?.likes || 0,
-      comments: campaign?.comments?.length || campaign?.metadata?.comments || 0,
-      shares: campaign?.analytics?.shares || campaign?.metadata?.shares || 0,
+      views: toSafeNumber(campaign?.analytics?.views || campaign?.metadata?.views),
+      likes: toSafeNumber(campaign?.likes?.length || campaign?.metadata?.likes),
+      comments: toSafeNumber(campaign?.comments?.length || campaign?.metadata?.comments),
+      shares: toSafeNumber(campaign?.analytics?.shares || campaign?.metadata?.shares),
     };
   };
 
@@ -251,7 +261,7 @@ export default function BrandCampaignsContent({ user }) {
                         Views
                       </Typography>
                       <Typography sx={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1.1rem' }}>
-                        {stats.views >= 1000 ? (stats.views / 1000).toFixed(1) + 'K' : stats.views}
+                        {formatCompactCount(stats.views)}
                       </Typography>
                     </div>
 

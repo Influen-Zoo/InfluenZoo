@@ -3,6 +3,13 @@ import { Box, Typography, Paper, Skeleton } from '@mui/material';
 import { getDonutSegments, getInteractionSegments } from '../../../../../features/influencer/analyticsProcessor';
 
 // Local Donut Chart component for breakdown
+const toSafeNumber = (value) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+};
+
+const formatCount = (value) => new Intl.NumberFormat('en-IN').format(toSafeNumber(value));
+
 const DonutChart = ({ segments, loading }) => {
   if (loading) return <Skeleton variant="circular" width={140} height={140} sx={{ mx: 'auto' }} />;
   
@@ -14,10 +21,11 @@ const DonutChart = ({ segments, loading }) => {
   let offset = 0;
   
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', justifyContent: 'center', width: '100%' }}>
+    <Box className="analytics-donut-layout" sx={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', justifyContent: 'center', width: '100%' }}>
       <svg width={size} height={size}>
         {segments.map((s, i) => {
-          const dash = (s.pct / 100) * circumference;
+          const pct = Math.min(100, Math.max(0, toSafeNumber(s.pct)));
+          const dash = (pct / 100) * circumference;
           const currentOffset = offset;
           offset += dash;
           return (
@@ -41,7 +49,7 @@ const DonutChart = ({ segments, loading }) => {
           <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ width: 10, height: 10, borderRadius: '50%', background: s.color }} />
             <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--text-secondary)' }}>
-              {s.label} ({s.pct}%)
+              {s.label} ({toSafeNumber(s.pct)}%{toSafeNumber(s.value) > 0 ? ` - ${formatCount(s.value)}` : ''})
             </Typography>
           </Box>
         ))}
@@ -51,6 +59,8 @@ const DonutChart = ({ segments, loading }) => {
 };
 
 export default function AnalyticsBreakdown({ breakdown, totals, selectedMetric, loading }) {
+  if (selectedMetric === 'followers') return null;
+
   const currentDonut = getDonutSegments(breakdown, totals, selectedMetric);
 
   // If selecting engagement, let's show interaction-specific breakdown
@@ -68,14 +78,14 @@ export default function AnalyticsBreakdown({ breakdown, totals, selectedMetric, 
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
+    <Box className="analytics-breakdown" sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
       {/* section header */}
       <Typography variant="h6" sx={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', mt: 1 }}>
         {sectionTitle[selectedMetric] ?? 'Breakdown'}
       </Typography>
 
       {/* Row 1: Main Donut Breakdown - FULL WIDTH */}
-      <Paper className="glass-panel" elevation={0} sx={{
+      <Paper className="glass-panel analytics-panel analytics-breakdown-panel" elevation={0} sx={{
           p: 4,
           width: '100%',
           display: 'flex',
@@ -83,7 +93,7 @@ export default function AnalyticsBreakdown({ breakdown, totals, selectedMetric, 
           alignItems: 'center'
         }}
       >
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 4, color: 'var(--text-primary)', alignSelf: 'flex-start' }}>
+        <Typography className="analytics-panel-title" variant="subtitle1" sx={{ fontWeight: 700, mb: 4, color: 'var(--text-primary)', alignSelf: 'flex-start' }}>
           {selectedMetric === 'followers' ? 'Growth type' : selectedMetric === 'earnings' ? 'Revenue source' : 'Viewer type'}
         </Typography>
         <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
@@ -92,26 +102,29 @@ export default function AnalyticsBreakdown({ breakdown, totals, selectedMetric, 
       </Paper>
 
       {/* Row 2: Detailed List Breakdown - FULL WIDTH */}
-      {(selectedMetric === 'views' || selectedMetric === 'engagement') && !loading && (
-        <Paper className="glass-panel" elevation={0} sx={{
+      {selectedMetric === 'engagement' && !loading && (
+        <Paper className="glass-panel analytics-panel analytics-breakdown-panel" elevation={0} sx={{
             p: 4,
             width: '100%',
           }}
         >
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 4, color: 'var(--text-primary)' }}>
-            {selectedMetric === 'views' ? 'Platform breakdown' : 'Interaction type'}
+          <Typography className="analytics-panel-title" variant="subtitle1" sx={{ fontWeight: 700, mb: 4, color: 'var(--text-primary)' }}>
+            Interaction type
           </Typography>
           
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            {((selectedMetric === 'views' ? breakdown?.mediaType : breakdown?.engagement) || []).map((item, i) => {
+            {(breakdown?.engagement || []).filter((item) => {
+              const label = String(item.type || item.label || '').toLowerCase();
+              return label !== 'save' && label !== 'saves';
+            }).map((item, i) => {
               const label = item.name || item.type;
-              const val = item.views ?? item.value;
-              const total = selectedMetric === 'views' ? totals?.views : totals?.engagement;
+              const val = toSafeNumber(item.views ?? item.value);
+              const total = toSafeNumber(totals?.engagement);
               const pct = total > 0 ? Math.min(100, Math.round((val / total) * 100)) : 0;
               const color = ['#1877f2', '#1d3461', '#3da1f7', '#aed6f1'][i % 4];
 
               return (
-                <Box key={i} sx={{ width: '100%' }}>
+                <Box className="analytics-progress-row" key={i} sx={{ width: '100%' }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 1.5 }}>
                     <Box>
                         <Typography variant="body1" sx={{ fontWeight: 700, color: 'var(--text-primary)', mb: 0.5 }}>{label}</Typography>
@@ -120,7 +133,7 @@ export default function AnalyticsBreakdown({ breakdown, totals, selectedMetric, 
                         </Typography>
                     </Box>
                     <Typography variant="h6" sx={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: '1.1rem' }}>
-                        {new Intl.NumberFormat('en-IN').format(val)}
+                        {formatCount(val)}
                     </Typography>
                   </Box>
                   <Box sx={{ height: 10, width: '100%', bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 5, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>

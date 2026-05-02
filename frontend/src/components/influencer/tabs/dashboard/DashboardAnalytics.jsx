@@ -23,10 +23,16 @@ const METRIC_TITLES = {
   followers:  'Net followers',
 };
 
+const toSafeNumber = (value) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+};
+
 const formatViewerCount = (count) => {
-  if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
-  if (count >= 1_000)     return `${(count / 1_000).toFixed(1)}K`;
-  return String(count);
+  const safeCount = toSafeNumber(count);
+  if (safeCount >= 1_000_000) return `${(safeCount / 1_000_000).toFixed(1)}M`;
+  if (safeCount >= 1_000)     return `${(safeCount / 1_000).toFixed(1)}K`;
+  return String(safeCount);
 };
 
 export default function DashboardAnalytics({ user }) {
@@ -56,13 +62,13 @@ export default function DashboardAnalytics({ user }) {
   const chartData = getChartDataForMetric(analytics, selectedMetric);
 
   return (
-    <Box className="dashboard-analytics-container" sx={{ animation: 'fadeIn 0.3s ease', pb: 6 }}>
+    <Box className="dashboard-analytics-container analytics-page" sx={{ animation: 'fadeIn 0.3s ease', pb: 6 }}>
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <Box sx={{ mb: 2 }}>
+      <Box className="analytics-page-header" sx={{ mb: 2 }}>
         <Typography
           variant="h5"
-          sx={{ fontWeight: 700, color: 'var(--text-primary, #1c1e21)', mb: 0.25 }}
+          sx={{ fontWeight: 800, color: 'var(--text-primary, #1c1e21)', mb: 0.25 }}
         >
           Analytics
         </Typography>
@@ -77,6 +83,7 @@ export default function DashboardAnalytics({ user }) {
         exclusive
         onChange={(_, val) => val && setTimeframe(val)}
         size="small"
+        className="analytics-time-filter"
         sx={{
           mb: 2.5,
           '& .MuiToggleButton-root': {
@@ -118,15 +125,15 @@ export default function DashboardAnalytics({ user }) {
       />
 
       {/* ── Trend Chart Section ──────────────────────────────────────────── */}
-      <Box sx={{ mb: 2.5 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.25 }}>
+      <Box className="analytics-section" sx={{ mb: 2.5 }}>
+        <Box className="analytics-section-title" sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.25 }}>
           <Typography variant="h6" sx={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
             {METRIC_TITLES[selectedMetric]}
           </Typography>
           <Typography component="span" sx={{ color: 'var(--text-muted)', fontSize: '1rem', cursor: 'help' }} title="Tracks changes over time">ⓘ</Typography>
         </Box>
 
-        <Paper className="glass-panel" elevation={0} sx={{ p: 2 }}>
+        <Paper className="glass-panel analytics-panel analytics-chart-panel" elevation={0} sx={{ p: 2 }}>
           {/* Y-max label */}
           {!loading && chartData.length > 0 && (
             <Typography variant="caption" sx={{ color: 'var(--text-muted)', display: 'block', mb: 0.5 }}>
@@ -166,7 +173,7 @@ export default function DashboardAnalytics({ user }) {
                   </Typography>
                 </Box>
                 <Typography variant="body1" sx={{ fontWeight: 800, color: '#18a340' }}>
-                  +₹{new Intl.NumberFormat('en-IN').format(source.amount)}
+                  +₹{new Intl.NumberFormat('en-IN').format(toSafeNumber(source.amount))}
                 </Typography>
               </Paper>
             ))}
@@ -177,7 +184,7 @@ export default function DashboardAnalytics({ user }) {
       {/* ── Viewers count for views metric ──────────────────────────────── */}
       {selectedMetric === 'views' && !loading && analytics?.totals && (
         <>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+          <Box className="analytics-inline-stat" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
             <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--text-primary)' }}>Viewers</Typography>
             <Typography variant="body1" sx={{ fontWeight: 700, color: 'var(--text-primary)' }}>
               {formatViewerCount(analytics.insights?.totalViewers ?? 0)}

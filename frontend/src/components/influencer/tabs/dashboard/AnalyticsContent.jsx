@@ -7,6 +7,16 @@ import './AnalyticsContent.css';
 
 const POSTS_PER_PAGE = 10;
 
+const toSafeNumber = (value) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+};
+
+const formatCompactCount = (value) => {
+  const safeValue = toSafeNumber(value);
+  return safeValue >= 1000 ? `${(safeValue / 1000).toFixed(1)}K` : safeValue;
+};
+
 export default function AnalyticsContent({ user, selectedTab }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,10 +67,10 @@ export default function AnalyticsContent({ user, selectedTab }) {
   // Format the post details for display
   const getPostStats = (post) => {
     return {
-      views: post?.analytics?.views ?? post?.metadata?.views ?? 0,
-      likes: post?.likes?.length ?? 0,
-      comments: post?.comments?.length ?? 0,
-      shares: post?.analytics?.shares ?? post?.metadata?.shares ?? 0,
+      views: toSafeNumber(post?.analytics?.views ?? post?.metadata?.views),
+      likes: toSafeNumber(post?.likes?.length),
+      comments: toSafeNumber(post?.comments?.length),
+      shares: toSafeNumber(post?.analytics?.shares ?? post?.metadata?.shares),
     };
   };
 
@@ -258,7 +268,7 @@ export default function AnalyticsContent({ user, selectedTab }) {
                           fontSize: '1.1rem',
                         }}
                       >
-                        {stats.views >= 1000 ? (stats.views / 1000).toFixed(1) + 'K' : stats.views}
+                        {formatCompactCount(stats.views)}
                       </Typography>
                     </div>
 
