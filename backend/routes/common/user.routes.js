@@ -1,26 +1,14 @@
 const express = require('express');
-const multer = require('multer');
-const fs = require('fs');
 const userController = require('../../controllers/common/user.controller');
 const { authMiddleware } = require('../../middleware/auth/auth.middleware');
 const { losslessImageCompression } = require('../../middleware/common/losslessImageCompression.middleware');
+const { createUpload, getRoleDataFolder, getUploadUrl } = require('../../utils/uploadStorage');
 
 const router = express.Router();
 
-// Multer Setup
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = 'uploads/';
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
-});
-
-const upload = multer({ 
-  storage,
+const upload = createUpload({
+  getFolderParts: (req) => getRoleDataFolder(req.role),
+  getEntityId: (req) => req.userId,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) cb(null, true);
@@ -32,7 +20,7 @@ router.get('/profile/:id', userController.getProfile);
 
 router.post('/upload', authMiddleware, upload.single('file'), losslessImageCompression, (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Please upload a file' });
-  const fileUrl = `/uploads/${req.file.filename}`;
+  const fileUrl = getUploadUrl(req.file);
   res.json({ success: true, url: fileUrl, compression: req.file.compression || null });
 });
 

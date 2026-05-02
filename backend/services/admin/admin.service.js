@@ -9,6 +9,7 @@ const Post = require('../../models/Post');
 const AppSetting = require('../../models/AppSetting');
 const CampaignRevenue = require('../../models/CampaignRevenue');
 const Badge = require('../../models/Badge');
+const { deleteUploadedFile } = require('../../utils/uploadStorage');
 
 const resizeObjectIdArray = (items = [], targetCount = 0) => {
   const nextCount = Math.max(0, Number(targetCount) || 0);
@@ -650,14 +651,26 @@ const adminService = {
   },
 
   updateBadge: async (badgeId, badgeData) => {
+    const existingBadge = await Badge.findById(badgeId);
+    if (!existingBadge) throw new Error('Badge not found');
+
     const badge = await Badge.findByIdAndUpdate(badgeId, badgeData, { new: true });
-    if (!badge) throw new Error('Badge not found');
+    if (
+      badgeData.icon &&
+      existingBadge.isCustomIcon &&
+      existingBadge.icon !== badgeData.icon
+    ) {
+      await deleteUploadedFile(existingBadge.icon);
+    }
     return badge;
   },
 
   deleteBadge: async (badgeId) => {
     const badge = await Badge.findByIdAndDelete(badgeId);
     if (!badge) throw new Error('Badge not found');
+    if (badge.isCustomIcon) {
+      await deleteUploadedFile(badge.icon);
+    }
     
     // Remove this badge from all users
     await User.updateMany(

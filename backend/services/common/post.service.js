@@ -1,19 +1,27 @@
 const Post = require('../../models/Post');
 const Analytics = require('../../models/Analytics');
 const Notification = require('../../models/Notification');
+const {
+  getUploadUrl,
+  deleteUploadedFiles,
+  deleteRemovedMedia,
+  getMediaUrls,
+} = require('../../utils/uploadStorage');
+
+const parseMedia = (files) => {
+  if (!files || files.length === 0) return [];
+  return files.map(file => {
+    let type = 'image';
+    if (file.mimetype.startsWith('video/')) type = 'video';
+    else if (file.mimetype.startsWith('audio/')) type = 'audio';
+    else if (file.mimetype === 'image/gif') type = 'gif';
+    return { url: getUploadUrl(file), type };
+  });
+};
 
 const postService = {
   createPost: async (authorId, data, files) => {
-    let mediaFiles = [];
-    if (files && files.length > 0) {
-      mediaFiles = files.map(file => {
-        let type = 'image';
-        if (file.mimetype.startsWith('video/')) type = 'video';
-        else if (file.mimetype.startsWith('audio/')) type = 'audio';
-        else if (file.mimetype === 'image/gif') type = 'gif';
-        return { url: `/uploads/${file.filename}`, type };
-      });
-    }
+    const mediaFiles = parseMedia(files);
 
     let parsedTags = [];
     if (data.tags) {
@@ -23,15 +31,22 @@ const postService = {
 
     const content = typeof data.content === 'string' ? data.content.trim() : '';
     if (!content && mediaFiles.length === 0) {
+      await deleteUploadedFiles(getMediaUrls(mediaFiles));
       throw new Error('Post content or media is required');
     }
 
-    const newPost = await Post.create({
-      author: authorId,
-      content,
-      media: mediaFiles,
-      tags: parsedTags,
-    });
+    let newPost;
+    try {
+      newPost = await Post.create({
+        author: authorId,
+        content,
+        media: mediaFiles,
+        tags: parsedTags,
+      });
+    } catch (error) {
+      await deleteUploadedFiles(getMediaUrls(mediaFiles));
+      throw error;
+    }
 
     return await Post.findById(newPost._id).populate('author', 'name avatar');
   },
@@ -132,17 +147,9 @@ const postService = {
       try { parsedRetainedMedia = JSON.parse(data.retainedMedia); } catch { parsedRetainedMedia = []; }
     }
 
-    let mediaFiles = [];
-    if (files && files.length > 0) {
-      mediaFiles = files.map(file => {
-        let type = 'image';
-        if (file.mimetype.startsWith('video/')) type = 'video';
-        else if (file.mimetype.startsWith('audio/')) type = 'audio';
-        else if (file.mimetype === 'image/gif') type = 'gif';
-        return { url: `/uploads/${file.filename}`, type };
-      });
-    }
+    const mediaFiles = parseMedia(files);
 
+    const previousMedia = post.media || [];
     post.media = [...parsedRetainedMedia, ...mediaFiles];
     if (data.tags !== undefined) {
       try { post.tags = JSON.parse(data.tags); }
@@ -150,7 +157,13 @@ const postService = {
     }
     if (data.content !== undefined) post.content = data.content;
 
-    await post.save();
+    try {
+      await post.save();
+      await deleteRemovedMedia(previousMedia, parsedRetainedMedia);
+    } catch (error) {
+      await deleteUploadedFiles(getMediaUrls(mediaFiles));
+      throw error;
+    }
     return await Post.findById(post._id).populate('author', 'name avatar').populate('comments.user', 'name avatar');
   },
 
@@ -159,7 +172,9 @@ const postService = {
     if (!post) throw new Error('Post not found');
     if (post.author.toString() !== userId) throw new Error('Not authorized');
 
+    const mediaUrls = getMediaUrls(post.media);
     await post.deleteOne();
+    await deleteUploadedFiles(mediaUrls);
     return { success: true };
   }
 };

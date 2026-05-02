@@ -1,4 +1,5 @@
 const adminService = require('../../services/admin/admin.service');
+const { getUploadUrl, deleteUploadedFile } = require('../../utils/uploadStorage');
 
 /**
  * GET /api/admin/stats
@@ -347,12 +348,15 @@ exports.createBadge = async (req, res) => {
   try {
     const badgeData = { ...req.body };
     if (req.file) {
-      badgeData.icon = req.file.path;
+      badgeData.icon = getUploadUrl(req.file);
       badgeData.isCustomIcon = true;
     }
     const badge = await adminService.createBadge(badgeData);
     res.json({ success: true, data: badge });
   } catch (error) {
+    if (req.file) {
+      await deleteUploadedFile(getUploadUrl(req.file));
+    }
     res.status(400).json({ error: error.message });
   }
 };
@@ -365,7 +369,7 @@ exports.updateBadge = async (req, res) => {
   try {
     const badgeData = { ...req.body };
     if (req.file) {
-      badgeData.icon = req.file.path;
+      badgeData.icon = getUploadUrl(req.file);
       badgeData.isCustomIcon = true;
     } else if (badgeData.isCustomIcon === 'false') {
       badgeData.isCustomIcon = false;
@@ -374,6 +378,9 @@ exports.updateBadge = async (req, res) => {
     const badge = await adminService.updateBadge(req.params.id, badgeData);
     res.json({ success: true, data: badge });
   } catch (error) {
+    if (req.file) {
+      await deleteUploadedFile(getUploadUrl(req.file));
+    }
     res.status(error.message === 'Badge not found' ? 404 : 400).json({ error: error.message });
   }
 };

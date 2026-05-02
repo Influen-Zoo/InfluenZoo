@@ -1,6 +1,5 @@
 const express = require('express');
-const multer = require('multer');
-const fs = require('fs');
+const mongoose = require('mongoose');
 const brandCampaignController = require('../../controllers/brand/campaign.controller');
 const brandApplicationController = require('../../controllers/brand/application.controller');
 const brandInfluencerController = require('../../controllers/brand/influencer.controller');
@@ -8,24 +7,19 @@ const brandProfileController = require('../../controllers/brand/profile.controll
 const { authMiddleware } = require('../../middleware/auth/auth.middleware');
 const { brandOnly } = require('../../middleware/brand/brand.middleware');
 const { losslessImageCompression } = require('../../middleware/common/losslessImageCompression.middleware');
+const { createUpload, uploadFolders } = require('../../utils/uploadStorage');
 
 const router = express.Router();
 const MAX_MEDIA_FILE_SIZE = 25 * 1024 * 1024;
 
-// Ensure uploads directory exists
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = 'uploads/';
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
-});
+const assignCampaignUploadId = (req, res, next) => {
+  req.uploadEntityId = req.params.id || new mongoose.Types.ObjectId().toString();
+  next();
+};
 
-const upload = multer({
-  storage,
+const upload = createUpload({
+  getFolderParts: () => uploadFolders.brandCampaign,
+  getEntityId: (req) => req.uploadEntityId || req.params.id || req.userId,
   limits: { fileSize: MAX_MEDIA_FILE_SIZE },
   fileFilter: (req, file, cb) => {
     const validPrefixes = ['image/', 'video/', 'audio/'];
@@ -35,9 +29,9 @@ const upload = multer({
 });
 
 // Brand Campaign Management
-router.post('/campaigns', authMiddleware, brandOnly, upload.array('media', 4), losslessImageCompression, brandCampaignController.createCampaign);
+router.post('/campaigns', authMiddleware, brandOnly, assignCampaignUploadId, upload.array('media', 4), losslessImageCompression, brandCampaignController.createCampaign);
 router.get('/campaigns/my', authMiddleware, brandOnly, brandCampaignController.getMyCampaigns);
-router.put('/campaigns/:id', authMiddleware, brandOnly, upload.array('media', 4), losslessImageCompression, brandCampaignController.updateCampaign);
+router.put('/campaigns/:id', authMiddleware, brandOnly, assignCampaignUploadId, upload.array('media', 4), losslessImageCompression, brandCampaignController.updateCampaign);
 router.delete('/campaigns/:id', authMiddleware, brandOnly, brandCampaignController.deleteCampaign);
 
 // Brand Application Review

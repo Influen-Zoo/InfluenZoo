@@ -1,26 +1,15 @@
 const express = require('express');
-const multer = require('multer');
-const fs = require('fs');
 const postController = require('../../controllers/common/post.controller');
 const { authMiddleware } = require('../../middleware/auth/auth.middleware');
 const { losslessImageCompression } = require('../../middleware/common/losslessImageCompression.middleware');
+const { createUpload, uploadFolders } = require('../../utils/uploadStorage');
 
 const router = express.Router();
 const MAX_MEDIA_FILE_SIZE = 25 * 1024 * 1024;
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = 'uploads/';
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
-});
-
-const upload = multer({ 
-  storage,
+const upload = createUpload({
+  getFolderParts: () => uploadFolders.influencerPost,
+  getEntityId: (req) => req.userId,
   limits: { fileSize: MAX_MEDIA_FILE_SIZE },
   fileFilter: (req, file, cb) => {
     const validPrefixes = ['image/', 'video/', 'audio/'];

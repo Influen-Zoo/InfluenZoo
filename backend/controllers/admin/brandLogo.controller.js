@@ -1,5 +1,6 @@
 const BrandLogo = require('../../models/BrandLogo');
 const AppSetting = require('../../models/AppSetting');
+const { getUploadUrl, deleteUploadedFile } = require('../../utils/uploadStorage');
 
 const normalizeLogo = (logo) => ({
   _id: logo._id,
@@ -44,11 +45,14 @@ exports.createBrandLogo = async (req, res) => {
       website: req.body.website || '',
       sortOrder: Number(req.body.sortOrder || 0),
       isActive: req.body.isActive !== 'false',
-      image: `/uploads/brand-logos/${req.file.filename}`,
+      image: getUploadUrl(req.file),
     });
 
     res.status(201).json({ success: true, data: normalizeLogo(logo) });
   } catch (error) {
+    if (req.file) {
+      await deleteUploadedFile(getUploadUrl(req.file));
+    }
     res.status(400).json({ error: error.message || 'Could not create brand logo' });
   }
 };
@@ -62,8 +66,11 @@ exports.updateBrandLogo = async (req, res) => {
       isActive: req.body.isActive !== 'false',
     };
 
+    const existingLogo = await BrandLogo.findById(req.params.id);
+    if (!existingLogo) return res.status(404).json({ error: 'Brand logo not found' });
+
     if (req.file) {
-      update.image = `/uploads/brand-logos/${req.file.filename}`;
+      update.image = getUploadUrl(req.file);
     }
 
     const logo = await BrandLogo.findByIdAndUpdate(req.params.id, update, {
@@ -71,9 +78,14 @@ exports.updateBrandLogo = async (req, res) => {
       runValidators: true,
     });
 
-    if (!logo) return res.status(404).json({ error: 'Brand logo not found' });
+    if (req.file && existingLogo.image !== update.image) {
+      await deleteUploadedFile(existingLogo.image);
+    }
     res.json({ success: true, data: normalizeLogo(logo) });
   } catch (error) {
+    if (req.file) {
+      await deleteUploadedFile(getUploadUrl(req.file));
+    }
     res.status(400).json({ error: error.message || 'Could not update brand logo' });
   }
 };
@@ -82,6 +94,7 @@ exports.deleteBrandLogo = async (req, res) => {
   try {
     const logo = await BrandLogo.findByIdAndDelete(req.params.id);
     if (!logo) return res.status(404).json({ error: 'Brand logo not found' });
+    await deleteUploadedFile(logo.image);
     res.json({ success: true, data: normalizeLogo(logo) });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });

@@ -1,28 +1,17 @@
 const express = require('express');
 const fs = require('fs');
-const multer = require('multer');
 const sharp = require('sharp');
 const adminController = require('../../controllers/admin/admin.controller');
 const brandLogoController = require('../../controllers/admin/brandLogo.controller');
 const { authMiddleware } = require('../../middleware/auth/auth.middleware');
 const { adminOnly } = require('../../middleware/admin/admin.middleware');
+const { createUpload, uploadFolders } = require('../../utils/uploadStorage');
 
 const router = express.Router();
 
-const brandLogoStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = 'uploads/brand-logos/';
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const safeName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '-');
-    cb(null, `${Date.now()}-${safeName}`);
-  },
-});
-
-const brandLogoUpload = multer({
-  storage: brandLogoStorage,
+const brandLogoUpload = createUpload({
+  getFolderParts: () => uploadFolders.adminData,
+  getEntityId: (req) => req.params.id || req.userId,
   limits: { fileSize: 2 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype === 'image/png') cb(null, true);
@@ -30,20 +19,9 @@ const brandLogoUpload = multer({
   },
 });
 
-const badgeIconStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = 'uploads/badges/';
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const safeName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '-');
-    cb(null, `${Date.now()}-${safeName}`);
-  },
-});
-
-const badgeIconUpload = multer({
-  storage: badgeIconStorage,
+const badgeIconUpload = createUpload({
+  getFolderParts: () => uploadFolders.adminData,
+  getEntityId: (req) => req.params.id || req.userId,
   limits: { fileSize: 1 * 1024 * 1024 }, // 1MB for badges
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) cb(null, true);

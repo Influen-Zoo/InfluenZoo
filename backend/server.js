@@ -5,6 +5,7 @@ const connectDB = require('./config/database');
 const { requestLogger } = require('./middleware/common/logger.middleware');
 const { errorMiddleware, notFoundHandler } = require('./middleware/common/error.middleware');
 const { startAnalyticsWorker, stopAnalyticsWorker } = require('./services/common/analyticsWorker.service');
+const { ensureUploadDirectories } = require('./utils/uploadStorage');
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
 // Connect to database
 connectDB();
 startAnalyticsWorker();
+ensureUploadDirectories();
 
 // Middleware
 app.use(cors({

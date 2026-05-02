@@ -5,7 +5,7 @@ const getCompressionResults = (files = []) => files.map(file => file.compression
 const brandCampaignController = {
   createCampaign: async (req, res) => {
     try {
-      const campaign = await brandCampaignService.createCampaign(req.userId, req.body, req.files);
+      const campaign = await brandCampaignService.createCampaign(req.userId, req.body, req.files, req.uploadEntityId);
       res.status(201).json({ success: true, campaign, compression: getCompressionResults(req.files) });
     } catch (error) {
       console.error('Create Campaign Error:', error);

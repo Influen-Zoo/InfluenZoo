@@ -7,6 +7,7 @@ const Post = require('../../models/Post');
 const Campaign = require('../../models/Campaign');
 const Notification = require('../../models/Notification');
 const { fetchSocialMediaStats, SUPPORTED_PLATFORMS } = require('./socialMediaStats.service');
+const { deleteUploadedFiles } = require('../../utils/uploadStorage');
 
 const userService = {
   getProfile: async (userId) => {
@@ -38,14 +39,19 @@ const userService = {
       : ['name', 'avatar', 'banner', 'location'];
 
     const updates = {};
+    const filesToDelete = [];
     for (const field of allowedFields) {
       if (updateData[field] !== undefined) {
         updates[field] = updateData[field];
+        if (['avatar', 'banner'].includes(field) && user[field] && user[field] !== updateData[field]) {
+          filesToDelete.push(user[field]);
+        }
       }
     }
 
     Object.assign(user, updates);
     await user.save();
+    await deleteUploadedFiles(filesToDelete);
     return user.toJSON();
   },
 

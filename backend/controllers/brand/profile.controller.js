@@ -1,5 +1,6 @@
 const BrandProfile = require('../../models/BrandProfile');
 const User = require('../../models/User');
+const { deleteUploadedFiles } = require('../../utils/uploadStorage');
 
 const profileController = {
   getSelfProfile: async (req, res) => {
@@ -36,11 +37,18 @@ const profileController = {
       // Ensure we don't overwrite crucial fields
       delete updateData.userId;
 
+      const existingProfile = await BrandProfile.findOne({ userId: req.userId });
+      const filesToDelete = [];
+      if (updateData.logo && existingProfile?.logo && existingProfile.logo !== updateData.logo) {
+        filesToDelete.push(existingProfile.logo);
+      }
+
       let profile = await BrandProfile.findOneAndUpdate(
         { userId: req.userId },
         { ...updateData, userId: req.userId },
         { new: true, upsert: true, runValidators: true }
       );
+      await deleteUploadedFiles(filesToDelete);
 
       // If brandName is provided, sync it with User.name for consistency if needed
       if (updateData.brandName) {

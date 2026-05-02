@@ -5,6 +5,12 @@ const {
   normalizePlatforms,
   normalizeCampaignForResponse,
 } = require('../../utils/campaignPayload');
+const {
+  getUploadUrl,
+  deleteUploadedFiles,
+  deleteRemovedMedia,
+  getMediaUrls,
+} = require('../../utils/uploadStorage');
 
 const parseMedia = (files) => {
   if (!files || files.length === 0) return [];
@@ -13,7 +19,7 @@ const parseMedia = (files) => {
     if (file.mimetype.startsWith('video/')) type = 'video';
     else if (file.mimetype.startsWith('audio/')) type = 'audio';
     else if (file.mimetype === 'image/gif') type = 'gif';
-    return { url: `/uploads/${file.filename}`, type };
+    return { url: getUploadUrl(file), type };
   });
 };
 
@@ -31,31 +37,40 @@ const parseDeliverables = (deliverables) => {
 const isCampaignDetailsEnabled = (data) => data.campaignDetailsEnabled === true || data.campaignDetailsEnabled === 'true';
 
 const brandCampaignService = {
-  createCampaign: async (authorId, data, files) => {
+  createCampaign: async (authorId, data, files, campaignId) => {
     const platforms = normalizePlatforms(data.platforms, data.platform);
     const outlets = parseStringList(data.outlets);
+    const media = parseMedia(files);
     if (isCampaignDetailsEnabled(data) && platforms.length === 0) {
+      await deleteUploadedFiles(getMediaUrls(media));
       throw new Error('At least one platform is required');
     }
 
-    const newCampaign = await Campaign.create({
-      author: authorId,
-      title: data.title || undefined,
-      content: data.content,
-      media: parseMedia(files),
-      tags: parseTags(data.tags),
-      budget: data.budget || undefined,
-      startDate: data.startDate || undefined,
-      endDate: data.endDate || undefined,
-      category: data.category || undefined,
-      compensation: data.compensation || 'paid',
-      status: data.status || 'active',
-      visibility: data.visibility || 'public',
-      requirements: data.requirements || undefined,
-      deliverables: parseDeliverables(data.deliverables),
-      ...(platforms.length > 0 ? { platforms, platform: platforms[0] } : {}),
-      outlets,
-    });
+    let newCampaign;
+    try {
+      newCampaign = await Campaign.create({
+        ...(campaignId ? { _id: campaignId } : {}),
+        author: authorId,
+        title: data.title || undefined,
+        content: data.content,
+        media,
+        tags: parseTags(data.tags),
+        budget: data.budget || undefined,
+        startDate: data.startDate || undefined,
+        endDate: data.endDate || undefined,
+        category: data.category || undefined,
+        compensation: data.compensation || 'paid',
+        status: data.status || 'active',
+        visibility: data.visibility || 'public',
+        requirements: data.requirements || undefined,
+        deliverables: parseDeliverables(data.deliverables),
+        ...(platforms.length > 0 ? { platforms, platform: platforms[0] } : {}),
+        outlets,
+      });
+    } catch (error) {
+      await deleteUploadedFiles(getMediaUrls(media));
+      throw error;
+    }
 
     const populated = await Campaign.findById(newCampaign._id).populate('author', 'name avatar');
     // Record platform revenue snapshot with current fee rates (fire-and-forget)
@@ -84,7 +99,9 @@ const brandCampaignService = {
       try { parsedRetainedMedia = JSON.parse(data.retainedMedia); } catch { parsedRetainedMedia = []; }
     }
 
-    campaign.media = [...parsedRetainedMedia, ...parseMedia(files)];
+    const media = parseMedia(files);
+    const previousMedia = campaign.media || [];
+    campaign.media = [...parsedRetainedMedia, ...media];
     if(data.tags !== undefined) campaign.tags = parseTags(data.tags);
     if(data.deliverables !== undefined) campaign.deliverables = parseDeliverables(data.deliverables);
     if(data.content !== undefined) campaign.content = data.content;
@@ -97,6 +114,7 @@ const brandCampaignService = {
     if(data.platforms !== undefined) {
       const platforms = normalizePlatforms(data.platforms, data.platform);
       if (isCampaignDetailsEnabled(data) && platforms.length === 0) {
+        await deleteUploadedFiles(getMediaUrls(media));
         throw new Error('At least one platform is required');
       }
       campaign.platforms = platforms;
@@ -107,7 +125,13 @@ const brandCampaignService = {
     if(data.visibility !== undefined) campaign.visibility = data.visibility;
     if(data.requirements !== undefined) campaign.requirements = data.requirements;
 
-    await campaign.save();
+    try {
+      await campaign.save();
+      await deleteRemovedMedia(previousMedia, parsedRetainedMedia);
+    } catch (error) {
+      await deleteUploadedFiles(getMediaUrls(media));
+      throw error;
+    }
 
     const populated = await Campaign.findById(campaign._id)
       .populate('author', 'name avatar')
@@ -121,7 +145,9 @@ const brandCampaignService = {
     if (campaign.author.toString() !== userId && userRole !== 'admin') {
       throw new Error('Not authorized to delete this campaign');
     }
+    const mediaUrls = getMediaUrls(campaign.media);
     await campaign.deleteOne();
+    await deleteUploadedFiles(mediaUrls);
     return { success: true };
   }
 };
