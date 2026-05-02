@@ -8,6 +8,12 @@ export const resolveAssetUrl = (value) => {
   return `${API_BASE}${value.startsWith('/') ? value : `/${value}`}`;
 };
 
+export const getOwnProfilePath = (role) => {
+  if (role === 'admin') return '/admin/profile';
+  if (role === 'brand') return '/brand/profile';
+  return '/influencer/profile';
+};
+
 export const getItemId = (item) => item?._id || item?.id;
 
 export const toDateInput = (value) => (value ? new Date(value).toISOString().split('T')[0] : '');

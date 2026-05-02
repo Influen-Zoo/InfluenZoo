@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserRound, LogOut, Moon, Sun } from 'lucide-react';
+import { getOwnProfilePath, resolveAssetUrl } from '../../utils/helpers';
 
 export const AdminTopbar = ({
   setSidebarOpen,
@@ -14,6 +15,12 @@ export const AdminTopbar = ({
   logout
 }) => {
   const navigate = useNavigate();
+  const openProfile = () => {
+    navigate(getOwnProfilePath(user?.role));
+    setShowProfileDropdown(false);
+    setActiveSection?.('profile');
+  };
+
   return (
     <div className="admin-topbar">
       <div className="admin-topbar-left">
@@ -34,15 +41,24 @@ export const AdminTopbar = ({
         </button>
 
         <div className="profile-dropdown-container">
-          <div className="admin-topbar-avatar" onClick={() => setShowProfileDropdown(!showProfileDropdown)}>
-            {user?.profilePicture ? <img src={user.profilePicture} alt="Profile" /> : user?.name?.[0]}
+          <div
+            className="admin-topbar-avatar"
+            onClick={openProfile}
+            role="button"
+            tabIndex={0}
+            aria-label="Open profile"
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openProfile();
+              }
+            }}
+          >
+            {user?.profilePicture ? <img src={resolveAssetUrl(user.profilePicture)} alt="Profile" /> : user?.name?.[0]}
           </div>
 
           <div className={`profile-dropdown ${showProfileDropdown ? 'open' : ''}`}>
-            <div className="dropdown-item" onClick={() => {
-              navigate('/admin/profile');
-              setShowProfileDropdown(false);
-            }}>
+            <div className="dropdown-item" onClick={openProfile}>
               <UserRound size={16} /> Update Profile
             </div>
             <div className="dropdown-divider"></div>

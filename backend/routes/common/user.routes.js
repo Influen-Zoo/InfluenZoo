@@ -1,17 +1,37 @@
 const express = require('express');
+const path = require('path');
 const userController = require('../../controllers/common/user.controller');
 const { authMiddleware } = require('../../middleware/auth/auth.middleware');
 const { losslessImageCompression } = require('../../middleware/common/losslessImageCompression.middleware');
 const { createUpload, getRoleDataFolder, getUploadUrl } = require('../../utils/uploadStorage');
 
 const router = express.Router();
+const MAX_PROFILE_IMAGE_FILE_SIZE = 25 * 1024 * 1024;
+const allowedImageExtensions = new Set([
+  '.jpg',
+  '.jpeg',
+  '.jpe',
+  '.jfif',
+  '.pjpeg',
+  '.png',
+  '.webp',
+  '.gif',
+  '.avif',
+  '.tif',
+  '.tiff',
+]);
+
+const isImageUpload = (file) => {
+  if (file.mimetype?.startsWith('image/')) return true;
+  return allowedImageExtensions.has(path.extname(file.originalname || '').toLowerCase());
+};
 
 const upload = createUpload({
   getFolderParts: (req) => getRoleDataFolder(req.role),
   getEntityId: (req) => req.userId,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: MAX_PROFILE_IMAGE_FILE_SIZE },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) cb(null, true);
+    if (isImageUpload(file)) cb(null, true);
     else cb(new Error('Only images are allowed!'));
   }
 });

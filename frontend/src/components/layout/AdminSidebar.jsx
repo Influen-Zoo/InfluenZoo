@@ -1,6 +1,7 @@
 import React from 'react';
 import { LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import logo from '../../assets/influenzoo-logo.png';
+import { getOwnProfilePath, resolveAssetUrl } from '../../utils/helpers';
 
 export const AdminSidebar = ({ 
   sidebarOpen, 
@@ -14,6 +15,12 @@ export const AdminSidebar = ({
   logout,
   navigate 
 }) => {
+  const openProfile = () => {
+    navigate(getOwnProfilePath(user?.role));
+    setActiveSection?.('profile');
+    setSidebarOpen(false);
+  };
+
   return (
     <>
       {sidebarOpen && <div className="sidebar-overlay active" onClick={() => setSidebarOpen(false)} />}
@@ -68,8 +75,21 @@ export const AdminSidebar = ({
         </nav>
         
         <div className="sidebar-user">
-          <div className="avatar" style={{ width: 36, height: 36, fontSize: '0.8125rem' }}>
-            {user?.profilePicture ? <img src={user.profilePicture} alt="Avatar" /> : user?.name?.[0]}
+          <div
+            className="avatar"
+            style={{ width: 36, height: 36, fontSize: '0.8125rem', cursor: 'pointer' }}
+            onClick={openProfile}
+            role="button"
+            tabIndex={0}
+            aria-label="Open profile"
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openProfile();
+              }
+            }}
+          >
+            {user?.profilePicture ? <img src={resolveAssetUrl(user.profilePicture)} alt="Avatar" /> : user?.name?.[0]}
           </div>
           {!isSidebarCollapsed && (
             <div className="sidebar-user-info">

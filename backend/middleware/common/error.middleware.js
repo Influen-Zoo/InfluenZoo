@@ -15,7 +15,7 @@ const errorMiddleware = (err, req, res, next) => {
 
   if (err.code === 'LIMIT_FILE_SIZE') {
     const message = req.path === '/upload'
-      ? 'Maximum image size allowed is 5 MB'
+      ? 'Maximum image size allowed is 25 MB'
       : 'Maximum video size allowed is 25 MB';
     return res.status(413).json({ error: message });
   }

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Search, Bell, MessageSquare, Moon, Sun } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { resolveAssetUrl } from '../../utils/helpers';
+import { getOwnProfilePath, resolveAssetUrl } from '../../utils/helpers';
 import logo from '../../assets/influenzoo-logo.png';
 
 export const TopNavbar = ({
@@ -79,7 +79,19 @@ export const TopNavbar = ({
             <span>influenZoo</span>
           </div>
 
-          <div className="avatar-mini" onClick={() => handleNav('profile', `/${user.role}/profile`)}>
+          <div
+            className="avatar-mini"
+            onClick={() => handleNav('profile', getOwnProfilePath(user?.role))}
+            role="button"
+            tabIndex={0}
+            aria-label="Open profile"
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                handleNav('profile', getOwnProfilePath(user?.role));
+              }
+            }}
+          >
             {user?.avatar ? (
               <img
                 src={resolveAssetUrl(user.avatar)}

@@ -29,6 +29,7 @@ import { useTheme } from '../context/ThemeContext';
 import CurvedNavbar from '../components/layout/CurvedNavbar/CurvedNavbar';
 import api from '../services/api';
 import TopNavbar from '../components/layout/TopNavbar';
+import { getOwnProfilePath } from '../utils/helpers';
 import './Notifications.css';
 
 
@@ -96,13 +97,13 @@ export default function Notifications() {
   const [activeMenu, setActiveMenu] = useState(null);
 
   // Dock Navigation Setup
-  const roleBase = user?.role === 'brand' ? '/brand' : '/influencer';
+  const roleBase = user?.role === 'admin' ? '/admin' : user?.role === 'brand' ? '/brand' : '/influencer';
   const navItems = [
     { key: 'explore', icon: Compass, label: 'Discover', path: `${roleBase}/explore` },
     { key: 'home', icon: House, label: 'Home', path: roleBase },
     { key: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: `${roleBase}/dashboard` },
     { key: 'ai', icon: Bot, label: 'AI' },
-    { key: 'profile', icon: User, label: 'Profile', path: `${roleBase}/profile`, isProfile: true },
+    { key: 'profile', icon: User, label: 'Profile', path: getOwnProfilePath(user?.role), isProfile: true },
   ];
 
   const unreadNotifs = notifications.filter((n) => !n.read).length;
@@ -191,7 +192,7 @@ export default function Notifications() {
     if (!notif.read) {
       await handleMarkAsRead(notif._id);
     }
-    const roleBase = user?.role === 'brand' ? '/brand' : '/influencer';
+    const roleBase = user?.role === 'admin' ? '/admin' : user?.role === 'brand' ? '/brand' : '/influencer';
 
     if (notif.type === 'message') {
       navigate(roleBase, { state: { activeTab: 'chat', selectedConvId: notif.relatedId } });

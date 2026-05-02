@@ -18,6 +18,10 @@ const formatCompactCount = (value) => {
   return `${(count / 1000).toFixed(1)}K`;
 };
 
+const getUploadErrorMessage = (error, fallback) => (
+  error.response?.data?.error || error.response?.data?.message || error.message || fallback
+);
+
 export default function UserProfile({ forcedUserId = null, embedded = false, onEditProfile = null }) {
   const params = useParams();
   const userId = forcedUserId || params.userId;
@@ -200,7 +204,7 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
       showToast('Profile picture updated successfully');
       await reloadProfileAndStats();
     } catch (error) {
-      showToast('Error uploading profile picture', 'danger');
+      showToast(getUploadErrorMessage(error, 'Error uploading profile picture'), 'danger');
       console.error(error);
     } finally {
       setUploading(false);
@@ -237,7 +241,7 @@ export default function UserProfile({ forcedUserId = null, embedded = false, onE
       showToast('Banner updated successfully');
       await reloadProfileAndStats();
     } catch (error) {
-      showToast('Error uploading banner picture', 'danger');
+      showToast(getUploadErrorMessage(error, 'Error uploading banner picture'), 'danger');
       console.error(error);
     } finally {
       setUploading(false);

@@ -9,6 +9,10 @@ import UserBadge from '../../components/common/UserBadge/UserBadge';
 import { resolveAssetUrl } from '../../utils/helpers';
 import './BrandProfile.css';
 
+const getUploadErrorMessage = (error, fallback) => (
+  error.response?.data?.error || error.response?.data?.message || error.message || fallback
+);
+
 export default function BrandProfile({ forcedUserId = null, embedded = false, onEditProfile = null }) {
   const params = useParams();
   const navigate = useNavigate();
@@ -75,7 +79,7 @@ export default function BrandProfile({ forcedUserId = null, embedded = false, on
       showToast('Profile picture updated successfully');
       await loadProfile();
     } catch (error) {
-      showToast('Error uploading logo', 'danger');
+      showToast(getUploadErrorMessage(error, 'Error uploading logo'), 'danger');
       console.error(error);
     } finally {
       setUploading(false);
@@ -98,7 +102,7 @@ export default function BrandProfile({ forcedUserId = null, embedded = false, on
       showToast('Cover photo updated successfully');
       await loadProfile();
     } catch (error) {
-      showToast('Error uploading cover photo', 'danger');
+      showToast(getUploadErrorMessage(error, 'Error uploading cover photo'), 'danger');
       console.error(error);
     } finally {
       setUploading(false);
