@@ -74,8 +74,8 @@ export const adminService = {
     return response.data?.data || response.data;
   },
 
-  async updateFeeStructure(campaignFee, applicationFee) {
-    const response = await apiClient.put('/admin/fee-structure', { campaignFee, applicationFee });
+  async updateFeeStructure(fees = {}) {
+    const response = await apiClient.put('/admin/fee-structure', fees);
     return response.data?.data || response.data;
   },
 

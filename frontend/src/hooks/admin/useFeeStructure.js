@@ -9,7 +9,7 @@ export const useFeeStructure = () => {
 
   const handleUpdateFeeStructure = async (fees) => {
     try {
-      await adminService.updateFeeStructure(fees.campaignFee, fees.applicationFee);
+      await adminService.updateFeeStructure(fees);
       showToast('Fee structure updated successfully! ✅');
       loadAllData();
     } catch (e) {

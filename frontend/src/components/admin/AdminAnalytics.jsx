@@ -178,7 +178,7 @@ export default function AdminAnalytics() {
             { label: 'Post Count', value: postCount, color: 'var(--success)', icon: '📸' },
             { label: 'Top Category', value: categoryData[0]?.name || 'N/A', color: 'var(--info)', icon: '🏷️' }
           ].map((kpi, i) => (
-            <Grid item xs={12} sm={6} md={3} key={i}>
+            <Grid item xs={12} sm={3} key={i}>
               <div className="chart-card" style={{ padding: '1.25rem', textAlign: 'center' }}>
                 <Typography variant="caption" sx={{ color: 'var(--text-muted)', fontWeight: 700, mb: 1, display: 'block' }}>
                   {kpi.icon} {kpi.label}
@@ -460,7 +460,7 @@ export default function AdminAnalytics() {
             { label: 'Avg. Applicants / Camp', value: avgApps, color: 'var(--accent)', icon: '📈' },
             { label: 'Active Campaigns', value: activeCampaigns, color: 'var(--info)', icon: '🚀' }
           ].map((kpi, i) => (
-            <Grid item xs={12} sm={6} md={3} key={i}>
+            <Grid item xs={12} sm={3} key={i}>
               <div className="chart-card" style={{ padding: '1.25rem', textAlign: 'center' }}>
                 <Typography variant="caption" sx={{ color: 'var(--text-muted)', fontWeight: 700, mb: 1, display: 'block' }}>
                   {kpi.icon} {kpi.label}
@@ -695,7 +695,7 @@ export default function AdminAnalytics() {
             { label: 'Total Earnings', value: `₹${totalEarnings.toLocaleString()}`, color: 'var(--success)', icon: '💰' },
             { label: 'Influencer Pool', value: (data.totalInfluencers || influencerPool.length).toLocaleString(), color: 'var(--info)', icon: '✨' }
           ].map((kpi, i) => (
-            <Grid item xs={12} sm={6} md={3} key={i}>
+            <Grid item xs={12} sm={3} key={i}>
               <div className="chart-card" style={{ padding: '1.25rem', textAlign: 'center' }}>
                 <Typography variant="caption" sx={{ color: 'var(--text-muted)', fontWeight: 700, mb: 1, display: 'block' }}>
                   {kpi.icon} {kpi.label}
@@ -896,7 +896,7 @@ export default function AdminAnalytics() {
             { label: 'Applications', value: (data.totalApplications || 0).toLocaleString(), color: 'var(--accent)', icon: '💼' },
             { label: 'Total Users', value: totalUsers.toLocaleString(), color: 'var(--info)', icon: '👥' }
           ].map((kpi, i) => (
-            <Grid item xs={12} sm={6} md={3} key={i}>
+            <Grid item xs={12} sm={3} key={i}>
               <div className="chart-card" style={{ padding: '1.25rem', textAlign: 'center' }}>
                 <Typography variant="caption" sx={{ color: 'var(--text-muted)', fontWeight: 700, mb: 1, display: 'block' }}>
                   {kpi.icon} {kpi.label}
@@ -1085,7 +1085,7 @@ export default function AdminAnalytics() {
             { label: 'Active Campaigns', value: totalCampaigns, color: 'var(--primary)', icon: '🚀' },
             { label: 'Brand Partnerships', value: brandPool.length, color: 'var(--accent)', icon: '🤝' }
           ].map((kpi, i) => (
-            <Grid item xs={12} sm={6} md={3} key={i}>
+            <Grid item xs={12} sm={3} key={i}>
               <div className="chart-card" style={{ padding: '1.25rem', textAlign: 'center' }}>
                 <Typography variant="caption" sx={{ color: 'var(--text-muted)', fontWeight: 700, mb: 1, display: 'block' }}>
                   {kpi.icon} {kpi.label}

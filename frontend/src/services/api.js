@@ -552,11 +552,11 @@ class ApiClient {
     return response.data?.data || response.data;
   }
 
-  async updateFeeStructure(campaignFee, applicationFee) {
-    const response = await this.client.put('/admin/fee-structure', { 
-      campaignFee, 
-      applicationFee 
-    });
+  async updateFeeStructure(feesOrCampaignFee, applicationFee) {
+    const payload = typeof feesOrCampaignFee === 'object'
+      ? feesOrCampaignFee
+      : { campaignFee: feesOrCampaignFee, applicationFee };
+    const response = await this.client.put('/admin/fee-structure', payload);
     return response.data?.data || response.data;
   }
 

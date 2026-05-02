@@ -82,7 +82,7 @@ export default function AdminFeeStructure({
           Configure platform fee structure. These fees are charged to different user groups for various actions.
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+        <div className="admin-four-card-grid" style={{ gap: '1.5rem' }}>
           {/* Campaign Fee Card */}
           <div className="chart-card" style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -345,7 +345,7 @@ export default function AdminFeeStructure({
               Existing campaigns will not be affected.
             </p>
 
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <LiquidButton 
                 variant="secondary" 
                 onClick={() => {
@@ -356,7 +356,7 @@ export default function AdminFeeStructure({
                   setMinRechargeAmount(feeStructure.minRechargeAmount !== undefined ? feeStructure.minRechargeAmount : 500);
                 }}
                 disabled={saving}
-                style={{ flex: 1 }}
+                style={{ minWidth: '120px' }}
               >
                 Cancel
               </LiquidButton>
@@ -364,7 +364,7 @@ export default function AdminFeeStructure({
                 variant="primary" 
                 onClick={handleSave}
                 disabled={saving || loading}
-                style={{ flex: 1 }}
+                style={{ minWidth: '160px' }}
               >
                 {saving ? '⏳ Saving...' : '💾 Save Changes'}
               </LiquidButton>
@@ -388,7 +388,7 @@ export default function AdminFeeStructure({
           )}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: paymentEditMode ? '1.5rem' : 0 }}>
+        <div className="admin-four-card-grid" style={{ gap: '1rem', marginBottom: paymentEditMode ? '1.5rem' : 0 }}>
           <div style={{ background: 'var(--surface-alt)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Status</div>
             <div style={{ fontSize: '1.125rem', fontWeight: 800, color: razorpaySettings.enabled ? 'var(--success)' : 'var(--warning)' }}>
