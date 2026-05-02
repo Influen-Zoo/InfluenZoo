@@ -130,6 +130,7 @@ export default function BrandLogosPage() {
 
   const visibleCount = logos.filter((logo) => logo.isActive !== false).length;
   const previewLogos = logos.length ? logos.slice(0, 5) : [{ _id: 'sample', name: 'Brand', image: '' }];
+  const previewLoopLogos = [...previewLogos, ...previewLogos];
 
   return (
     <AdminLayout
@@ -288,12 +289,12 @@ export default function BrandLogosPage() {
                   gap: `${showSeparator ? spacing / 2 : spacing}px`
                 }}
               >
-                {previewLogos.map((logo, index) => (
-                  <React.Fragment key={logo._id}>
+                {previewLoopLogos.map((logo, index) => (
+                  <React.Fragment key={`${logo._id}-${index}`}>
                     <div className="brand-logo-preview-chip">
                       {logo.image ? <img src={resolveAssetUrl(logo.image)} alt={logo.name} /> : <strong>PNG</strong>}
                     </div>
-                    {showSeparator && index < previewLogos.length - 1 && (
+                    {showSeparator && index < previewLoopLogos.length - 1 && (
                       <div className="brand-logo-preview-separator" />
                     )}
                   </React.Fragment>

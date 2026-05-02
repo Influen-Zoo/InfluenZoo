@@ -3,6 +3,7 @@ import { Check, Ban } from 'lucide-react';
 import { Box } from '@mui/material';
 import LiquidButton from '../common/LiquidButton/LiquidButton';
 import adminService from '../../services/admin.service';
+import useCategories from '../../hooks/useCategories';
 
 export default function AdminCampaignsNew({ 
   campaigns = [], 
@@ -11,6 +12,7 @@ export default function AdminCampaignsNew({
   setCampaignCostModal,
   onCampaignBlocked = () => {}
 }) {
+  const { categories } = useCategories();
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [applications, setApplications] = useState([]);
   const [appsLoading, setAppsLoading] = useState(false);
@@ -131,13 +133,9 @@ export default function AdminCampaignsNew({
             onChange={e => setCampaignFilter({ ...campaignFilter, category: e.target.value })}
           >
             <option value="">All Categories</option>
-            <option value="Fashion">Fashion</option>
-            <option value="Technology">Technology</option>
-            <option value="Travel">Travel</option>
-            <option value="Food">Food</option>
-            <option value="Lifestyle">Lifestyle</option>
-            <option value="Entertainment">Entertainment</option>
-            <option value="Other">Other</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>{category}</option>
+            ))}
           </select>
         </div>
         <div style={{ minWidth: '180px' }}>

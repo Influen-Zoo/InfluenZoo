@@ -1,6 +1,6 @@
 import React from 'react';
 import LiquidButton from '../common/LiquidButton/LiquidButton';
-import { PROFILE_CATEGORIES, SOCIAL_PLATFORMS } from '../../constants/common';
+import { SOCIAL_PLATFORMS } from '../../constants/common';
 
 export default function EditProfileModal({
   profileData,
@@ -16,7 +16,8 @@ export default function EditProfileModal({
   handleWorkChange,
   handleFullProfileSave,
   savingProfile,
-  uploading
+  uploading,
+  categories = []
 }) {
   return (
     <div className="modal-overlay" onClick={() => setEditProfileModal(false)}>
@@ -40,7 +41,7 @@ export default function EditProfileModal({
           <label>Category</label>
           <select className="input" value={profileData.category} onChange={e => handleProfileFieldChange('category', e.target.value)}>
             <option value="">Select category</option>
-            {PROFILE_CATEGORIES.map(category => <option key={category} value={category}>{category}</option>)}
+            {categories.map(category => <option key={category} value={category}>{category}</option>)}
           </select>
         </div>
         <div className="input-group" style={{ marginBottom: '1.5rem' }}>

@@ -1,7 +1,42 @@
 import React from 'react';
-import { LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Award,
+  BarChart3,
+  Camera,
+  ChevronLeft,
+  ChevronRight,
+  Image,
+  IndianRupee,
+  LineChart,
+  LogOut,
+  Megaphone,
+  Scale,
+  Tags,
+  Users,
+  Wallet,
+} from 'lucide-react';
 import logo from '../../assets/influenzoo-logo.png';
 import { getOwnProfilePath, resolveAssetUrl } from '../../utils/helpers';
+
+const sidebarIconMap = {
+  overview: BarChart3,
+  withdrawals: Wallet,
+  users: Users,
+  campaigns: Megaphone,
+  posts: Camera,
+  'brand-logos': Image,
+  categories: Tags,
+  badges: Award,
+  'fee-structure': IndianRupee,
+  analytics: LineChart,
+  disputes: Scale,
+};
+
+const SidebarIcon = ({ item }) => {
+  const Icon = sidebarIconMap[item.key];
+  if (Icon) return <Icon className="sidebar-item-icon-svg" size={18} strokeWidth={2.1} />;
+  return <span className="sidebar-item-icon-fallback">{item.icon}</span>;
+};
 
 export const AdminSidebar = ({ 
   sidebarOpen, 
@@ -62,8 +97,10 @@ export const AdminSidebar = ({
                   setSidebarOpen(false); 
                 }}
               >
-                <span style={{ fontSize: 18 }}>{item.icon}</span>
-                <span>{item.label}</span>
+                <span className="sidebar-item-icon">
+                  <SidebarIcon item={item} />
+                </span>
+                <span className="sidebar-item-label">{item.label}</span>
                 {item.badge > 0 && (
                   <span className="badge" style={{ marginLeft: 'auto', padding: '0.1rem 0.5rem', fontSize: 10, background: 'rgba(14,165,160,0.2)', color: 'var(--accent-light)' }}>
                     {item.badge}

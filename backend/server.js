@@ -39,6 +39,7 @@ app.use('/api/admin', require('./routes/admin/admin.routes')); // Badge routes i
 app.use('/api/admin/wallet', require('./routes/admin/wallet.admin.routes'));
 app.use('/api/chatbot', require('./routes/common/chatbot.routes'));
 app.use('/api/brand-logos', require('./routes/common/brandLogo.routes'));
+app.use('/api/categories', require('./routes/common/category.routes'));
 app.use('/api/posts', require('./routes/common/post.routes'));
 app.use('/api/messages', require('./routes/common/chat.routes'));
 app.use('/api/notifications', require('./routes/common/notification.routes'));

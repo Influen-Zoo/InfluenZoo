@@ -5,6 +5,7 @@ export const getAdminSidebarItems = ({ stats = {}, withdrawals = [], campaigns =
   { key: 'campaigns', icon: '📢', label: 'Campaigns', badge: campaigns.length || 0 },
   { key: 'posts', icon: '📸', label: 'Posts', badge: posts.length || 0 },
   { key: 'brand-logos', icon: 'B', label: 'Brand Logos' },
+  { key: 'categories', icon: 'C', label: 'Categories' },
   { key: 'badges', icon: '🏅', label: 'User Badges' },
   { key: 'fee-structure', icon: '💰', label: 'Fee Structure' },
   { key: 'analytics', icon: '📈', label: 'Analytics' },

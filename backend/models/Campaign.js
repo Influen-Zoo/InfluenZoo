@@ -51,7 +51,7 @@ const campaignSchema = new mongoose.Schema(
     endDate: { type: Date },
     category: {
       type: String,
-      enum: ['Fashion', 'Tech', 'Fitness', 'Beauty', 'Food', 'Travel', 'Other'],
+      trim: true,
     },
     requirements: { type: String, trim: true },
     deliverables: [{ type: String, trim: true }],

@@ -89,6 +89,17 @@ export const adminService = {
     return response.data?.data || response.data;
   },
 
+  async getCategories() {
+    const response = await apiClient.get('/categories');
+    const data = response.data;
+    return Array.isArray(data) ? data : (data?.data || []);
+  },
+
+  async updateCategories(categories) {
+    const response = await apiClient.put('/categories', { categories });
+    return response.data?.data || response.data;
+  },
+
   async blockPost(postId, reason) {
     const response = await apiClient.put(`/admin/posts/${postId}/block`, { reason });
     return response.data?.data || response.data;

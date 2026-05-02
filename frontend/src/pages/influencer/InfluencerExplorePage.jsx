@@ -4,16 +4,17 @@ import ExploreTab from '../../components/influencer/tabs/ExploreTab';
 import ProfileViewerModal from '../../components/common/ProfileViewerModal/ProfileViewerModal';
 import ApplyModal from '../../components/influencer/ApplyModal';
 import CampaignDetailModal from '../../components/influencer/CampaignDetailModal';
-import { PROFILE_CATEGORIES } from '../../constants/common';
 import { getItemId } from '../../utils/helpers';
+import useCategories from '../../hooks/useCategories';
 
 export const InfluencerExplorePage = () => {
   const dashboard = useOutletContext();
+  const { categories } = useCategories();
 
   return (
     <div className="tab-container">
       <ExploreTab 
-        categories={PROFILE_CATEGORIES}
+        categories={categories}
         filters={dashboard.filters}
         setFilters={dashboard.setFilters}
         exploreSubTab={dashboard.exploreSubTab}

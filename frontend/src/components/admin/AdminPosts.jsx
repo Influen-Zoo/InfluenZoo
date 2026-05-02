@@ -3,6 +3,7 @@ import { Check, Ban } from 'lucide-react';
 import { Box } from '@mui/material';
 import LiquidButton from '../common/LiquidButton/LiquidButton';
 import adminService from '../../services/admin.service';
+import useCategories from '../../hooks/useCategories';
 
 export default function AdminPosts({ 
   posts = [],
@@ -10,6 +11,7 @@ export default function AdminPosts({
   setPostFilter = () => {},
   onPostBlocked = () => {}
 }) {
+  const { categories } = useCategories();
   const [blockedPosts, setBlockedPosts] = useState({});
   const [blockingPost, setBlockingPost] = useState(null);
   const [blockReason, setBlockReason] = useState('Not meeting community standards');
@@ -110,13 +112,9 @@ export default function AdminPosts({
             onChange={e => setPostFilter({ ...postFilter, category: e.target.value })}
           >
             <option value="">All Categories</option>
-            <option value="Fashion">Fashion</option>
-            <option value="Technology">Technology</option>
-            <option value="Travel">Travel</option>
-            <option value="Food">Food</option>
-            <option value="Lifestyle">Lifestyle</option>
-            <option value="Entertainment">Entertainment</option>
-            <option value="Other">Other</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>{category}</option>
+            ))}
           </select>
         </div>
         <div style={{ minWidth: '180px' }}>

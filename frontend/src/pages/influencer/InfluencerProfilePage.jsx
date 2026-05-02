@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import UserProfile from '../UserProfile';
 import EditProfileModal from '../../components/influencer/EditProfileModal';
 import LiquidButton from '../../components/common/LiquidButton/LiquidButton';
+import useCategories from '../../hooks/useCategories';
 
 export const InfluencerProfilePage = () => {
   const { 
@@ -25,6 +26,7 @@ export const InfluencerProfilePage = () => {
     savingProfile,
     uploading
   } = useOutletContext();
+  const { categories } = useCategories();
 
   return (
     <div className="tab-container">
@@ -57,6 +59,7 @@ export const InfluencerProfilePage = () => {
           handleFullProfileSave={handleFullProfileSave}
           savingProfile={savingProfile}
           uploading={uploading}
+          categories={categories}
         />
       )}
     </div>

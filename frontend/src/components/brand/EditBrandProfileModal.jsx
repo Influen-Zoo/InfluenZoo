@@ -10,7 +10,8 @@ export default function EditBrandProfileModal({
   handlePreferenceChange,
   handleSave,
   saving,
-  uploading
+  uploading,
+  categories = []
 }) {
   return (
     <div className="modal-overlay" onClick={() => setEditModal(false)}>
@@ -37,14 +38,9 @@ export default function EditBrandProfileModal({
             <label>Industry</label>
             <select className="input" value={profileData.industry} onChange={e => handleFieldChange('industry', e.target.value)}>
               <option value="">Select Industry</option>
-              <option value="Fashion">Fashion</option>
-              <option value="Beauty">Beauty</option>
-              <option value="Technology">Technology</option>
-              <option value="Food & Beverage">Food & Beverage</option>
-              <option value="Health & Wellness">Health & Wellness</option>
-              <option value="Gaming">Gaming</option>
-              <option value="Travel">Travel</option>
-              <option value="Other">Other</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>{category}</option>
+              ))}
             </select>
           </div>
           <div className="input-group">
@@ -129,8 +125,18 @@ export default function EditBrandProfileModal({
             <input className="input" value={profileData.campaignPreferences?.budgetRange || ''} onChange={e => handlePreferenceChange('budgetRange', e.target.value)} placeholder="e.g. ₹10k - ₹50k" />
           </div>
           <div className="input-group">
-            <label>Niches / Categories (Comma separated)</label>
-            <input className="input" value={(profileData.campaignPreferences?.categories || []).join(', ')} onChange={e => handlePreferenceChange('categories', e.target.value.split(',').map(s => s.trim()))} placeholder="Fashion, Tech, Gaming" />
+            <label>Niches / Categories</label>
+            <select
+              className="input"
+              multiple
+              value={profileData.campaignPreferences?.categories || []}
+              onChange={e => handlePreferenceChange('categories', Array.from(e.target.selectedOptions).map(option => option.value))}
+              style={{ minHeight: '120px' }}
+            >
+              {categories.map((category) => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
           </div>
         </div>
 

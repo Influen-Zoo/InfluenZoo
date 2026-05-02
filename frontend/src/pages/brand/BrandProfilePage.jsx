@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import UserProfile from '../UserProfile';
 import LiquidButton from '../../components/common/LiquidButton/LiquidButton';
 import EditBrandProfileModal from '../../components/brand/EditBrandProfileModal';
+import useCategories from '../../hooks/useCategories';
 
 export const BrandProfilePage = () => {
   const { 
@@ -16,6 +17,7 @@ export const BrandProfilePage = () => {
     saveBrandProfile,
     savingBrandProfile
   } = useOutletContext();
+  const { categories } = useCategories();
 
   return (
     <div className="tab-container">
@@ -40,7 +42,8 @@ export const BrandProfilePage = () => {
           handleSocialLinkChange={(platform, value) => setBrandProfileData(prev => ({ ...prev, socialLinks: { ...prev.socialLinks, [platform]: value } }))}
           handlePreferenceChange={(field, value) => setBrandProfileData(prev => ({ ...prev, campaignPreferences: { ...prev.campaignPreferences, [field]: value } }))}
           handleSave={saveBrandProfile}
-          savingProfile={savingBrandProfile}
+          saving={savingBrandProfile}
+          categories={categories}
         />
       )}
     </div>

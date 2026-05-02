@@ -161,6 +161,8 @@ router.get('/carousel-settings', brandLogoController.getBrandLogoSettings);
 router.put('/carousel-settings', brandLogoController.updateBrandLogoSettings);
 router.get('/razorpay-settings', adminController.getRazorpaySettings);
 router.put('/razorpay-settings', adminController.updateRazorpaySettings);
+router.get('/categories', adminController.getCategories);
+router.put('/categories', adminController.updateCategories);
 router.get('/brand-logos', brandLogoController.getAdminBrandLogos);
 router.post('/brand-logos', brandLogoUpload.single('logo'), trimBrandLogo, brandLogoController.createBrandLogo);
 router.put('/brand-logos/:id', brandLogoUpload.single('logo'), trimBrandLogo, brandLogoController.updateBrandLogo);

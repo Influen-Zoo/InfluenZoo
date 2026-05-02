@@ -1,6 +1,9 @@
 import React from 'react';
+import useCategories from '../../hooks/useCategories';
 
 const CampaignFilters = ({ campaignFilter, setCampaignFilter }) => {
+  const { categories } = useCategories();
+
   return (
     <div className="admin-section-filters" style={{ background: 'var(--surface-alt)', padding: '1.25rem', borderRadius: '16px', marginBottom: '1.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
       <div style={{ flex: '1 1 200px' }}>
@@ -20,13 +23,9 @@ const CampaignFilters = ({ campaignFilter, setCampaignFilter }) => {
           onChange={e => setCampaignFilter({ ...campaignFilter, category: e.target.value })}
         >
           <option value="">All Categories</option>
-          <option value="Fashion">Fashion</option>
-          <option value="Technology">Technology</option>
-          <option value="Travel">Travel</option>
-          <option value="Food">Food</option>
-          <option value="Lifestyle">Lifestyle</option>
-          <option value="Entertainment">Entertainment</option>
-          <option value="Other">Other</option>
+          {categories.map((category) => (
+            <option key={category} value={category}>{category}</option>
+          ))}
         </select>
       </div>
       <div style={{ minWidth: '180px' }}>

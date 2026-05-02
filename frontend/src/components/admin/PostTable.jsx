@@ -19,8 +19,8 @@ const PostTable = ({ posts, setSelectedPost, handleUnblockPost, setBlockingPost,
   };
 
   return (
-    <div style={{ overflowX: 'auto', marginTop: '1.5rem' }}>
-      <table className="table" style={{ width: '100%', minWidth: '800px' }}>
+    <div className="admin-post-table-wrap">
+      <table className="table admin-post-table" style={{ width: '100%', minWidth: '860px' }}>
         <thead>
           <tr>
             <th style={{ minWidth: '120px' }}>Influencer</th>
@@ -75,43 +75,47 @@ const PostTable = ({ posts, setSelectedPost, handleUnblockPost, setBlockingPost,
                     {isBlocked ? 'Blocked' : 'Live'}
                   </span>
                 </td>
-                <td style={{ display: 'flex', gap: '0.4rem' }}>
-                  {isBlocked ? (
-                    <LiquidButton
-                      circular
-                      variant="success"
-                      onClick={(e) => { e.stopPropagation(); handleUnblockPost(postId); }}
-                      title="Unblock post"
-                    >
-                      <Check size={18} />
-                    </LiquidButton>
-                  ) : (
-                    <LiquidButton
-                      circular
-                      variant="error"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setBlockingPost(post);
-                      }}
-                      title="Block post"
-                    >
-                      <Ban size={18} />
-                    </LiquidButton>
-                  )}
+                <td>
+                  <div className="admin-post-action-cell">
+                    {isBlocked ? (
+                      <LiquidButton
+                        circular
+                        variant="success"
+                        onClick={(e) => { e.stopPropagation(); handleUnblockPost(postId); }}
+                        title="Unblock post"
+                      >
+                        <Check size={18} />
+                      </LiquidButton>
+                    ) : (
+                      <LiquidButton
+                        circular
+                        variant="error"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setBlockingPost(post);
+                        }}
+                        title="Block post"
+                      >
+                        <Ban size={18} />
+                      </LiquidButton>
+                    )}
+                  </div>
                 </td>
                 <td>
-                  <LiquidButton
-                    variant="primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setLikesEditModal({ postId, currentLikes: likeCount });
-                    }}
-                    title="Add likes"
-                    style={{ whiteSpace: 'nowrap', padding: '0.45rem 0.85rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
-                  >
-                    <Heart size={18} />
-                    Add Likes
-                  </LiquidButton>
+                  <div className="admin-post-growth-cell">
+                    <LiquidButton
+                      variant="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLikesEditModal({ postId, currentLikes: likeCount });
+                      }}
+                      title="Add likes"
+                      style={{ whiteSpace: 'nowrap', padding: '0.5rem 0.9rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                    >
+                      <Heart size={16} />
+                      Add Likes
+                    </LiquidButton>
+                  </div>
                 </td>
               </tr>
             );

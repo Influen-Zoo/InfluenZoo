@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import api from '../../services/api';
-import { PROFILE_CATEGORIES, SOCIAL_PLATFORMS } from '../../constants/common';
+import { SOCIAL_PLATFORMS } from '../../constants/common';
+import useCategories from '../../hooks/useCategories';
 
 const PREDEFINED_AVATARS = [
   'https://api.dicebear.com/7.x/notionists/svg?seed=Felix',
@@ -19,7 +21,7 @@ export default function CreatorSetupFlow({ user, onComplete }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const categories = PROFILE_CATEGORIES;
+  const { categories } = useCategories();
   const platforms = SOCIAL_PLATFORMS;
 
   const handleAddLink = () => setSocialLinks([...socialLinks, { platform: 'Instagram', url: '' }]);

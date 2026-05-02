@@ -338,6 +338,12 @@ class ApiClient {
     return response.data?.url || response.data;
   }
 
+  async getCategories() {
+    const response = await this.client.get('/categories');
+    const data = response.data;
+    return Array.isArray(data) ? data : (data?.data || []);
+  }
+
   async getBrandLogos() {
     try {
       const response = await this.client.get('/brand-logos');
@@ -397,6 +403,17 @@ class ApiClient {
 
   async updateAdminBrandLogoSettings(settings) {
     const response = await this.client.put('/admin/carousel-settings', settings);
+    return response.data?.data || response.data;
+  }
+
+  async getAdminCategories() {
+    const response = await this.client.get('/categories');
+    const data = response.data;
+    return Array.isArray(data) ? data : (data?.data || []);
+  }
+
+  async updateAdminCategories(categories) {
+    const response = await this.client.put('/categories', { categories });
     return response.data?.data || response.data;
   }
 

@@ -5,8 +5,10 @@ import LiquidButton from '../common/LiquidButton/LiquidButton';
 export default function AdminFeeStructure({ 
   feeStructure = {},
   razorpaySettings = {},
+  categories = [],
   onUpdateFees,
   onUpdateRazorpaySettings,
+  onUpdateCategories,
   loading = false 
 }) {
   const [campaignFee, setCampaignFee] = useState(0);
@@ -21,6 +23,8 @@ export default function AdminFeeStructure({
   const [paymentEditMode, setPaymentEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savingPayment, setSavingPayment] = useState(false);
+  const [categoryText, setCategoryText] = useState('');
+  const [savingCategories, setSavingCategories] = useState(false);
 
   useEffect(() => {
     if (feeStructure) {
@@ -39,6 +43,10 @@ export default function AdminFeeStructure({
       setCoinRate(razorpaySettings.coinRate || 1);
     }
   }, [razorpaySettings]);
+
+  useEffect(() => {
+    setCategoryText((categories || []).join(', '));
+  }, [categories]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -72,6 +80,21 @@ export default function AdminFeeStructure({
       console.error('Error saving Razorpay settings:', error);
     } finally {
       setSavingPayment(false);
+    }
+  };
+
+  const handleCategorySave = async () => {
+    setSavingCategories(true);
+    try {
+      const nextCategories = categoryText
+        .split(',')
+        .map((category) => category.trim())
+        .filter(Boolean);
+      await onUpdateCategories(nextCategories);
+    } catch (error) {
+      console.error('Error saving categories:', error);
+    } finally {
+      setSavingCategories(false);
     }
   };
 
@@ -371,6 +394,33 @@ export default function AdminFeeStructure({
             </div>
           </div>
         )}
+      </div>
+
+      <div className="chart-card" style={{ padding: '1.5rem', marginTop: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem' }}>
+          <div>
+            <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem 0' }}>Platform Categories</h3>
+            <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', margin: 0 }}>
+              These categories appear in influencer profiles, brand campaign forms, and admin filters.
+            </p>
+          </div>
+        </div>
+        <textarea
+          className="input"
+          value={categoryText}
+          onChange={(event) => setCategoryText(event.target.value)}
+          placeholder="Beauty, Fitness, Tech, Travel"
+          style={{ width: '100%', minHeight: '90px', resize: 'vertical', marginBottom: '1rem' }}
+        />
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <LiquidButton
+            variant="primary"
+            onClick={handleCategorySave}
+            disabled={savingCategories || loading}
+          >
+            {savingCategories ? 'Saving...' : 'Save Categories'}
+          </LiquidButton>
+        </div>
       </div>
 
       <div className="chart-card" style={{ padding: '1.5rem', marginTop: '2rem' }}>

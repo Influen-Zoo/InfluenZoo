@@ -7,6 +7,7 @@ import CustomToast from '../common/CustomToast/CustomToast';
 import api from '../../services/api';
 import EmojiPicker from 'emoji-picker-react';
 import { serializeCampaignPayload } from '../../features/brand/campaignSerializer';
+import useCategories from '../../hooks/useCategories';
 import '../common/CreatePost/CreatePost.css';
 
 const MAX_VIDEO_SIZE_BYTES = 25 * 1024 * 1024;
@@ -77,6 +78,7 @@ const PlatformIcon = ({ platform }) => {
 
 export default function CreateCampaign({ onCampaignCreated, onSuccess, editData, onCancelEdit, onClose }) {
   const { user } = useAuth();
+  const { categories } = useCategories();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [mediaFiles, setMediaFiles] = useState([]);
@@ -84,7 +86,7 @@ export default function CreateCampaign({ onCampaignCreated, onSuccess, editData,
   const [loading, setLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [budget, setBudget] = useState('');
-  const [category, setCategory] = useState('Other');
+  const [category, setCategory] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [compensation, setCompensation] = useState('paid');
@@ -96,6 +98,9 @@ export default function CreateCampaign({ onCampaignCreated, onSuccess, editData,
   const [showCampaignFields, setShowCampaignFields] = useState(true);
   const [toast, setToast] = useState(null);
   const campaignFieldsVisible = editData ? true : showCampaignFields;
+  const categoryOptions = category && !categories.includes(category)
+    ? [category, ...categories]
+    : categories;
 
   const imageRef = useRef(null);
   const videoRef = useRef(null);
@@ -153,6 +158,12 @@ export default function CreateCampaign({ onCampaignCreated, onSuccess, editData,
       setShowCampaignFields(true);
     }
   }, [editData]);
+
+  React.useEffect(() => {
+    if (!editData && !category && categories.length) {
+      setCategory(categories[0]);
+    }
+  }, [categories, category, editData]);
 
   const handleMediaSelect = (e, ref) => {
     if (e.target.files) {
@@ -242,7 +253,7 @@ export default function CreateCampaign({ onCampaignCreated, onSuccess, editData,
       } else {
         const created = await api.createCampaign(formData);
         setTitle(''); setContent(''); setMediaFiles([]); setTags('');
-        setBudget(''); setCategory('Other'); setStartDate(''); setEndDate('');
+        setBudget(''); setCategory(categories[0] || ''); setStartDate(''); setEndDate('');
         setCompensation('paid'); setRequirements(''); setDeliverables('');
         setPlatforms([]); setOutlets([]); setOutletInput('');
         setShowCampaignFields(true);
@@ -355,7 +366,7 @@ export default function CreateCampaign({ onCampaignCreated, onSuccess, editData,
             <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem', display: 'block' }}>Category</label>
             <select className="input sm glass-indicator" value={category} onChange={e => setCategory(e.target.value)}
               style={{ width: '100%', padding: '0.6rem 1rem', borderRadius: '20px', border: '1px solid var(--border)', background: 'var(--surface-alt)', color: 'var(--text-primary)' }}>
-              {['Fashion', 'Tech', 'Fitness', 'Beauty', 'Food', 'Travel', 'Other'].map(cat => (
+              {categoryOptions.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
