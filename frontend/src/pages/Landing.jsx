@@ -21,6 +21,7 @@ import { resolveAssetUrl } from "../utils/helpers";
 import logo from "../assets/influenzoo-logo.png";
 import heroImage from "../assets/hero-marketplace.png";
 import heroMobileImage from "../assets/hero-marketplace-mobile.jpg";
+import heroMobileVideo from "../assets/hero-marketplace-mobile.mp4";
 import showcaseCafe from "../assets/showcase-cafe-realistic.jpg";
 import showcaseMobile from "../assets/showcase-mobile-hero-marketplace.jpg";
 import showcaseSkincare from "../assets/showcase-skincare-realistic.jpg";
@@ -297,7 +298,20 @@ export default function Landing() {
             "--hero-desktop-image": `url(${heroImage})`,
             "--hero-mobile-image": `url(${heroMobileImage})`,
           }}
-        />
+        >
+          <video
+            className="hero-mobile-video"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster={heroMobileImage}
+            tabIndex={-1}
+          >
+            <source src={heroMobileVideo} type="video/mp4" />
+          </video>
+        </div>
         {renderBrandLogoCarousel("brand-logo-strip-mobile")}
 
         <div className="hero-grid">
