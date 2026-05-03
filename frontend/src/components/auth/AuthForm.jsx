@@ -11,6 +11,8 @@ import {
 import { 
   PersonAdd as PersonAddIcon, 
   Email as EmailIcon, 
+  Phone as PhoneIcon,
+  GroupAdd as GroupAddIcon,
   Lock as LockIcon,
   LockOpen as LockOpenIcon,
   Visibility, 
@@ -44,6 +46,48 @@ export const AuthForm = ({
               startAdornment: (
                 <InputAdornment position="start">
                   <PersonAddIcon sx={{ color: 'var(--accent)', mr: 1 }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 'var(--radius-lg)',
+                color: 'var(--text-primary)',
+                '&:hover fieldset': {
+                  borderColor: 'var(--accent)',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'var(--accent)',
+                  borderWidth: '2px',
+                },
+              },
+              '& .MuiInputBase-input::placeholder': {
+                color: 'var(--text-secondary)',
+                opacity: 1,
+              },
+            }}
+          />
+        )}
+
+        {!isLogin && (
+          <TextField
+            fullWidth
+            label="Phone Number"
+            type="tel"
+            placeholder="9876543210"
+            value={form.phone}
+            onChange={(e) => handleFieldChange('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
+            required
+            variant="outlined"
+            inputProps={{
+              inputMode: 'numeric',
+              maxLength: 10,
+              pattern: '[0-9]{10}',
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PhoneIcon sx={{ color: 'var(--accent)', mr: 1 }} />
                 </InputAdornment>
               ),
             }}
@@ -101,6 +145,42 @@ export const AuthForm = ({
             },
           }}
         />
+
+        {!isLogin && (
+          <TextField
+            fullWidth
+            label="Referral Code"
+            type="text"
+            placeholder="Optional"
+            value={form.referralCode}
+            onChange={(e) => handleFieldChange('referralCode', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+            variant="outlined"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <GroupAddIcon sx={{ color: 'var(--accent)', mr: 1 }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 'var(--radius-lg)',
+                color: 'var(--text-primary)',
+                '&:hover fieldset': {
+                  borderColor: 'var(--accent)',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'var(--accent)',
+                  borderWidth: '2px',
+                },
+              },
+              '& .MuiInputBase-input::placeholder': {
+                color: 'var(--text-secondary)',
+                opacity: 1,
+              },
+            }}
+          />
+        )}
 
         <TextField
           fullWidth

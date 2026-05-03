@@ -5,16 +5,19 @@ import LiquidButton from '../common/LiquidButton/LiquidButton';
 export default function AdminFeeStructure({ 
   feeStructure = {},
   razorpaySettings = {},
-  categories = [],
   onUpdateFees,
   onUpdateRazorpaySettings,
-  onUpdateCategories,
   loading = false 
 }) {
   const [campaignFee, setCampaignFee] = useState(0);
   const [applicationFee, setApplicationFee] = useState(0);
   const [minInfluencerBalance, setMinInfluencerBalance] = useState(500);
   const [minRechargeAmount, setMinRechargeAmount] = useState(500);
+  const [firstCampaignCoinCost, setFirstCampaignCoinCost] = useState(50);
+  const [referralRequiredCompleted, setReferralRequiredCompleted] = useState(10);
+  const [referralReferrerRewardMode, setReferralReferrerRewardMode] = useState('percentage');
+  const [referralReferrerRewardValue, setReferralReferrerRewardValue] = useState(5);
+  const [referralReferredRewardCoins, setReferralReferredRewardCoins] = useState(200);
   const [razorpayEnabled, setRazorpayEnabled] = useState(false);
   const [razorpayKeyId, setRazorpayKeyId] = useState('');
   const [razorpayKeySecret, setRazorpayKeySecret] = useState('');
@@ -23,8 +26,6 @@ export default function AdminFeeStructure({
   const [paymentEditMode, setPaymentEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savingPayment, setSavingPayment] = useState(false);
-  const [categoryText, setCategoryText] = useState('');
-  const [savingCategories, setSavingCategories] = useState(false);
 
   useEffect(() => {
     if (feeStructure) {
@@ -32,6 +33,11 @@ export default function AdminFeeStructure({
       setApplicationFee(feeStructure.applicationFee || 0);
       setMinInfluencerBalance(feeStructure.minInfluencerBalance !== undefined ? feeStructure.minInfluencerBalance : 500);
       setMinRechargeAmount(feeStructure.minRechargeAmount !== undefined ? feeStructure.minRechargeAmount : 500);
+      setFirstCampaignCoinCost(feeStructure.firstCampaignCoinCost !== undefined ? feeStructure.firstCampaignCoinCost : 50);
+      setReferralRequiredCompleted(feeStructure.referralRequiredCompleted !== undefined ? feeStructure.referralRequiredCompleted : 10);
+      setReferralReferrerRewardMode(feeStructure.referralReferrerRewardMode || 'percentage');
+      setReferralReferrerRewardValue(feeStructure.referralReferrerRewardValue !== undefined ? feeStructure.referralReferrerRewardValue : 5);
+      setReferralReferredRewardCoins(feeStructure.referralReferredRewardCoins !== undefined ? feeStructure.referralReferredRewardCoins : 200);
     }
   }, [feeStructure]);
 
@@ -44,10 +50,6 @@ export default function AdminFeeStructure({
     }
   }, [razorpaySettings]);
 
-  useEffect(() => {
-    setCategoryText((categories || []).join(', '));
-  }, [categories]);
-
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -55,7 +57,12 @@ export default function AdminFeeStructure({
         campaignFee: Number(campaignFee),
         applicationFee: Number(applicationFee),
         minInfluencerBalance: Number(minInfluencerBalance),
-        minRechargeAmount: Number(minRechargeAmount)
+        minRechargeAmount: Number(minRechargeAmount),
+        firstCampaignCoinCost: Number(firstCampaignCoinCost),
+        referralRequiredCompleted: Number(referralRequiredCompleted),
+        referralReferrerRewardMode,
+        referralReferrerRewardValue: Number(referralReferrerRewardValue),
+        referralReferredRewardCoins: Number(referralReferredRewardCoins)
       });
       setEditMode(false);
     } catch (error) {
@@ -80,21 +87,6 @@ export default function AdminFeeStructure({
       console.error('Error saving Razorpay settings:', error);
     } finally {
       setSavingPayment(false);
-    }
-  };
-
-  const handleCategorySave = async () => {
-    setSavingCategories(true);
-    try {
-      const nextCategories = categoryText
-        .split(',')
-        .map((category) => category.trim())
-        .filter(Boolean);
-      await onUpdateCategories(nextCategories);
-    } catch (error) {
-      console.error('Error saving categories:', error);
-    } finally {
-      setSavingCategories(false);
     }
   };
 
@@ -352,6 +344,67 @@ export default function AdminFeeStructure({
               💡 The lowest allowed top-up value in the wallet modal.
             </div>
           </div>
+
+          {/* First Campaign Coin Cost Card */}
+          <div className="chart-card" style={{ padding: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>First Campaign Cost</h3>
+              {!editMode && (
+                <button
+                  onClick={() => setEditMode(true)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1.25rem',
+                    color: 'var(--accent)'
+                  }}
+                  title="Edit"
+                >
+                  Edit
+                </button>
+              )}
+            </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                Coins charged to brands when they launch their first campaign
+              </p>
+              <div style={{
+                fontSize: '2rem',
+                fontWeight: 800,
+                color: 'var(--accent)',
+                marginBottom: '1rem'
+              }}>
+                {Number(firstCampaignCoinCost)}
+              </div>
+              {editMode && (
+                <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    className="input"
+                    value={firstCampaignCoinCost}
+                    onChange={(e) => setFirstCampaignCoinCost(e.target.value)}
+                    placeholder="Enter coins (e.g. 50)"
+                    style={{ paddingRight: '2.5rem' }}
+                  />
+                  <span style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontWeight: 700 }}>coins</span>
+                </div>
+              )}
+            </div>
+
+            <div style={{
+              background: 'var(--surface-alt)',
+              padding: '0.75rem',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '0.75rem',
+              color: 'var(--text-muted)'
+            }}>
+              This one-time fee is deducted from the brand wallet before the campaign enters admin review.
+            </div>
+          </div>
         </div>
 
         {editMode && (
@@ -377,6 +430,11 @@ export default function AdminFeeStructure({
                   setApplicationFee(feeStructure.applicationFee || 0);
                   setMinInfluencerBalance(feeStructure.minInfluencerBalance !== undefined ? feeStructure.minInfluencerBalance : 500);
                   setMinRechargeAmount(feeStructure.minRechargeAmount !== undefined ? feeStructure.minRechargeAmount : 500);
+                  setFirstCampaignCoinCost(feeStructure.firstCampaignCoinCost !== undefined ? feeStructure.firstCampaignCoinCost : 50);
+                  setReferralRequiredCompleted(feeStructure.referralRequiredCompleted !== undefined ? feeStructure.referralRequiredCompleted : 10);
+                  setReferralReferrerRewardMode(feeStructure.referralReferrerRewardMode || 'percentage');
+                  setReferralReferrerRewardValue(feeStructure.referralReferrerRewardValue !== undefined ? feeStructure.referralReferrerRewardValue : 5);
+                  setReferralReferredRewardCoins(feeStructure.referralReferredRewardCoins !== undefined ? feeStructure.referralReferredRewardCoins : 200);
                 }}
                 disabled={saving}
                 style={{ minWidth: '120px' }}
@@ -397,30 +455,97 @@ export default function AdminFeeStructure({
       </div>
 
       <div className="chart-card" style={{ padding: '1.5rem', marginTop: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.5rem' }}>
           <div>
-            <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem 0' }}>Platform Categories</h3>
+            <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem 0' }}>Referral Rewards</h3>
             <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', margin: 0 }}>
-              These categories appear in influencer profiles, brand campaign forms, and admin filters.
+              Configure wallet referral rewards for brands and influencers.
             </p>
           </div>
+          {!editMode && (
+            <LiquidButton variant="secondary" onClick={() => setEditMode(true)}>
+              Edit
+            </LiquidButton>
+          )}
         </div>
-        <textarea
-          className="input"
-          value={categoryText}
-          onChange={(event) => setCategoryText(event.target.value)}
-          placeholder="Beauty, Fitness, Tech, Travel"
-          style={{ width: '100%', minHeight: '90px', resize: 'vertical', marginBottom: '1rem' }}
-        />
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <LiquidButton
-            variant="primary"
-            onClick={handleCategorySave}
-            disabled={savingCategories || loading}
-          >
-            {savingCategories ? 'Saving...' : 'Save Categories'}
-          </LiquidButton>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+          <div>
+            <label style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Completed referrals required</label>
+            <input
+              className="input"
+              type="number"
+              min="1"
+              step="1"
+              value={referralRequiredCompleted}
+              disabled={!editMode}
+              onChange={(e) => setReferralRequiredCompleted(e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Referrer reward type</label>
+            <select
+              className="input"
+              value={referralReferrerRewardMode}
+              disabled={!editMode}
+              onChange={(e) => setReferralReferrerRewardMode(e.target.value)}
+            >
+              <option value="percentage">Percentage of top-up</option>
+              <option value="fixed">Fixed coins</option>
+            </select>
+          </div>
+          <div>
+            <label style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>
+              Referrer reward {referralReferrerRewardMode === 'percentage' ? '(%)' : '(coins)'}
+            </label>
+            <input
+              className="input"
+              type="number"
+              min="0"
+              step={referralReferrerRewardMode === 'percentage' ? '0.1' : '1'}
+              value={referralReferrerRewardValue}
+              disabled={!editMode}
+              onChange={(e) => setReferralReferrerRewardValue(e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Referred user reward (coins)</label>
+            <input
+              className="input"
+              type="number"
+              min="0"
+              step="1"
+              value={referralReferredRewardCoins}
+              disabled={!editMode}
+              onChange={(e) => setReferralReferredRewardCoins(e.target.value)}
+            />
+          </div>
         </div>
+
+        {editMode && (
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', flexWrap: 'wrap', marginTop: '1.5rem' }}>
+            <LiquidButton
+              variant="secondary"
+              onClick={() => {
+                setEditMode(false);
+                setReferralRequiredCompleted(feeStructure.referralRequiredCompleted !== undefined ? feeStructure.referralRequiredCompleted : 10);
+                setReferralReferrerRewardMode(feeStructure.referralReferrerRewardMode || 'percentage');
+                setReferralReferrerRewardValue(feeStructure.referralReferrerRewardValue !== undefined ? feeStructure.referralReferrerRewardValue : 5);
+                setReferralReferredRewardCoins(feeStructure.referralReferredRewardCoins !== undefined ? feeStructure.referralReferredRewardCoins : 200);
+              }}
+              disabled={saving}
+            >
+              Cancel
+            </LiquidButton>
+            <LiquidButton
+              variant="primary"
+              onClick={handleSave}
+              disabled={saving || loading}
+            >
+              {saving ? 'Saving...' : 'Save Referral Settings'}
+            </LiquidButton>
+          </div>
+        )}
       </div>
 
       <div className="chart-card" style={{ padding: '1.5rem', marginTop: '2rem' }}>

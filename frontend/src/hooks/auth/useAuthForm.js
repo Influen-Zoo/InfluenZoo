@@ -6,7 +6,13 @@ export const useAuthForm = () => {
   const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(searchParams.get('mode') !== 'signup');
   const [role, setRole] = useState('influencer');
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    referralCode: (searchParams.get('ref') || '').toUpperCase(),
+    password: ''
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -17,7 +23,7 @@ export const useAuthForm = () => {
   const toggleMode = () => {
     setIsLogin(prev => !prev);
     setError('');
-    setForm({ name: '', email: '', password: '' });
+    setForm({ name: '', email: '', phone: '', referralCode: '', password: '' });
   };
 
   const handleSubmit = async (e) => {

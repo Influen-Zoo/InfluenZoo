@@ -34,6 +34,11 @@ export const adminService = {
     return response.data;
   },
 
+  async updateUserStatus(id, status) {
+    const response = await apiClient.put(`/admin/users/${id}/status`, { status });
+    return response.data?.data || response.data;
+  },
+
   async updateUserFollowers(id, followers) {
     const response = await apiClient.put(`/admin/users/${id}/followers`, { followers });
     return response.data?.data || response.data;

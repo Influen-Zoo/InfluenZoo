@@ -1,14 +1,71 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import LiquidButton from '../../../common/LiquidButton/LiquidButton';
 import { getItemId } from '../../../../utils/helpers';
 import WithdrawModal from '../../WithdrawModal';
 import { getTransactionDecoration, formatCurrency } from '../../../../features/common/walletProcessor';
+import walletService from '../../../../services/wallet.service';
 
 export default function DashboardWallet({ user, setShowTopUp, walletTransactions, coinBalance, onWithdraw }) {
   const [showWithdraw, setShowWithdraw] = useState(false);
+  const [referralSummary, setReferralSummary] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
 
   // Use coinBalance (from API) as the source of truth, fall back to user context only if necessary
   const displayBalance = coinBalance !== undefined ? coinBalance : (user?.coins || 0);
+  const referralLink = useMemo(() => {
+    const code = referralSummary?.referralCode;
+    if (!code) return '';
+    return `${window.location.origin}/auth?mode=signup&ref=${code}`;
+  }, [referralSummary?.referralCode]);
+
+  useEffect(() => {
+    let active = true;
+    walletService.getReferralSummary()
+      .then((data) => {
+        if (active) setReferralSummary(data);
+      })
+      .catch(() => {
+        if (active) setReferralSummary(null);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const copyReferralLink = async () => {
+    if (!referralLink) return;
+    try {
+      await navigator.clipboard.writeText(referralLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  const shareReferralLink = async () => {
+    if (!referralLink) return;
+    const shareData = {
+      title: 'Join InfluenZoo',
+      text: `Use my referral code ${referralSummary?.referralCode} on InfluenZoo.`,
+      url: referralLink,
+    };
+
+    try {
+      if (navigator.share && navigator.canShare?.(shareData)) {
+        await navigator.share(shareData);
+        setShared(true);
+      } else {
+        await navigator.clipboard.writeText(referralLink);
+        setShared(true);
+      }
+      setTimeout(() => setShared(false), 1600);
+    } catch {
+      setShared(false);
+    }
+  };
 
   return (
     <div className="dashboard-wallet-container" style={{ animation: 'fadeIn 0.3s ease' }}>
@@ -69,6 +126,70 @@ export default function DashboardWallet({ user, setShowTopUp, walletTransactions
                 </div>
               );
             })}
+          </div>
+        )}
+      </div>
+
+      <div className="glass-panel" style={{ marginTop: '2rem', padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+          <div>
+            <h3 style={{ margin: '0 0 0.35rem' }}>Referral Program</h3>
+            <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.8125rem' }}>
+              Invite brands or influencers and earn rewards after completed referral payments.
+            </p>
+          </div>
+          <span className="badge badge-accent" style={{ alignSelf: 'flex-start' }}>
+            Code: {referralSummary?.referralCode || 'Loading...'}
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+          <div style={{ background: 'var(--surface-alt)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800 }}>Completed</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>{referralSummary?.stats?.completedReferrals || 0}</div>
+          </div>
+          <div style={{ background: 'var(--surface-alt)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800 }}>Required</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>{referralSummary?.settings?.requiredCompletedReferrals || 10}</div>
+          </div>
+          <div style={{ background: 'var(--surface-alt)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800 }}>Reward</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 900 }}>
+              {referralSummary?.settings?.referrerRewardMode === 'fixed'
+                ? `${referralSummary?.settings?.referrerRewardValue || 0} coins`
+                : `${referralSummary?.settings?.referrerRewardValue || 5}%`}
+            </div>
+          </div>
+          <div style={{ background: 'var(--surface-alt)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800 }}>Friend Gets</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 900 }}>{referralSummary?.settings?.referredRewardCoins || 200} coins</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <input
+            className="input"
+            readOnly
+            value={referralLink}
+            placeholder="Referral link loading..."
+            style={{ flex: '1 1 260px' }}
+          />
+          <LiquidButton variant="secondary" onClick={copyReferralLink} disabled={!referralLink}>
+            {copied ? 'Copied' : 'Copy Link'}
+          </LiquidButton>
+          <LiquidButton variant="primary" onClick={shareReferralLink} disabled={!referralLink}>
+            {shared ? 'Shared' : 'Share Link'}
+          </LiquidButton>
+        </div>
+
+        {referralSummary?.referrals?.length > 0 && (
+          <div style={{ marginTop: '1rem', display: 'grid', gap: '0.6rem' }}>
+            {referralSummary.referrals.slice(0, 5).map((item) => (
+              <div key={item._id} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                <span>{item.name} · {item.role}</span>
+                <span className={`badge ${item.completed ? 'badge-success' : 'badge-warning'}`}>{item.completed ? 'completed' : 'pending'}</span>
+              </div>
+            ))}
           </div>
         )}
       </div>

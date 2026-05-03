@@ -18,7 +18,7 @@ const authController = {
       res.status(200).json({ success: true, ...data });
     } catch (error) {
       console.error('Login error:', error);
-      const isClientError = error.message.includes('required') || error.message.includes('Invalid');
+      const isClientError = error.message.includes('required') || error.message.includes('Invalid') || error.message.includes('blocked');
       res.status(isClientError ? 401 : 500).json({ error: isClientError ? error.message : 'Server error. Please try again.' });
     }
   },

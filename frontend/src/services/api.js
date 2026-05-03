@@ -217,7 +217,16 @@ class ApiClient {
     const response = await this.client.post('/brand/campaigns', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return response.data?.campaign || response.data;
+    const data = response.data;
+    if (data?.campaign) {
+      return {
+        ...data.campaign,
+        creationFeeCharged: data.creationFeeCharged,
+        updatedCoinBalance: data.updatedCoinBalance,
+        message: data.message
+      };
+    }
+    return data;
   }
 
   async likeCampaign(id) {
@@ -534,13 +543,8 @@ class ApiClient {
   }
 
   async updateUserStatus(userId, status) {
-    // User status update not yet implemented
-    try {
-      const response = await this.client.put(`/admin/users/${userId}/status`, { status });
-      return response.data;
-    } catch (e) {
-      throw new Error('User status update feature coming soon!');
-    }
+    const response = await this.client.put(`/admin/users/${userId}/status`, { status });
+    return response.data?.data || response.data;
   }
 
   async updateCampaignCost(campaignId, cost) {

@@ -6,6 +6,12 @@ const Transaction = require('../../models/Transaction');
 const AppSetting = require('../../models/AppSetting');
 
 const RAZORPAY_SETTING_KEY = 'payment.razorpay';
+const REFERRAL_DEFAULTS = {
+  requiredCompletedReferrals: 10,
+  referrerRewardMode: 'percentage',
+  referrerRewardValue: 5,
+  referredRewardCoins: 200,
+};
 
 const getRazorpaySettings = async () => {
   const setting = await AppSetting.findOne({ key: RAZORPAY_SETTING_KEY });
@@ -17,6 +23,145 @@ const getRazorpaySettings = async () => {
     coinRate: Number(value.coinRate) > 0 ? Number(value.coinRate) : 1,
     currency: value.currency || 'INR'
   };
+};
+
+const getReferralSettings = async () => {
+  const [
+    requiredCompletedReferrals,
+    referrerRewardMode,
+    referrerRewardValue,
+    referredRewardCoins,
+  ] = await Promise.all([
+    AppSetting.findOne({ key: 'referral.requiredCompletedReferrals' }),
+    AppSetting.findOne({ key: 'referral.referrerRewardMode' }),
+    AppSetting.findOne({ key: 'referral.referrerRewardValue' }),
+    AppSetting.findOne({ key: 'referral.referredRewardCoins' }),
+  ]);
+
+  const mode = referrerRewardMode?.value === 'fixed' ? 'fixed' : 'percentage';
+
+  return {
+    requiredCompletedReferrals: Number(requiredCompletedReferrals?.value) > 0
+      ? Number(requiredCompletedReferrals.value)
+      : REFERRAL_DEFAULTS.requiredCompletedReferrals,
+    referrerRewardMode: mode,
+    referrerRewardValue: Number(referrerRewardValue?.value) >= 0
+      ? Number(referrerRewardValue.value)
+      : REFERRAL_DEFAULTS.referrerRewardValue,
+    referredRewardCoins: Number(referredRewardCoins?.value) >= 0
+      ? Number(referredRewardCoins.value)
+      : REFERRAL_DEFAULTS.referredRewardCoins,
+  };
+};
+
+const getCompletedReferralUserIds = async (referrerId) => {
+  const referredUsers = await User.find({ referredBy: referrerId }).select('_id');
+  const referredUserIds = referredUsers.map((user) => user._id);
+  if (referredUserIds.length === 0) return [];
+
+  return await Transaction.distinct('user', {
+    user: { $in: referredUserIds },
+    type: 'topup',
+    status: 'completed',
+  });
+};
+
+const ensureReferralCode = async (user) => {
+  if (user.referralCode) return user.referralCode;
+  const base = String(user.name || 'USER').replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase() || 'USER';
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const code = `${base}${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    const exists = await User.exists({ referralCode: code });
+    if (!exists) {
+      user.referralCode = code;
+      await user.save({ validateBeforeSave: false });
+      return code;
+    }
+  }
+
+  user.referralCode = `${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
+  await user.save({ validateBeforeSave: false });
+  return user.referralCode;
+};
+
+const processReferralRewards = async (referredUser, topupTransaction) => {
+  if (!referredUser?.referredBy || !topupTransaction) return null;
+
+  const settings = await getReferralSettings();
+  const referredRewardCoins = Math.floor(settings.referredRewardCoins);
+  const rewards = {};
+
+  const referredAlreadyRewarded = await Transaction.exists({
+    user: referredUser._id,
+    method: 'referral_bonus',
+    $or: [
+      { 'details.rewardType': 'referred_first_payment' },
+      { description: 'Referral signup reward after first payment' }
+    ]
+  });
+
+  if (!referredAlreadyRewarded && referredRewardCoins > 0) {
+    referredUser.coins = (referredUser.coins || 0) + referredRewardCoins;
+    await referredUser.save({ validateBeforeSave: false });
+    rewards.referredTransaction = await Transaction.create({
+      user: referredUser._id,
+      type: 'earning',
+      amount: referredRewardCoins,
+      asset: 'coins',
+      status: 'completed',
+      method: 'referral_bonus',
+      description: 'Referral signup reward after first payment',
+      referenceId: referredUser.referredBy,
+      referenceModel: 'User',
+      details: {
+        rewardType: 'referred_first_payment',
+        referrer: referredUser.referredBy,
+        sourceTransaction: topupTransaction._id,
+      }
+    });
+  }
+
+  const completedReferralUserIds = await getCompletedReferralUserIds(referredUser.referredBy);
+  if (completedReferralUserIds.length < settings.requiredCompletedReferrals) {
+    return Object.keys(rewards).length ? rewards : null;
+  }
+
+  const referrerAlreadyRewarded = await Transaction.exists({
+    user: referredUser.referredBy,
+    method: 'referral_bonus',
+    'details.referredUser': referredUser._id,
+  });
+
+  const referrerRewardCoins = settings.referrerRewardMode === 'fixed'
+    ? Math.floor(settings.referrerRewardValue)
+    : Math.floor((topupTransaction.amount * settings.referrerRewardValue) / 100);
+
+  if (!referrerAlreadyRewarded && referrerRewardCoins > 0) {
+    await User.findByIdAndUpdate(referredUser.referredBy, { $inc: { coins: referrerRewardCoins } });
+    rewards.referrerTransaction = await Transaction.create({
+      user: referredUser.referredBy,
+      type: 'earning',
+      amount: referrerRewardCoins,
+      asset: 'coins',
+      status: 'completed',
+      method: 'referral_bonus',
+      description: `Referral reward from ${referredUser.name}'s first payment`,
+      referenceId: referredUser._id,
+      referenceModel: 'User',
+      details: {
+        rewardType: 'referrer_threshold_payment',
+        referredUser: referredUser._id,
+        sourceTransaction: topupTransaction._id,
+        completedReferrals: completedReferralUserIds.length,
+        requiredCompletedReferrals: settings.requiredCompletedReferrals,
+        rewardMode: settings.referrerRewardMode,
+        rewardValue: settings.referrerRewardValue,
+      }
+    });
+  }
+
+  return Object.keys(rewards).length ? rewards : null;
 };
 
 const postToRazorpay = (path, payload, settings) => new Promise((resolve, reject) => {
@@ -90,6 +235,9 @@ const walletController = {
       const minBalanceSetting = await AppSetting.findOne({ key: 'platformFeeStructure.minInfluencerBalance' });
       const minInfluencerBalance = minBalanceSetting?.value !== undefined ? Number(minBalanceSetting.value) : 500;
 
+      const firstCampaignCoinCostSetting = await AppSetting.findOne({ key: 'platformFeeStructure.firstCampaignCoinCost' });
+      const firstCampaignCoinCost = firstCampaignCoinCostSetting?.value !== undefined ? Number(firstCampaignCoinCostSetting.value) : 50;
+
       res.json({
         success: true,
         data: {
@@ -98,7 +246,9 @@ const walletController = {
           coinRate: settings.coinRate,
           currency: settings.currency,
           minRechargeAmount,
-          minInfluencerBalance
+          minInfluencerBalance,
+          firstCampaignCoinCost,
+          referral: await getReferralSettings()
         }
       });
     } catch (error) {
@@ -222,7 +372,17 @@ const walletController = {
 
         if (existingTransaction?.status === 'completed') {
           const existingUser = await User.findById(req.userId);
-          return res.json({ success: true, data: { coins: existingUser?.coins || 0, transaction: existingTransaction } });
+          const referralRewards = existingUser
+            ? await processReferralRewards(existingUser, existingTransaction)
+            : null;
+          return res.json({
+            success: true,
+            data: {
+              coins: existingUser?.coins || 0,
+              transaction: existingTransaction,
+              referralRewards
+            }
+          });
         }
 
         return res.status(404).json({ error: 'Payment order not found' });
@@ -232,12 +392,14 @@ const walletController = {
       if (!user) return res.status(404).json({ error: 'User not found' });
 
       user.coins = (user.coins || 0) + transaction.amount;
-      await user.save();
+      await user.save({ validateBeforeSave: false });
 
       transaction.description = `Purchased ${transaction.amount} coins via Razorpay`;
       await transaction.save();
 
-      res.json({ success: true, data: { coins: user.coins, transaction } });
+      const referralRewards = await processReferralRewards(user, transaction);
+
+      res.json({ success: true, data: { coins: user.coins, transaction, referralRewards } });
     } catch (error) {
       console.error('Verify Coin Payment Error:', error);
       res.status(500).json({ error: 'Failed to verify payment' });
@@ -291,6 +453,54 @@ const walletController = {
     } catch (error) {
       console.error('Withdrawal Error:', error);
       res.status(500).json({ error: 'Failed to process withdrawal' });
+    }
+  },
+
+  getReferralSummary: async (req, res) => {
+    try {
+      const user = await User.findById(req.userId).populate('referredBy', 'name referralCode');
+      if (!user) return res.status(404).json({ error: 'User not found' });
+
+      const referralCode = await ensureReferralCode(user);
+      const referredUsers = await User.find({ referredBy: req.userId })
+        .select('name email role createdAt')
+        .sort({ createdAt: -1 });
+      const referredUserIds = referredUsers.map((item) => item._id);
+      const completedUserIds = referredUserIds.length > 0
+        ? await Transaction.distinct('user', {
+            user: { $in: referredUserIds },
+            type: 'topup',
+            status: 'completed',
+          })
+        : [];
+      const completedSet = new Set(completedUserIds.map(String));
+      const settings = await getReferralSettings();
+
+      res.json({
+        success: true,
+        data: {
+          referralCode,
+          referredBy: user.referredBy || null,
+          settings,
+          stats: {
+            totalReferrals: referredUsers.length,
+            completedReferrals: completedUserIds.length,
+            pendingReferrals: Math.max(0, referredUsers.length - completedUserIds.length),
+            remainingForReward: Math.max(0, settings.requiredCompletedReferrals - completedUserIds.length),
+          },
+          referrals: referredUsers.map((item) => ({
+            _id: item._id,
+            name: item.name,
+            email: item.email,
+            role: item.role,
+            createdAt: item.createdAt,
+            completed: completedSet.has(String(item._id)),
+          })),
+        }
+      });
+    } catch (error) {
+      console.error('Referral Summary Error:', error);
+      res.status(500).json({ error: 'Failed to fetch referral summary' });
     }
   }
 };

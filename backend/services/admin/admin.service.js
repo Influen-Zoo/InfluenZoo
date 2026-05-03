@@ -27,6 +27,56 @@ const resizeObjectIdArray = (items = [], targetCount = 0) => {
   return existing;
 };
 
+const enrichAdminUserReferralCounts = async (users = []) => {
+  if (!users.length) return users;
+
+  const userIdStrings = users
+    .map((user) => user._id)
+    .filter((id) => mongoose.Types.ObjectId.isValid(String(id)))
+    .map((id) => String(id));
+
+  const referralGroups = await User.aggregate([
+    { $match: { referredBy: { $exists: true, $ne: null } } },
+    { $addFields: { referrerIdString: { $toString: '$referredBy' } } },
+    { $match: { referrerIdString: { $in: userIdStrings } } },
+    {
+      $group: {
+        _id: '$referrerIdString',
+        total: { $sum: 1 },
+        referredUserIds: { $addToSet: '$_id' }
+      }
+    }
+  ]);
+
+  const referredUserIds = referralGroups.flatMap((group) => group.referredUserIds || []);
+  const completedReferralUserIds = referredUserIds.length > 0
+    ? await Transaction.distinct('user', {
+        user: { $in: referredUserIds },
+        type: 'topup',
+        status: 'completed',
+      })
+    : [];
+  const completedSet = new Set(completedReferralUserIds.map(String));
+  const totalByReferrer = new Map();
+  const completedByReferrer = new Map();
+
+  referralGroups.forEach((group) => {
+    const referrerId = String(group._id);
+    const referredIds = group.referredUserIds || [];
+    totalByReferrer.set(referrerId, group.total || referredIds.length || 0);
+    completedByReferrer.set(
+      referrerId,
+      referredIds.filter((id) => completedSet.has(String(id))).length
+    );
+  });
+
+  return users.map((user) => ({
+    ...user,
+    referralsCount: totalByReferrer.get(String(user._id)) || 0,
+    completedReferralsCount: completedByReferrer.get(String(user._id)) || 0,
+  }));
+};
+
 const adminService = {
   getStats: async () => {
     const totalUsers = await User.countDocuments();
@@ -125,8 +175,9 @@ const adminService = {
   getUsers: async (filter) => {
     // If filtering by brand, aggregate campaign metrics
     if (filter.role === 'brand') {
-      return await User.aggregate([
+      const users = await User.aggregate([
         { $match: filter },
+        { $addFields: { status: { $ifNull: ['$status', 'active'] } } },
         {
           $lookup: {
             from: 'campaigns',
@@ -142,10 +193,58 @@ const adminService = {
           }
         },
         {
+          $lookup: {
+            from: 'users',
+            localField: '_id',
+            foreignField: 'referredBy',
+            as: 'referralData'
+          }
+        },
+        {
+          $lookup: {
+            from: 'transactions',
+            localField: 'referralData._id',
+            foreignField: 'user',
+            as: 'referralTransactionData'
+          }
+        },
+        {
+          $addFields: {
+            referralsCount: { $size: '$referralData' },
+            completedReferralsCount: {
+              $size: {
+                $setUnion: [
+                  {
+                    $map: {
+                      input: {
+                        $filter: {
+                          input: '$referralTransactionData',
+                          as: 'transaction',
+                          cond: {
+                            $and: [
+                              { $eq: ['$$transaction.type', 'topup'] },
+                              { $eq: ['$$transaction.status', 'completed'] }
+                            ]
+                          }
+                        }
+                      },
+                      as: 'transaction',
+                      in: '$$transaction.user'
+                    }
+                  },
+                  []
+                ]
+              }
+            }
+          }
+        },
+        {
           $project: {
             password: 0,
             refreshToken: 0,
-            campaignData: 0
+            campaignData: 0,
+            referralData: 0,
+            referralTransactionData: 0
           }
         },
         {
@@ -159,12 +258,14 @@ const adminService = {
         { $sort: { totalSpent: -1 } },
         { $limit: 100 }
       ]);
+      return await enrichAdminUserReferralCounts(users);
     }
 
     // If filtering by influencer, aggregate post metrics and earnings
     if (filter.role === 'influencer') {
-      return await User.aggregate([
+      const users = await User.aggregate([
         { $match: filter },
+        { $addFields: { status: { $ifNull: ['$status', 'active'] } } },
         {
           $lookup: {
             from: 'posts',
@@ -209,6 +310,52 @@ const adminService = {
           }
         },
         {
+          $lookup: {
+            from: 'users',
+            localField: '_id',
+            foreignField: 'referredBy',
+            as: 'referralData'
+          }
+        },
+        {
+          $lookup: {
+            from: 'transactions',
+            localField: 'referralData._id',
+            foreignField: 'user',
+            as: 'referralTransactionData'
+          }
+        },
+        {
+          $addFields: {
+            referralsCount: { $size: '$referralData' },
+            completedReferralsCount: {
+              $size: {
+                $setUnion: [
+                  {
+                    $map: {
+                      input: {
+                        $filter: {
+                          input: '$referralTransactionData',
+                          as: 'transaction',
+                          cond: {
+                            $and: [
+                              { $eq: ['$$transaction.type', 'topup'] },
+                              { $eq: ['$$transaction.status', 'completed'] }
+                            ]
+                          }
+                        }
+                      },
+                      as: 'transaction',
+                      in: '$$transaction.user'
+                    }
+                  },
+                  []
+                ]
+              }
+            }
+          }
+        },
+        {
           $addFields: {
             engagementRate: {
               $cond: [
@@ -229,7 +376,9 @@ const adminService = {
             password: 0,
             refreshToken: 0,
             postData: 0,
-            transactionData: 0
+            transactionData: 0,
+            referralData: 0,
+            referralTransactionData: 0
           }
         },
         {
@@ -243,14 +392,79 @@ const adminService = {
         { $sort: { totalEarnings: -1 } },
         { $limit: 100 }
       ]);
+      return await enrichAdminUserReferralCounts(users);
     }
 
     // Default fetch for others
-    return await User.find(filter)
-      .select('-password -refreshToken')
-      .populate('badges')
-      .sort({ createdAt: -1 })
-      .limit(100);
+    const users = await User.aggregate([
+      { $match: filter },
+      { $addFields: { status: { $ifNull: ['$status', 'active'] } } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: 'referredBy',
+          as: 'referralData'
+        }
+      },
+      {
+        $lookup: {
+          from: 'transactions',
+          localField: 'referralData._id',
+          foreignField: 'user',
+          as: 'referralTransactionData'
+        }
+      },
+      {
+        $addFields: {
+          referralsCount: { $size: '$referralData' },
+          completedReferralsCount: {
+            $size: {
+              $setUnion: [
+                {
+                  $map: {
+                    input: {
+                      $filter: {
+                        input: '$referralTransactionData',
+                        as: 'transaction',
+                        cond: {
+                          $and: [
+                            { $eq: ['$$transaction.type', 'topup'] },
+                            { $eq: ['$$transaction.status', 'completed'] }
+                          ]
+                        }
+                      }
+                    },
+                    as: 'transaction',
+                    in: '$$transaction.user'
+                  }
+                },
+                []
+              ]
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          password: 0,
+          refreshToken: 0,
+          referralData: 0,
+          referralTransactionData: 0
+        }
+      },
+      {
+        $lookup: {
+          from: 'badges',
+          localField: 'badges',
+          foreignField: '_id',
+          as: 'badges'
+        }
+      },
+      { $sort: { createdAt: -1 } },
+      { $limit: 100 }
+    ]);
+    return await enrichAdminUserReferralCounts(users);
   },
 
   toggleUserVerification: async (userId) => {
@@ -259,6 +473,25 @@ const adminService = {
 
     user.isVerified = !user.isVerified;
     await user.save();
+    return user;
+  },
+
+  updateUserStatus: async (userId, status) => {
+    if (!mongoose.Types.ObjectId.isValid(String(userId))) {
+      throw new Error('Invalid user id');
+    }
+
+    if (!['active', 'banned'].includes(status)) {
+      throw new Error('Invalid status');
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { status },
+      { new: true, runValidators: false }
+    ).select('-password -refreshToken');
+
+    if (!user) throw new Error('User not found');
     return user;
   },
 
@@ -341,7 +574,7 @@ const adminService = {
   },
 
   updateCampaignStatus: async (campaignId, status) => {
-    if (!['draft', 'active', 'completed', 'cancelled'].includes(status)) {
+    if (!['draft', 'pending', 'active', 'completed', 'cancelled', 'rejected'].includes(status)) {
       throw new Error('Invalid status');
     }
 
@@ -499,16 +732,26 @@ const adminService = {
     const applicationFeeSetting = await AppSetting.findOne({ key: 'platformFeeStructure.applicationFee' });
     const minInfluencerBalanceSetting = await AppSetting.findOne({ key: 'platformFeeStructure.minInfluencerBalance' });
     const minRechargeAmountSetting = await AppSetting.findOne({ key: 'platformFeeStructure.minRechargeAmount' });
+    const firstCampaignCoinCostSetting = await AppSetting.findOne({ key: 'platformFeeStructure.firstCampaignCoinCost' });
+    const referralRequiredSetting = await AppSetting.findOne({ key: 'referral.requiredCompletedReferrals' });
+    const referralRewardModeSetting = await AppSetting.findOne({ key: 'referral.referrerRewardMode' });
+    const referralRewardValueSetting = await AppSetting.findOne({ key: 'referral.referrerRewardValue' });
+    const referralReferredRewardSetting = await AppSetting.findOne({ key: 'referral.referredRewardCoins' });
 
     return {
       campaignFee: campaignFeeSetting?.value || 0,
       applicationFee: applicationFeeSetting?.value || 0,
       minInfluencerBalance: minInfluencerBalanceSetting?.value !== undefined ? minInfluencerBalanceSetting.value : 500,
-      minRechargeAmount: minRechargeAmountSetting?.value !== undefined ? minRechargeAmountSetting.value : 500
+      minRechargeAmount: minRechargeAmountSetting?.value !== undefined ? minRechargeAmountSetting.value : 500,
+      firstCampaignCoinCost: firstCampaignCoinCostSetting?.value !== undefined ? firstCampaignCoinCostSetting.value : 50,
+      referralRequiredCompleted: referralRequiredSetting?.value !== undefined ? referralRequiredSetting.value : 10,
+      referralReferrerRewardMode: referralRewardModeSetting?.value || 'percentage',
+      referralReferrerRewardValue: referralRewardValueSetting?.value !== undefined ? referralRewardValueSetting.value : 5,
+      referralReferredRewardCoins: referralReferredRewardSetting?.value !== undefined ? referralReferredRewardSetting.value : 200,
     };
   },
 
-  updateFeeStructure: async (campaignFee, applicationFee, minInfluencerBalance, minRechargeAmount) => {
+  updateFeeStructure: async (campaignFee, applicationFee, minInfluencerBalance, minRechargeAmount, firstCampaignCoinCost, referralSettings = {}) => {
     if (campaignFee !== undefined) {
       await AppSetting.findOneAndUpdate(
         { key: 'platformFeeStructure.campaignFee' },
@@ -537,6 +780,46 @@ const adminService = {
       await AppSetting.findOneAndUpdate(
         { key: 'platformFeeStructure.minRechargeAmount' },
         { value: Number(minRechargeAmount) || 0, description: 'Minimum INR amount an influencer can recharge' },
+        { upsert: true }
+      );
+    }
+
+    if (firstCampaignCoinCost !== undefined) {
+      await AppSetting.findOneAndUpdate(
+        { key: 'platformFeeStructure.firstCampaignCoinCost' },
+        { value: Number(firstCampaignCoinCost) || 0, description: 'Coin fee charged to a brand for launching their first campaign' },
+        { upsert: true }
+      );
+    }
+
+    if (referralSettings.requiredCompleted !== undefined) {
+      await AppSetting.findOneAndUpdate(
+        { key: 'referral.requiredCompletedReferrals' },
+        { value: Math.max(1, Number(referralSettings.requiredCompleted) || 10), description: 'Completed referrals required before referral rewards are paid' },
+        { upsert: true }
+      );
+    }
+
+    if (referralSettings.referrerRewardMode !== undefined) {
+      await AppSetting.findOneAndUpdate(
+        { key: 'referral.referrerRewardMode' },
+        { value: referralSettings.referrerRewardMode === 'fixed' ? 'fixed' : 'percentage', description: 'Referral reward mode for referrers' },
+        { upsert: true }
+      );
+    }
+
+    if (referralSettings.referrerRewardValue !== undefined) {
+      await AppSetting.findOneAndUpdate(
+        { key: 'referral.referrerRewardValue' },
+        { value: Math.max(0, Number(referralSettings.referrerRewardValue) || 0), description: 'Referral reward value for referrers' },
+        { upsert: true }
+      );
+    }
+
+    if (referralSettings.referredRewardCoins !== undefined) {
+      await AppSetting.findOneAndUpdate(
+        { key: 'referral.referredRewardCoins' },
+        { value: Math.max(0, Number(referralSettings.referredRewardCoins) || 0), description: 'Coin reward given to referred users after their first payment' },
         { upsert: true }
       );
     }

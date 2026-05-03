@@ -61,6 +61,17 @@ export const useCampaigns = () => {
     }
   };
 
+  const handleCampaignStatus = async (campaignId, status) => {
+    try {
+      await adminService.updateCampaignStatus(campaignId, status);
+      const updated = await adminService.getCampaigns();
+      setCampaigns(updated);
+      showToast(status === 'active' ? 'Campaign approved successfully' : 'Campaign status updated');
+    } catch (error) {
+      showToast(error.message || 'Failed to update campaign status', 'danger');
+    }
+  };
+
   const handleUpdateCoinCost = async (e) => {
     e.preventDefault();
     if (!campaignCostModal) return;
@@ -102,6 +113,7 @@ export const useCampaigns = () => {
     handleCampaignClick,
     handleBlockCampaign,
     handleUnblockCampaign,
+    handleCampaignStatus,
     handleUpdateCoinCost,
     blockingCampaign,
     setBlockingCampaign,

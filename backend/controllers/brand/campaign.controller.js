@@ -5,11 +5,23 @@ const getCompressionResults = (files = []) => files.map(file => file.compression
 const brandCampaignController = {
   createCampaign: async (req, res) => {
     try {
-      const campaign = await brandCampaignService.createCampaign(req.userId, req.body, req.files, req.uploadEntityId);
-      res.status(201).json({ success: true, campaign, compression: getCompressionResults(req.files) });
+      const result = await brandCampaignService.createCampaign(req.userId, req.body, req.files, req.uploadEntityId);
+      res.status(201).json({
+        success: true,
+        campaign: result.campaign,
+        creationFeeCharged: result.creationFeeCharged,
+        updatedCoinBalance: result.updatedCoinBalance,
+        message: result.creationFeeCharged > 0
+          ? `${result.creationFeeCharged} coins deducted for your first campaign. It is pending admin approval.`
+          : 'Campaign submitted for admin approval.',
+        compression: getCompressionResults(req.files)
+      });
     } catch (error) {
       console.error('Create Campaign Error:', error);
-      if (error.message === 'At least one platform is required') return res.status(400).json({ error: error.message });
+      if (
+        error.message === 'At least one platform is required' ||
+        error.message.includes('first campaign launch requires')
+      ) return res.status(400).json({ error: error.message });
       res.status(500).json({ error: 'Failed to create campaign' });
     }
   },

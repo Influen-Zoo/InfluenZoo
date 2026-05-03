@@ -1,11 +1,38 @@
 const User = require('../../models/User');
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../../utils/tokenUtils');
 
+const generateReferralCode = (name = '') => {
+  const prefix = String(name)
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .slice(0, 4)
+    .toUpperCase() || 'USER';
+  return `${prefix}${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+};
+
+const createUniqueReferralCode = async (name) => {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const code = generateReferralCode(name);
+    const existing = await User.exists({ referralCode: code });
+    if (!existing) return code;
+  }
+  return `${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
+};
+
 const authService = {
-  registerUser: async ({ name, email, password, role }) => {
+  registerUser: async (payload = {}) => {
+    const { name, email, password, role } = payload;
+    const phone = String(payload.phone || payload.phoneNumber || payload.mobile || '')
+      .replace(/\D/g, '')
+      .trim();
+    const referralInput = String(payload.referralCode || payload.referral || '').trim().toUpperCase();
+
     // Validation
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !phone || !password || !role) {
       throw new Error('All fields are required');
+    }
+
+    if (!/^\d{10}$/.test(phone)) {
+      throw new Error('Phone number must be exactly 10 digits');
     }
 
     if (!['influencer', 'brand', 'admin'].includes(role)) {
@@ -18,12 +45,23 @@ const authService = {
       throw new Error('Email already registered');
     }
 
+    let referrer = null;
+    if (referralInput) {
+      referrer = await User.findOne({ referralCode: referralInput }).select('_id');
+      if (!referrer) {
+        throw new Error('Invalid referral code');
+      }
+    }
+
     // Create new user
     const user = new User({
       name,
       email,
+      phone,
       password,
       role,
+      referralCode: await createUniqueReferralCode(name),
+      referredBy: referrer?._id,
     });
 
     await user.save();
@@ -58,6 +96,10 @@ const authService = {
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
       throw new Error('Invalid email or password');
+    }
+
+    if (user.status === 'banned') {
+      throw new Error('User is blocked');
     }
 
     // Check password
@@ -100,6 +142,9 @@ const authService = {
 
     if (!user || user.refreshToken !== refreshToken) {
       throw new Error('Invalid refresh token');
+    }
+    if (user.status === 'banned') {
+      throw new Error('User is blocked');
     }
 
     // Generate new tokens

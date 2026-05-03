@@ -21,6 +21,11 @@ export const walletService = {
     return response.data?.data || response.data;
   },
 
+  async getReferralSummary() {
+    const response = await apiClient.get('/wallet/referrals');
+    return response.data?.data || response.data;
+  },
+
   async withdrawEarnings(amount, details) {
     const response = await apiClient.post('/wallet/withdraw', { amount, details });
     return response.data?.data || response.data;

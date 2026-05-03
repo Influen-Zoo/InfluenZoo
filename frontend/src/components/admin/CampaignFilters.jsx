@@ -36,9 +36,11 @@ const CampaignFilters = ({ campaignFilter, setCampaignFilter }) => {
           onChange={e => setCampaignFilter({ ...campaignFilter, status: e.target.value })}
         >
           <option value="">All Status</option>
+          <option value="pending">Pending Approval</option>
           <option value="active">Active</option>
-          <option value="closed">Closed</option>
-          <option value="pending">Pending</option>
+          <option value="rejected">Rejected</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
         </select>
       </div>
     </div>

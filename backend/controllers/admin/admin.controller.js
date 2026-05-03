@@ -53,6 +53,20 @@ exports.verifyUser = async (req, res) => {
 };
 
 /**
+ * PUT /api/admin/users/:id/status
+ * Block or unblock a user
+ */
+exports.updateUserStatus = async (req, res) => {
+  try {
+    const user = await adminService.updateUserStatus(req.params.id, req.body.status);
+    res.json({ success: true, data: user });
+  } catch (error) {
+    const status = error.message.includes('not found') ? 404 : 400;
+    res.status(status).json({ error: error.message });
+  }
+};
+
+/**
  * GET /api/admin/campaigns
  * List all campaigns
  */
@@ -220,15 +234,42 @@ exports.getFeeStructure = async (req, res) => {
  */
 exports.updateFeeStructure = async (req, res) => {
   try {
-    const { campaignFee, applicationFee, minInfluencerBalance, minRechargeAmount } = req.body;
-    if (campaignFee === undefined && applicationFee === undefined && minInfluencerBalance === undefined && minRechargeAmount === undefined) {
+    const {
+      campaignFee,
+      applicationFee,
+      minInfluencerBalance,
+      minRechargeAmount,
+      firstCampaignCoinCost,
+      referralRequiredCompleted,
+      referralReferrerRewardMode,
+      referralReferrerRewardValue,
+      referralReferredRewardCoins,
+    } = req.body;
+    if (
+      campaignFee === undefined &&
+      applicationFee === undefined &&
+      minInfluencerBalance === undefined &&
+      minRechargeAmount === undefined &&
+      firstCampaignCoinCost === undefined &&
+      referralRequiredCompleted === undefined &&
+      referralReferrerRewardMode === undefined &&
+      referralReferrerRewardValue === undefined &&
+      referralReferredRewardCoins === undefined
+    ) {
       return res.status(400).json({ error: 'Please provide at least one fee/setting to update' });
     }
     const feeStructure = await adminService.updateFeeStructure(
       campaignFee !== undefined ? campaignFee : undefined,
       applicationFee !== undefined ? applicationFee : undefined,
       minInfluencerBalance !== undefined ? minInfluencerBalance : undefined,
-      minRechargeAmount !== undefined ? minRechargeAmount : undefined
+      minRechargeAmount !== undefined ? minRechargeAmount : undefined,
+      firstCampaignCoinCost !== undefined ? firstCampaignCoinCost : undefined,
+      {
+        requiredCompleted: referralRequiredCompleted,
+        referrerRewardMode: referralReferrerRewardMode,
+        referrerRewardValue: referralReferrerRewardValue,
+        referredRewardCoins: referralReferredRewardCoins,
+      }
     );
     res.json({ success: true, data: feeStructure });
   } catch (error) {

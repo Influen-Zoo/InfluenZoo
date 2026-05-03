@@ -76,6 +76,7 @@ router.get('/posts', adminController.getPosts);
  * @access  Private (Admin)
  */
 router.put('/users/:id/verify', adminController.verifyUser);
+router.put('/users/:id/status', adminController.updateUserStatus);
 
 /**
  * @route   GET /api/admin/campaigns

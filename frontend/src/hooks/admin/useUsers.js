@@ -21,8 +21,8 @@ export const useUsers = () => {
 
   const handleUserStatus = async (id, status) => {
     try {
-      await adminService.verifyUser(id); // Using verifyUser for activation/status
-      showToast('User status updated');
+      await adminService.updateUserStatus(id, status);
+      showToast(status === 'banned' ? 'User blocked' : 'User unblocked');
       const updatedUsers = await adminService.getUsers();
       setUsers(updatedUsers);
     } catch (e) {

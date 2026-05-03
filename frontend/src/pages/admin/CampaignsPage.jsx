@@ -14,7 +14,7 @@ export const CampaignsPage = () => {
     campaigns, filteredCampaigns, stats, loading, toast, withdrawals, posts,
     campaignFilter, setCampaignFilter, campaignCostModal, setCampaignCostModal,
     selectedCampaign, setSelectedCampaign, applications, appsLoading,
-    handleCampaignClick, handleBlockCampaign, handleUnblockCampaign, handleUpdateCoinCost,
+    handleCampaignClick, handleBlockCampaign, handleUnblockCampaign, handleCampaignStatus, handleUpdateCoinCost,
     blockingCampaign, setBlockingCampaign, blockReason, setBlockReason, statsData
   } = useCampaigns();
 
@@ -46,6 +46,7 @@ export const CampaignsPage = () => {
             handleCampaignClick={handleCampaignClick}
             setCampaignCostModal={setCampaignCostModal}
             handleUnblockCampaign={handleUnblockCampaign}
+            handleCampaignStatus={handleCampaignStatus}
             setBlockingCampaign={setBlockingCampaign}
           />
         )}

@@ -8,6 +8,7 @@ export const BrandHomePage = () => {
   return (
     <div className="tab-container">
       <HomeTab 
+        campaigns={campaigns}
         announcements={announcements}
         setAnnouncements={setAnnouncements} 
         onCampaignCreated={() => { loadCampaigns(); loadAnnouncements(); }}

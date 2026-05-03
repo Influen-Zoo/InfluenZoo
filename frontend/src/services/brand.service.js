@@ -21,7 +21,16 @@ export const brandService = {
     const response = await apiClient.post('/brand/campaigns', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-    return response.data?.campaign || response.data;
+    const data = response.data;
+    if (data?.campaign) {
+      return {
+        ...data.campaign,
+        creationFeeCharged: data.creationFeeCharged,
+        updatedCoinBalance: data.updatedCoinBalance,
+        message: data.message
+      };
+    }
+    return data;
   },
 
   async updateCampaign(id, formData) {

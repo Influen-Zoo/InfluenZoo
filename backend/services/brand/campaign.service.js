@@ -1,4 +1,8 @@
+const mongoose = require('mongoose');
 const Campaign = require('../../models/Campaign');
+const User = require('../../models/User');
+const Transaction = require('../../models/Transaction');
+const AppSetting = require('../../models/AppSetting');
 const campaignRevenueService = require('../campaignRevenue.service');
 const {
   parseStringList,
@@ -36,6 +40,12 @@ const parseDeliverables = (deliverables) => {
 
 const isCampaignDetailsEnabled = (data) => data.campaignDetailsEnabled === true || data.campaignDetailsEnabled === 'true';
 
+const getFirstCampaignCoinCost = async () => {
+  const setting = await AppSetting.findOne({ key: 'platformFeeStructure.firstCampaignCoinCost' });
+  const cost = Number(setting?.value);
+  return Number.isFinite(cost) && cost >= 0 ? cost : 50;
+};
+
 const brandCampaignService = {
   createCampaign: async (authorId, data, files, campaignId) => {
     const platforms = normalizePlatforms(data.platforms, data.platform);
@@ -47,35 +57,81 @@ const brandCampaignService = {
     }
 
     let newCampaign;
+    let creationFeeCharged = 0;
+    let updatedCoinBalance;
+    let session;
     try {
-      newCampaign = await Campaign.create({
-        ...(campaignId ? { _id: campaignId } : {}),
-        author: authorId,
-        title: data.title || undefined,
-        content: data.content,
-        media,
-        tags: parseTags(data.tags),
-        budget: data.budget || undefined,
-        startDate: data.startDate || undefined,
-        endDate: data.endDate || undefined,
-        category: data.category || undefined,
-        compensation: data.compensation || 'paid',
-        status: data.status || 'active',
-        visibility: data.visibility || 'public',
-        requirements: data.requirements || undefined,
-        deliverables: parseDeliverables(data.deliverables),
-        ...(platforms.length > 0 ? { platforms, platform: platforms[0] } : {}),
-        outlets,
+      session = await mongoose.startSession();
+      await session.withTransaction(async () => {
+        const existingCampaignCount = await Campaign.countDocuments({ author: authorId }).session(session);
+        const firstCampaignCoinCost = existingCampaignCount === 0 ? await getFirstCampaignCoinCost() : 0;
+
+        if (firstCampaignCoinCost > 0) {
+          const user = await User.findOneAndUpdate(
+            { _id: authorId, coins: { $gte: firstCampaignCoinCost } },
+            { $inc: { coins: -firstCampaignCoinCost } },
+            { new: true, session }
+          );
+
+          if (!user) {
+            throw new Error(`Your first campaign launch requires ${firstCampaignCoinCost} coins`);
+          }
+
+          creationFeeCharged = firstCampaignCoinCost;
+          updatedCoinBalance = user.coins;
+        }
+
+        const [createdCampaign] = await Campaign.create([{
+          ...(campaignId ? { _id: campaignId } : {}),
+          author: authorId,
+          title: data.title || undefined,
+          content: data.content,
+          media,
+          tags: parseTags(data.tags),
+          budget: data.budget || undefined,
+          startDate: data.startDate || undefined,
+          endDate: data.endDate || undefined,
+          category: data.category || undefined,
+          compensation: data.compensation || 'paid',
+          status: 'pending',
+          visibility: data.visibility || 'public',
+          requirements: data.requirements || undefined,
+          deliverables: parseDeliverables(data.deliverables),
+          ...(platforms.length > 0 ? { platforms, platform: platforms[0] } : {}),
+          outlets,
+        }], { session });
+
+        newCampaign = createdCampaign;
+
+        if (creationFeeCharged > 0) {
+          await Transaction.create([{
+            user: authorId,
+            type: 'deduction',
+            amount: creationFeeCharged,
+            asset: 'coins',
+            status: 'completed',
+            description: 'First campaign launch fee',
+            referenceId: newCampaign._id,
+            referenceModel: 'Campaign',
+            method: 'wallet'
+          }], { session });
+        }
       });
     } catch (error) {
       await deleteUploadedFiles(getMediaUrls(media));
       throw error;
+    } finally {
+      if (session) await session.endSession();
     }
 
     const populated = await Campaign.findById(newCampaign._id).populate('author', 'name avatar');
     // Record platform revenue snapshot with current fee rates (fire-and-forget)
     campaignRevenueService.recordCampaignCreation(newCampaign).catch(() => {});
-    return normalizeCampaignForResponse(populated);
+    return {
+      campaign: normalizeCampaignForResponse(populated),
+      creationFeeCharged,
+      updatedCoinBalance,
+    };
   },
 
   getMyCampaigns: async (authorId) => {
@@ -121,7 +177,6 @@ const brandCampaignService = {
       campaign.platform = platforms[0] || 'Other';
     }
     if(data.outlets !== undefined) campaign.outlets = parseStringList(data.outlets);
-    if(data.status !== undefined) campaign.status = data.status;
     if(data.visibility !== undefined) campaign.visibility = data.visibility;
     if(data.requirements !== undefined) campaign.requirements = data.requirements;
 

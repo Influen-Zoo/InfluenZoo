@@ -49,6 +49,12 @@ const userSchema = new mongoose.Schema(
         'Please provide a valid email',
       ],
     },
+    phone: {
+      type: String,
+      required: [true, 'Please provide a phone number'],
+      trim: true,
+      match: [/^\d{10}$/, 'Please provide a valid 10-digit phone number'],
+    },
     password: {
       type: String,
       required: [true, 'Please provide a password'],
@@ -59,6 +65,17 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ['influencer', 'brand', 'admin'],
       default: 'influencer',
+    },
+    referralCode: {
+      type: String,
+      unique: true,
+      sparse: true,
+      uppercase: true,
+      trim: true,
+    },
+    referredBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
     },
     bio: String,
     avatar: String,
@@ -83,6 +100,11 @@ const userSchema = new mongoose.Schema(
     isVerified: {
       type: Boolean,
       default: false,
+    },
+    status: {
+      type: String,
+      enum: ['active', 'banned'],
+      default: 'active',
     },
     category: String, // For influencers: Fashion, Tech, Fitness, etc.
     engagement: {

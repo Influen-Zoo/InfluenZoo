@@ -21,6 +21,7 @@ export const RoleSelector = ({ role, setRole }) => {
         exclusive
         fullWidth
         sx={{
+          gap: 2,
           '& .MuiToggleButton-root': {
             border: '2px solid var(--border)',
             borderRadius: 'var(--radius-lg)',
@@ -34,6 +35,10 @@ export const RoleSelector = ({ role, setRole }) => {
               color: 'white',
               borderColor: 'transparent',
             },
+          },
+          '& .MuiToggleButtonGroup-grouped:not(:first-of-type)': {
+            marginLeft: 0,
+            borderLeft: '2px solid var(--border)',
           },
         }}
       >

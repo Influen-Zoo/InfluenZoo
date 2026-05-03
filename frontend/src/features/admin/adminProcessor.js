@@ -57,7 +57,7 @@ export const filterAdminUsers = (users, filter) => {
     if (filter.status && u.status !== filter.status) return false;
     if (filter.search) {
       const q = filter.search.toLowerCase();
-      if (!u.name?.toLowerCase().includes(q) && !u.email?.toLowerCase().includes(q)) return false;
+      if (!u.name?.toLowerCase().includes(q) && !u.email?.toLowerCase().includes(q) && !u.phone?.toLowerCase().includes(q)) return false;
     }
     return true;
   });

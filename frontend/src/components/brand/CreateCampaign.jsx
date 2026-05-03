@@ -5,6 +5,7 @@ import { resolveAssetUrl } from '../../utils/helpers';
 import LiquidButton from '../common/LiquidButton/LiquidButton';
 import CustomToast from '../common/CustomToast/CustomToast';
 import api from '../../services/api';
+import walletService from '../../services/wallet.service';
 import EmojiPicker from 'emoji-picker-react';
 import { serializeCampaignPayload } from '../../features/brand/campaignSerializer';
 import useCategories from '../../hooks/useCategories';
@@ -76,8 +77,8 @@ const PlatformIcon = ({ platform }) => {
   );
 };
 
-export default function CreateCampaign({ onCampaignCreated, onSuccess, editData, onCancelEdit, onClose }) {
-  const { user } = useAuth();
+export default function CreateCampaign({ campaigns = [], onCampaignCreated, onSuccess, editData, onCancelEdit, onClose }) {
+  const { user, updateUser } = useAuth();
   const { categories } = useCategories();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -97,7 +98,10 @@ export default function CreateCampaign({ onCampaignCreated, onSuccess, editData,
   const [outletInput, setOutletInput] = useState('');
   const [showCampaignFields, setShowCampaignFields] = useState(true);
   const [toast, setToast] = useState(null);
+  const [paymentConfig, setPaymentConfig] = useState(null);
   const campaignFieldsVisible = editData ? true : showCampaignFields;
+  const isFirstCampaign = !editData && campaigns.length === 0;
+  const firstCampaignCoinCost = Number(paymentConfig?.firstCampaignCoinCost ?? 50);
   const categoryOptions = category && !categories.includes(category)
     ? [category, ...categories]
     : categories;
@@ -164,6 +168,22 @@ export default function CreateCampaign({ onCampaignCreated, onSuccess, editData,
       setCategory(categories[0]);
     }
   }, [categories, category, editData]);
+
+  React.useEffect(() => {
+    if (editData) return;
+    let active = true;
+    walletService.getPaymentConfig()
+      .then((config) => {
+        if (active) setPaymentConfig(config);
+      })
+      .catch(() => {
+        if (active) setPaymentConfig({ firstCampaignCoinCost: 50 });
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [editData]);
 
   const handleMediaSelect = (e, ref) => {
     if (e.target.files) {
@@ -237,6 +257,13 @@ export default function CreateCampaign({ onCampaignCreated, onSuccess, editData,
         return;
       }
 
+      if (isFirstCampaign && firstCampaignCoinCost > 0) {
+        setToast({
+          message: `Your first campaign launch will deduct ${firstCampaignCoinCost} coins and then go to admin approval.`,
+          type: 'warning'
+        });
+      }
+
       const payload = {
         title, content, tags, mediaFiles, budget, category, 
         startDate, endDate, compensation, requirements, deliverables,
@@ -252,6 +279,9 @@ export default function CreateCampaign({ onCampaignCreated, onSuccess, editData,
         if (onSuccess) onSuccess(updated);
       } else {
         const created = await api.createCampaign(formData);
+        if (created.updatedCoinBalance !== undefined) {
+          updateUser({ coins: created.updatedCoinBalance });
+        }
         setTitle(''); setContent(''); setMediaFiles([]); setTags('');
         setBudget(''); setCategory(categories[0] || ''); setStartDate(''); setEndDate('');
         setCompensation('paid'); setRequirements(''); setDeliverables('');
@@ -259,6 +289,7 @@ export default function CreateCampaign({ onCampaignCreated, onSuccess, editData,
         setShowCampaignFields(true);
         if (onCampaignCreated) onCampaignCreated(created);
         if (onSuccess) onSuccess(created);
+        setToast({ message: created.message || 'Campaign submitted for admin approval.', type: 'success' });
       }
     } catch (err) {
       console.error(err);

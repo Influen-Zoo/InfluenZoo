@@ -1,4 +1,5 @@
 const { verifyAccessToken } = require('../../utils/tokenUtils');
+const User = require('../../models/User');
 
 /**
  * Common Authentication Middleware
@@ -13,6 +14,14 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const decoded = verifyAccessToken(token);
+    const user = await User.findById(decoded.userId).select('status');
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+    if (user.status === 'banned') {
+      return res.status(403).json({ error: 'User is blocked' });
+    }
+
     req.userId = decoded.userId;
     req.role = decoded.role;
     next();

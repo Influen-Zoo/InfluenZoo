@@ -5,6 +5,7 @@ import { EmptyState } from '../../common/LayoutBlocks';
 import { Megaphone } from 'lucide-react';
 
 export default function HomeTab({ 
+  campaigns = [],
   announcements = [], 
   setAnnouncements, 
   onCampaignCreated,
@@ -12,7 +13,7 @@ export default function HomeTab({
 }) {
   return (
     <div className="tab-pane home-timeline" style={{ animation: 'fadeIn 0.3s ease' }}>
-      <CreateCampaign onCampaignCreated={onCampaignCreated} />
+      <CreateCampaign campaigns={campaigns} onCampaignCreated={onCampaignCreated} />
       <div className="posts-feed responsive-feed home-feed">
         {announcements.map(campaign => (
           <BrandCampaignCard

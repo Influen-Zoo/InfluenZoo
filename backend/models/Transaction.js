@@ -40,6 +40,7 @@ const transactionSchema = new mongoose.Schema(
     },
     method: {
       type: String,
+      enum: ['bank_transfer', 'razorpay', 'wallet', 'referral_bonus'],
       default: 'bank_transfer'
     },
     details: {

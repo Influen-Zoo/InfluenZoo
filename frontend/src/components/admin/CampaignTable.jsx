@@ -1,8 +1,23 @@
 import React from 'react';
-import { Check, Ban } from 'lucide-react';
+import { Check, Ban, X } from 'lucide-react';
 import LiquidButton from '../common/LiquidButton/LiquidButton';
 
-const CampaignTable = ({ campaigns, handleCampaignClick, setCampaignCostModal, handleUnblockCampaign, setBlockingCampaign }) => {
+const getStatusClass = (status, isBlocked) => {
+  if (isBlocked) return 'badge-danger';
+  if (status === 'active') return 'badge-success';
+  if (status === 'pending') return 'badge-warning';
+  if (status === 'rejected') return 'badge-danger';
+  return 'badge-paid';
+};
+
+const CampaignTable = ({
+  campaigns,
+  handleCampaignClick,
+  setCampaignCostModal,
+  handleUnblockCampaign,
+  handleCampaignStatus,
+  setBlockingCampaign
+}) => {
   const truncate = (text, length = 30) => {
     if (!text) return '-';
     return text.length > length ? text.substring(0, length) + '...' : text;
@@ -10,7 +25,7 @@ const CampaignTable = ({ campaigns, handleCampaignClick, setCampaignCostModal, h
 
   const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString('en-IN', { 
+    return new Date(date).toLocaleDateString('en-IN', {
       day: '2-digit',
       month: '2-digit'
     });
@@ -27,16 +42,18 @@ const CampaignTable = ({ campaigns, handleCampaignClick, setCampaignCostModal, h
             <th style={{ minWidth: '100px' }}>Category</th>
             <th style={{ minWidth: '80px' }}>Date</th>
             <th style={{ minWidth: '70px' }}>Fee</th>
-            <th style={{ minWidth: '80px' }}>Status</th>
-            <th style={{ minWidth: '100px' }}>Actions</th>
+            <th style={{ minWidth: '90px' }}>Status</th>
+            <th style={{ minWidth: '140px' }}>Actions</th>
           </tr>
         </thead>
         <tbody>
           {campaigns.map(campaign => {
             const isBlocked = campaign.blocked;
+            const status = campaign.status || 'pending';
+
             return (
-              <tr 
-                key={campaign._id} 
+              <tr
+                key={campaign._id}
                 style={{ opacity: isBlocked ? 0.6 : 1, cursor: 'pointer' }}
                 onClick={() => handleCampaignClick(campaign)}
               >
@@ -71,37 +88,57 @@ const CampaignTable = ({ campaigns, handleCampaignClick, setCampaignCostModal, h
                     style={{ cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem' }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCampaignCostModal({ 
-                        id: campaign._id, 
+                      setCampaignCostModal({
+                        id: campaign._id,
                         title: campaign.title || 'Campaign',
                         type: 'campaign',
-                        cost: Number(campaign.coinCost) || 0 
+                        cost: Number(campaign.coinCost) || 0
                       });
                     }}
                     title="Click to edit fee"
                   >
-                    {Number(campaign.coinCost || 0).toLocaleString('en-IN')} ✎
+                    {Number(campaign.coinCost || 0).toLocaleString('en-IN')} Edit
                   </span>
                 </td>
                 <td>
-                  <span className={`badge ${isBlocked ? 'badge-danger' : 'badge-success'}`} style={{ fontSize: '0.75rem' }}>
-                    {isBlocked ? '🚫' : '✓'}
+                  <span className={`badge ${getStatusClass(status, isBlocked)}`} style={{ fontSize: '0.75rem' }}>
+                    {isBlocked ? 'Blocked' : status}
                   </span>
                 </td>
                 <td style={{ display: 'flex', gap: '0.4rem' }}>
+                  {status === 'pending' && !isBlocked && (
+                    <>
+                      <LiquidButton
+                        circular
+                        variant="success"
+                        onClick={(e) => { e.stopPropagation(); handleCampaignStatus(campaign._id, 'active'); }}
+                        title="Approve campaign"
+                      >
+                        <Check size={18} />
+                      </LiquidButton>
+                      <LiquidButton
+                        circular
+                        variant="error"
+                        onClick={(e) => { e.stopPropagation(); handleCampaignStatus(campaign._id, 'rejected'); }}
+                        title="Reject campaign"
+                      >
+                        <X size={18} />
+                      </LiquidButton>
+                    </>
+                  )}
                   {isBlocked ? (
-                    <LiquidButton 
-                      circular 
-                      variant="success" 
+                    <LiquidButton
+                      circular
+                      variant="success"
                       onClick={(e) => { e.stopPropagation(); handleUnblockCampaign(campaign._id); }}
                       title="Unblock campaign"
                     >
                       <Check size={18} />
                     </LiquidButton>
                   ) : (
-                    <LiquidButton 
-                      circular 
-                      variant="error" 
+                    <LiquidButton
+                      circular
+                      variant="error"
                       onClick={(e) => {
                         e.stopPropagation();
                         setBlockingCampaign(campaign);

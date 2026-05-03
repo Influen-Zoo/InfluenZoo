@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, Ban, Coins, Users, Award } from 'lucide-react';
+import { Ban, CheckCircle, Coins, Users, Award } from 'lucide-react';
 import LiquidButton from '../common/LiquidButton/LiquidButton';
 import UserBadge from '../common/UserBadge/UserBadge';
 
@@ -10,7 +10,7 @@ const UserTable = ({ filteredUsers, handleUserStatus, setCoinEditModal, setFollo
     <div className="table-container">
       <table className="table">
         <thead>
-          <tr><th>User</th><th>Role</th><th>Followers</th><th>Status</th><th>Moderation</th><th>Growth</th></tr>
+          <tr><th>User</th><th>Role</th><th>Followers</th><th>Referrals</th><th>Status</th><th>Moderation</th><th>Growth</th></tr>
         </thead>
         <tbody>
           {filteredUsers.map(u => (
@@ -30,22 +30,31 @@ const UserTable = ({ filteredUsers, handleUserStatus, setCoinEditModal, setFollo
                       </div>
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.email}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.phone || 'No phone number'}</div>
                   </div>
                 </div>
               </td>
               <td><span className={`badge ${u.role === 'influencer' ? 'badge-accent' : u.role === 'brand' ? 'badge-primary' : 'badge-warning'}`}>{u.role}</span></td>
               <td>{getCount(u.followers).toLocaleString('en-IN')}</td>
+              <td>
+                <span className="badge badge-accent">
+                  {Number(u.completedReferralsCount || 0).toLocaleString('en-IN')} / {Number(u.referralsCount || 0).toLocaleString('en-IN')}
+                </span>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                  paid / total
+                </div>
+              </td>
               <td><span className={`badge ${u.status === 'active' ? 'badge-success' : u.status === 'banned' ? 'badge-danger' : u.status === 'inactive' ? 'badge-paid' : 'badge-warning'}`}>{u.status}</span></td>
               <td>
                 <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-                  {u.status !== 'active' && u.role !== 'admin' && (
-                    <LiquidButton circular variant="success" onClick={() => handleUserStatus(u._id, 'active')} title="Approve User">
-                      <CheckCircle size={20} />
+                  {u.status !== 'banned' && u.role !== 'admin' && (
+                    <LiquidButton circular variant="error" onClick={() => handleUserStatus(u._id, 'banned')} title="Block User">
+                      <Ban size={20} />
                     </LiquidButton>
                   )}
-                  {u.status !== 'banned' && u.role !== 'admin' && (
-                    <LiquidButton circular variant="error" onClick={() => handleUserStatus(u._id, 'banned')} title="Ban User">
-                      <Ban size={20} />
+                  {u.status === 'banned' && u.role !== 'admin' && (
+                    <LiquidButton circular variant="success" onClick={() => handleUserStatus(u._id, 'active')} title="Unblock User">
+                      <CheckCircle size={20} />
                     </LiquidButton>
                   )}
                   {u.role === 'influencer' && (
@@ -76,7 +85,7 @@ const UserTable = ({ filteredUsers, handleUserStatus, setCoinEditModal, setFollo
             </tr>
           ))}
           {filteredUsers.length === 0 && (
-            <tr><td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No users found matching filters</td></tr>
+            <tr><td colSpan="7" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No users found matching filters</td></tr>
           )}
         </tbody>
       </table>

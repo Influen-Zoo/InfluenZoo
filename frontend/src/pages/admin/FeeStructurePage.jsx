@@ -7,7 +7,7 @@ import useFeeStructure from '../../hooks/admin/useFeeStructure';
 export const FeeStructurePage = () => {
   const { 
     feeStructure, razorpaySettings, stats, loading, toast, withdrawals, campaigns, posts,
-    categories, handleUpdateFeeStructure, handleUpdateRazorpaySettings, handleUpdateCategories
+    handleUpdateFeeStructure, handleUpdateRazorpaySettings
   } = useFeeStructure();
 
   const sidebarItems = getAdminSidebarItems({ stats, withdrawals, campaigns, posts });
@@ -24,8 +24,6 @@ export const FeeStructurePage = () => {
         razorpaySettings={razorpaySettings}
         onUpdateFees={handleUpdateFeeStructure}
         onUpdateRazorpaySettings={handleUpdateRazorpaySettings}
-        categories={categories}
-        onUpdateCategories={handleUpdateCategories}
         loading={loading}
       />
     </AdminLayout>
