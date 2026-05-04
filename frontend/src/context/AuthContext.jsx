@@ -58,6 +58,34 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const loginWithGoogle = async (credential, role = 'influencer') => {
+    try {
+      setError(null);
+      const response = await api.loginWithGoogle(credential, role);
+      const userData = response.user || response.data;
+      setUser(userData);
+      return userData;
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || err.message || 'Google Login failed';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
+  };
+
+  const loginWithFacebook = async (accessToken, role = 'influencer') => {
+    try {
+      setError(null);
+      const response = await api.loginWithFacebook(accessToken, role);
+      const userData = response.user || response.data;
+      setUser(userData);
+      return userData;
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || err.message || 'Facebook Login failed';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
+  };
+
   const register = async (userData) => {
     try {
       setError(null);
@@ -100,6 +128,8 @@ export function AuthProvider({ children }) {
       loading,
       error,
       login,
+      loginWithGoogle,
+      loginWithFacebook,
       register,
       logout,
       updateUser,

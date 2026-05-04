@@ -96,6 +96,24 @@ class ApiClient {
     return response.data;
   }
 
+  async loginWithGoogle(credential, role) {
+    const response = await this.client.post('/auth/google', { credential, role });
+    if (response.data.accessToken) {
+      localStorage.setItem('accessToken', response.data.accessToken);
+      localStorage.setItem('refreshToken', response.data.refreshToken);
+    }
+    return response.data;
+  }
+
+  async loginWithFacebook(accessToken, role) {
+    const response = await this.client.post('/auth/facebook', { accessToken, role });
+    if (response.data.accessToken) {
+      localStorage.setItem('accessToken', response.data.accessToken);
+      localStorage.setItem('refreshToken', response.data.refreshToken);
+    }
+    return response.data;
+  }
+
   async register(data) {
     const response = await this.client.post('/auth/register', data);
     if (response.data.accessToken) {

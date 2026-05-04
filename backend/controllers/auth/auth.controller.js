@@ -23,6 +23,28 @@ const authController = {
     }
   },
 
+  googleLogin: async (req, res) => {
+    try {
+      const data = await authService.googleLogin(req.body);
+      res.status(200).json({ success: true, ...data });
+    } catch (error) {
+      console.error('Google login error:', error);
+      const isClientError = error.message.includes('blocked');
+      res.status(isClientError ? 401 : 500).json({ error: isClientError ? error.message : 'Server error during Google login' });
+    }
+  },
+
+  facebookLogin: async (req, res) => {
+    try {
+      const data = await authService.facebookLogin(req.body);
+      res.status(200).json({ success: true, ...data });
+    } catch (error) {
+      console.error('Facebook login error:', error);
+      const isClientError = error.message.includes('blocked') || error.message.includes('email');
+      res.status(isClientError ? 401 : 500).json({ error: isClientError ? error.message : 'Server error during Facebook login' });
+    }
+  },
+
   refreshToken: async (req, res) => {
     try {
       const data = await authService.refreshToken(req.body.refreshToken);

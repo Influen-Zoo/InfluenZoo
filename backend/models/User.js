@@ -51,15 +51,36 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      required: [true, 'Please provide a phone number'],
+      required: [
+        function() { return this.authProvider === 'local'; },
+        'Please provide a phone number'
+      ],
       trim: true,
       match: [/^\d{10}$/, 'Please provide a valid 10-digit phone number'],
     },
     password: {
       type: String,
-      required: [true, 'Please provide a password'],
+      required: [
+        function() { return this.authProvider === 'local'; },
+        'Please provide a password'
+      ],
       minlength: 6,
       select: false,
+    },
+    authProvider: {
+      type: String,
+      enum: ['local', 'google', 'facebook'],
+      default: 'local',
+    },
+    googleId: {
+      type: String,
+      sparse: true,
+      unique: true,
+    },
+    facebookId: {
+      type: String,
+      sparse: true,
+      unique: true,
     },
     role: {
       type: String,
@@ -152,7 +173,7 @@ const userSchema = new mongoose.Schema(
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password') || !this.password) return next();
 
   try {
     const salt = await bcrypt.genSalt(10);

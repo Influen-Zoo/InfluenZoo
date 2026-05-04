@@ -131,6 +131,102 @@ const authService = {
     };
   },
 
+  googleLogin: async ({ credential, role = 'influencer' }) => {
+    let email, name, googleId, picture;
+    
+    // Check if credential is a JWT (id_token) or an access_token
+    if (credential.split('.').length === 3) {
+      const { OAuth2Client } = require('google-auth-library');
+      const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+      const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      ({ email, name, sub: googleId, picture } = payload);
+    } else {
+      const axios = require('axios');
+      const { data } = await axios.get(`https://www.googleapis.com/oauth2/v3/userinfo`, {
+        headers: { Authorization: `Bearer ${credential}` }
+      });
+      ({ email, name, sub: googleId, picture } = data);
+    }
+    
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = new User({
+        name,
+        email,
+        authProvider: 'google',
+        googleId,
+        role,
+        avatar: picture,
+        referralCode: await createUniqueReferralCode(name)
+      });
+      await user.save();
+    } else if (!user.googleId) {
+      user.googleId = googleId;
+      if (user.authProvider === 'local') {
+        user.authProvider = 'google';
+      }
+      if (!user.avatar) user.avatar = picture;
+      await user.save();
+    }
+
+    if (user.status === 'banned') throw new Error('User is blocked');
+
+    const lastLogin = new Date();
+    const accessToken = generateAccessToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id);
+
+    await User.updateOne({ _id: user._id }, { $set: { refreshToken, lastLogin } }, { runValidators: false });
+    user.refreshToken = refreshToken;
+    user.lastLogin = lastLogin;
+
+    return { accessToken, refreshToken, user: user.toJSON() };
+  },
+
+  facebookLogin: async ({ accessToken: fbAccessToken, role = 'influencer' }) => {
+    const axios = require('axios');
+    const { data } = await axios.get(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${fbAccessToken}`);
+    const { id: facebookId, name, email, picture } = data;
+    
+    if (!email) throw new Error('Facebook account must have an email attached.');
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = new User({
+        name,
+        email,
+        authProvider: 'facebook',
+        facebookId,
+        role,
+        avatar: picture?.data?.url,
+        referralCode: await createUniqueReferralCode(name)
+      });
+      await user.save();
+    } else if (!user.facebookId) {
+      user.facebookId = facebookId;
+      if (user.authProvider === 'local') {
+        user.authProvider = 'facebook';
+      }
+      if (!user.avatar) user.avatar = picture?.data?.url;
+      await user.save();
+    }
+
+    if (user.status === 'banned') throw new Error('User is blocked');
+
+    const lastLogin = new Date();
+    const accessToken = generateAccessToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id);
+
+    await User.updateOne({ _id: user._id }, { $set: { refreshToken, lastLogin } }, { runValidators: false });
+    user.refreshToken = refreshToken;
+    user.lastLogin = lastLogin;
+
+    return { accessToken, refreshToken, user: user.toJSON() };
+  },
+
   refreshToken: async (refreshToken) => {
     if (!refreshToken) {
       throw new Error('Refresh token required');
